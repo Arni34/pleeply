@@ -1,0 +1,771 @@
+# pleeply
+
+> pleeply is a home speaker with a computer inside. It runs open-weight AI models on the device, keeps a private memory of you at home, and works without the cloud.
+
+Status: in development, not for sale yet. Prices on the site are expected prices for planned products; specs may change. Waitlist: https://pleeply.vercel.app/
+
+# Your own AI at home
+
+> Guides to running a private AI assistant at home — how local voice assistants work, what hardware you need, how smart speakers handle your voice, and where pleeply fits in.
+
+Source: https://pleeply.vercel.app/info/ · Updated 2026-10-24
+
+You can run an AI assistant at home that listens, answers and remembers without sending your voice to a company's servers. These docs explain how that works, what it takes to build one yourself, and how it compares with cloud speakers like Alexa.
+
+> **Short answer**
+> A local AI assistant runs four things on a computer in your home: a wake word detector, speech-to-text (for example Whisper), an open-weight language model (for example Llama, Qwen or Gemma) and text-to-speech (for example Piper). A Raspberry Pi 5 handles small 1–3B models; conversation-quality 7–8B models need about 16 GB of memory. See [Choose your hardware](https://pleeply.vercel.app/info/run-ai-at-home/).
+
+## In this section
+
+- [What is a local AI assistant?](https://pleeply.vercel.app/info/local-ai-assistant/) — how on-device AI differs from cloud assistants, and what you give up.
+- [How a local voice assistant works](https://pleeply.vercel.app/info/how-local-voice-assistants-work/) — the pipeline from wake word to spoken answer, and where the delay comes from.
+- [Do smart speakers send your voice to the cloud?](https://pleeply.vercel.app/info/smart-speaker-privacy/) — what changed for Amazon Echo in March 2025.
+- [Choose your hardware](https://pleeply.vercel.app/info/run-ai-at-home/) — from a Raspberry Pi to a PC with a graphics card.
+- [Run an LLM on a Raspberry Pi 5](https://pleeply.vercel.app/info/raspberry-pi-5-llm/) — measured speeds and which models to pick.
+- [Use a local LLM with Home Assistant](https://pleeply.vercel.app/info/home-assistant-local-llm/) — Assist, Ollama and the Voice Preview Edition.
+- [How much RAM a local LLM needs](https://pleeply.vercel.app/info/local-llm-memory/) — rules of thumb for 8, 16, 24 and 48 GB.
+- [Private alternatives to Alexa](https://pleeply.vercel.app/info/alexa-alternatives/) — compared on privacy, cost and effort.
+- [Open-source voice assistants compared](https://pleeply.vercel.app/info/open-source-voice-assistants/) — Assist, OpenVoiceOS, Neon, Rhasspy, Mycroft.
+- [What is pleeply?](https://pleeply.vercel.app/info/pleeply/) — the speaker we're building, and its status.
+
+## Choose your path
+
+
+### [Understand it first](https://pleeply.vercel.app/info/local-ai-assistant/)
+**Best for:** deciding whether local AI is worth it.
+
+What runs where, how good small models are, and what stays private.
+
+### [Build it yourself](https://pleeply.vercel.app/info/run-ai-at-home/)
+**Best for:** tinkerers with a Raspberry Pi, a Mac mini or a spare PC.
+
+**Requirements:** 8 GB of memory for small models, 16 GB or more for 7–8B models.
+
+### [Use Home Assistant](https://pleeply.vercel.app/info/home-assistant-local-llm/)
+**Best for:** controlling a smart home by voice.
+
+**Requirements:** a Home Assistant server and an Ollama server on your network.
+
+### [Get a ready-made device](https://pleeply.vercel.app/info/pleeply/)
+**Best for:** private AI without assembling it yourself.
+
+pleeply is in development. The waitlist is open.
+
+## How these pages are written
+
+Every number and date links to its source at the bottom of the page. Speeds on small hardware vary a lot with the model, the quantization and the runtime, so treat them as ranges, not promises. Each page shows when it was last checked.
+
+---
+
+# What is a local AI assistant?
+
+> A local AI assistant runs speech recognition, an open-weight language model and speech synthesis on hardware in your home, so your voice and memory stay on the device. How it compares with cloud assistants.
+
+Source: https://pleeply.vercel.app/info/local-ai-assistant/ · Updated 2026-10-24
+
+A local AI assistant is a voice or chat assistant whose AI runs on a computer in your home instead of on a company's servers. It hears you, works out an answer with an open-weight language model and replies — all on the device — so your voice, your questions and its memory of you stay on hardware you own.
+
+## Local vs cloud
+
+| | Local AI assistant | Cloud assistant (for example Alexa+) |
+|---|---|---|
+| Where your voice is processed | On a device in your home | On the company's servers |
+| Without internet | Core features keep working | Stops working |
+| Model size | Limited by your hardware: about 1–3B parameters on a Raspberry Pi 5, 7–8B with 16 GB of memory | Very large models in data centers |
+| Answer quality | Good for everyday questions, timers, notes and home control; weaker on complex reasoning | Strongest on hard questions |
+| Speed | Depends on hardware — several seconds on small boards | Usually quick, depends on your connection |
+| Memory of you | Stored on the device, where you can inspect and delete it | Stored in the provider's account |
+| Cost | Hardware up front, no per-request fees | Often a subscription — Alexa+ is $19.99 a month without Prime |
+
+## What runs on the device
+
+A local assistant chains four components:
+
+1. **Wake word** — a tiny model listens for a trigger phrase, for example openWakeWord.
+2. **Speech-to-text** — turns your sentence into text, for example Whisper.
+3. **Language model** — an open-weight model such as Llama, Qwen, Gemma or Mistral writes the answer, usually through a runtime like Ollama or llama.cpp.
+4. **Text-to-speech** — speaks the answer, for example Piper.
+
+Timings and tuning are in [How a local voice assistant works](https://pleeply.vercel.app/info/how-local-voice-assistants-work/).
+
+## What "open-weight model" means
+
+An open-weight model is a language model whose trained weights are published, so anyone can download it and run it on their own hardware. Meta's Llama, Alibaba's Qwen, Google's Gemma and Mistral's models are common examples. Because the weights sit on your disk, the model works without contacting its publisher, and you can swap it for a better one when it comes out. Licenses differ, so check each model's terms before using it in a product.
+
+## Is it as smart as ChatGPT?
+
+Not for every task. Small models that fit on home hardware handle everyday requests well — reminders, short answers, summaries of your notes, controlling devices — but they make more mistakes than frontier cloud models on multi-step reasoning and niche facts. The gap narrows as memory grows: 16 GB runs 7–8B models, and 24 GB or more opens 14–32B models. See [How much RAM a local LLM needs](https://pleeply.vercel.app/info/local-llm-memory/).
+
+## What stays at home
+
+With a local assistant the audio, the transcript, the answer and the long-term memory can all stay on the device. That is a property of the design rather than a setting: data that is never sent can't be stored somewhere else. A local assistant can still go online for things that need fresh data — weather, news, music services — but only for those requests, and only if you connect them.
+
+## FAQ
+
+### Does a local AI assistant need internet?
+
+Not for its core loop. The wake word, speech recognition, the language model and speech output all run on the device. You need internet to download models and updates, and for online services you choose to connect, such as weather or music.
+
+### What is the difference between on-device AI and cloud AI?
+
+On-device AI runs the model on hardware you own, so data stays local and it works offline, but the model's size is limited by your hardware. Cloud AI runs large models in a provider's data center, which is more capable but means sending your data there.
+
+### Which models can a local assistant run?
+
+Open-weight models such as Llama, Qwen, Gemma and Mistral, in sizes that fit the device's memory. Small boards run 1–3B models; 16 GB of memory fits 7–8B models at 4-bit quantization.
+
+### Can a local assistant remember things about me?
+
+Yes. Memory is data stored on the device — notes, preferences, past conversations — that the assistant looks up when it answers. Because it lives locally, you can see, edit or delete it.
+
+## Sources
+
+- Alexa+ pricing: [Android Authority — Alexa+ pricing](https://androidauthority.com/alexa-plus-pricing-3530655)
+- Memory needed for 7–8B models: [Starmorph — Best Mac mini for local LLMs](https://blog.starmorph.com/blog/best-mac-mini-for-local-llms)
+- Local voice components: [Home Assistant — The era of open voice assistants has arrived](https://www.home-assistant.io/blog/2024/12/19/voice-preview-edition-the-era-of-open-voice/)
+
+---
+
+# How a local voice assistant works
+
+> The four stages of an offline voice assistant — wake word, speech-to-text, language model, text-to-speech — which open-source software does each, and how long each step takes on small hardware.
+
+Source: https://pleeply.vercel.app/info/how-local-voice-assistants-work/ · Updated 2026-10-24
+
+An offline voice assistant turns your speech into a spoken answer in four stages that all run on one machine: a wake word detector, speech-to-text, a language model and text-to-speech. On a Raspberry Pi 5 the whole loop takes several seconds, and most of that time is the language model writing its answer.
+
+## The pipeline
+
+| Stage | What it does | Common open-source choice |
+|---|---|---|
+| 1. Wake word | Listens for a trigger phrase and ignores everything else | openWakeWord, microWakeWord |
+| 2. Speech-to-text | Turns your sentence into text | Whisper (faster-whisper, whisper.cpp) |
+| 3. Language model | Understands the request and writes the answer | Llama, Qwen or Gemma through Ollama or llama.cpp |
+| 4. Text-to-speech | Speaks the answer | Piper |
+
+In front of all four sits the audio hardware: a microphone array with echo cancellation and noise suppression, so the assistant can hear you over its own speaker and the room. Home Assistant's Voice Preview Edition, for example, uses an XMOS XU316 chip for this.
+
+## Where the time goes
+
+Reported timings on a Raspberry Pi 5:
+
+- **Speech-to-text:** Whisper "small" in int8 takes about 2–4 seconds, depending on sentence length.
+- **Language model:** with 4-bit models in Ollama, a 1B model generates about 11 tokens per second and a 3B model about 4.7. A one-sentence answer of about 25 tokens therefore takes roughly 2–5 seconds, plus the time to read the prompt.
+- **Text-to-speech:** Piper synthesizes faster than real time on the Pi 5's CPU.
+
+End to end, guides report about 5–8 seconds per request on a Pi 5 with a small model. That works for hands-free questions but feels slow in conversation. Faster hardware mostly shortens the language-model step — see [Choose your hardware](https://pleeply.vercel.app/info/run-ai-at-home/).
+
+## How to make it feel faster
+
+- **Stream the answer.** Start speaking the first sentence while the model writes the rest.
+- **Send simple commands around the model.** "Turn off the kitchen lights" can go to a fast intent matcher; only open questions need the language model. Home Assistant supports this pattern.
+- **Keep the model loaded.** Loading a model from disk adds seconds; Ollama's keep-alive setting keeps it in memory.
+- **Use the smallest model that does the job.** 1–3B for commands and short answers, 7–8B and up for conversation.
+- **Cool the board.** A Raspberry Pi 5 throttles under sustained load without active cooling, which can roughly halve language-model throughput.
+
+## What works offline
+
+Timers and alarms, conversions, questions the model can answer from what it learned in training, your notes and memory, and control of smart-home devices on your network. Anything that needs fresh data — weather, news, sports scores — needs an internet lookup, which a local assistant can make on request without sending your audio anywhere.
+
+## FAQ
+
+### Can Whisper run on a Raspberry Pi?
+
+Yes. Small Whisper models run on a Raspberry Pi 5: the "small" model in int8 takes about 2–4 seconds per sentence. Larger models such as "medium" use too much of the Pi's memory to be practical.
+
+### What is the best offline text-to-speech?
+
+Piper is the most widely used offline text-to-speech for home assistants. It runs faster than real time on a Raspberry Pi 5 CPU and has voices in many languages. Its development moved to the OHF-Voice/piper1-gpl repository under the GPL-3.0 license, which matters if you ship it in a product.
+
+### Why are local voice assistants slower than Alexa?
+
+Because the language model runs on small hardware in your home instead of on data-center GPUs. On a Raspberry Pi 5 a request takes about 5–8 seconds end to end; a board with a GPU or an Apple Silicon Mac generates short answers several times faster.
+
+### Does the wake word detector record everything?
+
+In a typical design, no. The wake word model checks a short rolling audio buffer on the device and discards it; transcription starts only after it hears the trigger phrase. In a local assistant even the audio after the wake word stays on the device.
+
+## Sources
+
+- Pi 5 language-model speeds: [Stratosphere Linux IPS — LLM performance on Raspberry Pi 5](https://stratospherelinuxips.readthedocs.io/en/develop/immune/research_rpi_llm_performance.html)
+- Whisper on a Pi 5: [raspberry.tips — Local voice assistant with Home Assistant and Raspberry Pi 5](https://raspberry.tips/en/smart-home/local-voice-assistant-replace-alexa-with-home-assistant-and-raspberry-pi-5)
+- End-to-end latency: [PromptQuorum — Build a local voice assistant (2026)](https://www.promptquorum.com/power-local-llm/build-local-voice-assistant-2026)
+- Piper speed and license: [Piper TTS: fast offline voice synthesis on a Raspberry Pi](https://aivideosensei.com/guides/piper-tts-offline-voice-guide)
+- Throttling without cooling: [bestllmfor — Local LLM on Raspberry Pi 5](https://bestllmfor.com/best/raspberry-pi-5-llm/)
+- Command routing and keep-alive: [Home Assistant — Ollama integration](https://www.home-assistant.io/integrations/ollama/)
+- Audio front-end: [Home Assistant — Voice Preview Edition announcement](https://www.home-assistant.io/blog/2024/12/19/voice-preview-edition-the-era-of-open-voice/)
+
+---
+
+# Do smart speakers send your voice to the cloud?
+
+> Mainstream smart speakers send your requests to company servers. What changed for Amazon Echo on March 28, 2025, what Alexa+ means for privacy, and how a local assistant differs.
+
+Source: https://pleeply.vercel.app/info/smart-speaker-privacy/ · Updated 2026-10-24
+
+Yes. Mainstream smart speakers send what you say after the wake word to the company's servers to be processed. Amazon switched off the last Echo setting that kept requests on the device on March 28, 2025, so every Alexa request now goes to Amazon's cloud. A local assistant processes your voice on the device instead.
+
+## What changed for Alexa in 2025
+
+- A few Echo models — the Echo Dot (4th generation), Echo Show 10 and Echo Show 15 — had a "Do Not Send Voice Recordings" option that processed requests on the device.
+- Amazon ended support for that option on March 28, 2025. In its email to customers it said it was expanding Alexa with generative AI features that rely on cloud processing, and had "decided to no longer support this feature".
+- You can still tell Alexa not to save recordings, but requests are processed in Amazon's cloud either way.
+
+## Alexa+ runs in the cloud
+
+Alexa+, Amazon's generative-AI assistant, processes requests on Amazon's servers. It costs $19.99 a month, or is included with Amazon Prime. Google's Nest speakers also send requests to Google's servers.
+
+## How to limit what Alexa keeps
+
+1. In the Alexa app, open the Alexa Privacy settings and choose not to save voice recordings.
+2. In the same place, review and delete your voice history.
+3. Press the microphone-off button when you don't need the speaker.
+
+These reduce what is stored. They don't change where requests are processed.
+
+## What "local" means
+
+| Question | Cloud smart speaker | Local assistant |
+|---|---|---|
+| Does audio leave the house? | Yes, after the wake word | No |
+| Who handles the transcript? | The provider's servers | Only the device in your home |
+| Works when the internet is down? | No | Yes, for core features |
+| Can processing move to the cloud later? | Yes — Echo's local option was removed in 2025 | Only if the device's software changes; open-source software lets you check |
+
+## FAQ
+
+### Does Alexa record everything I say?
+
+No. An Echo listens on the device for the wake word and sends audio to Amazon only after it hears it. Since March 28, 2025 every request is processed in Amazon's cloud; you can choose not to save recordings, but the audio still goes to Amazon.
+
+### Can I stop Alexa from sending recordings to Amazon?
+
+No. The only option that kept requests on the device was removed on March 28, 2025. You can choose not to save recordings, delete your voice history or mute the microphones, but requests are still processed in Amazon's cloud.
+
+### Is there a smart speaker that doesn't send audio to the cloud?
+
+Yes, if it runs speech recognition and the language model locally. Home Assistant's Voice Preview Edition does this when paired with a Home Assistant server powerful enough to process speech locally, and pleeply is being built to do it on the speaker itself.
+
+### Is Alexa+ private?
+
+Alexa+ processes your requests on Amazon's servers, under Amazon's privacy policy. Whether that is acceptable is your call, but it is not local processing.
+
+## Sources
+
+- [TechCrunch — Amazon's Echo will send all voice recordings to the cloud, starting March 28](https://techcrunch.com/2025/03/15/amazons-echo-will-send-all-voice-recordings-to-the-cloud-starting-march-28)
+- [AlternativeTo — Amazon Echo removes the "Do Not Send Voice Recordings" option](https://alternativeto.net/news/2025/3/amazon-echo-to-remove-do-not-send-voice-recordings-to-the-cloud-option-weakening-privacy)
+- [Android Authority — Alexa+ pricing](https://androidauthority.com/alexa-plus-pricing-3530655)
+- [Home Assistant — Voice Preview Edition announcement](https://www.home-assistant.io/blog/2024/12/19/voice-preview-edition-the-era-of-open-voice/)
+
+---
+
+# Run AI at home: choose your hardware
+
+> Compare the ways to run a private AI assistant at home — Raspberry Pi 5, Jetson Orin Nano Super, Mac mini, a PC with a GPU, Home Assistant Voice, or a ready-made device — by model size, speed and effort.
+
+Source: https://pleeply.vercel.app/info/run-ai-at-home/ · Updated 2026-10-24
+
+You can run a private AI assistant on anything from a single-board computer to a desktop with a graphics card. Memory is what decides: it sets the largest model you can run, and the model's size sets how capable and how fast your assistant is.
+
+> **Short answer**
+> For a voice assistant with small 1–3B models, a Raspberry Pi 5 with 8 GB works, but answers take several seconds. For conversation-quality 7–8B models, use a machine with about 16 GB of memory, such as an Apple Silicon Mac mini. For the fastest small models on a low-power board, a Jetson Orin Nano Super.
+
+## Choose your setup
+
+
+### [Raspberry Pi 5](https://pleeply.vercel.app/info/raspberry-pi-5-llm/)
+**Best for:** tinkerers and always-on, low-power setups.
+
+**Models:** 1–3B at about 5–11 tokens per second; 7B is very slow (about 1.5–2.5).
+
+**Requirements:** the 8 GB or 16 GB board and an active cooler.
+
+### Jetson Orin Nano Super
+**Best for:** faster small models on a low-power board.
+
+**Models:** 3B-class models at roughly 22–43 tokens per second in published tests.
+
+**Requirements:** 8 GB of shared memory, so small models only. Launched at $249 in December 2024.
+
+### Mac mini with Apple Silicon
+**Best for:** quiet, capable 7–8B models.
+
+**Models:** 16 GB runs 7–8B at 4-bit; 24 GB or more opens 14–32B.
+
+**Requirements:** 16 GB of memory for a useful assistant.
+
+### PC or mini PC with a GPU
+**Best for:** larger models and the fastest answers.
+
+**Models:** set by the card's memory; a 12 GB card such as an RTX 3060 runs 7–8B models.
+
+**Requirements:** more power and noise, so it usually lives away from the speaker.
+
+### [Home Assistant Voice + a server](https://pleeply.vercel.app/info/home-assistant-local-llm/)
+**Best for:** voice control of a smart home.
+
+**Requirements:** the $59 Voice Preview Edition is a satellite — speech and the language model run on your Home Assistant and Ollama servers.
+
+### [pleeply (in development)](https://pleeply.vercel.app/info/pleeply/)
+**Best for:** private AI without assembling it yourself.
+
+**Planned:** a speaker with a built-in computer — One for models up to about 8B, Pro up to about 32B. Expected prices; specs may change.
+
+## Compare at a glance
+
+| Setup | Memory | Practical model size | Watch out for |
+|---|---|---|---|
+| Raspberry Pi 5 | 8 or 16 GB | 1–3B; 7B is slow | Throttles without active cooling |
+| Jetson Orin Nano Super | 8 GB shared | Up to about 3–4B | Published speeds vary by model and runtime |
+| Mac mini, 16 GB | 16 GB unified | 7–8B at 4-bit | Memory can't be upgraded later |
+| Mac mini, 24 GB or more | 24–64 GB unified | 14–32B at 4-bit | Cost rises quickly with memory |
+| PC with a 12 GB GPU | 12 GB of VRAM plus system RAM | 7–8B; more with bigger cards | Power draw and fan noise |
+| Home Assistant Voice PE | Uses your server | Depends on the server | Needs a Home Assistant server |
+
+## What size of model do you need?
+
+- **1–3B parameters:** commands, timers, short answers, simple lookups in your notes. Fits 8 GB devices.
+- **7–8B:** natural conversation, summaries, better at following instructions. Needs about 16 GB.
+- **14–32B:** noticeably better reasoning and writing. Needs 24–48 GB.
+
+Details in [How much RAM a local LLM needs](https://pleeply.vercel.app/info/local-llm-memory/).
+
+## FAQ
+
+### What is the cheapest way to run a local LLM at home?
+
+A Raspberry Pi 5 with 8 GB is the cheapest common option. It runs 1–3B models at roughly 5–11 tokens per second — fine for commands and short answers, slow for conversation.
+
+### Is a Raspberry Pi 5 or a Jetson Orin Nano better for local AI?
+
+For language models, the Jetson Orin Nano Super is several times faster on small models because it has a CUDA GPU: published 3B results are roughly 22–43 tokens per second against about 5 on a Pi 5. The Pi 5 is cheaper, simpler and has more community guides.
+
+### Can a Mac mini run a local LLM?
+
+Yes. Apple Silicon Macs share memory between the CPU and GPU, so a 16 GB Mac mini runs 7–8B models at 4-bit quantization, and 24 GB or more fits 14–32B models.
+
+### Do I need a GPU to run AI at home?
+
+No. Small models run on CPUs, including the Raspberry Pi 5's. A GPU or Apple Silicon makes larger models fast enough for conversation.
+
+## Sources
+
+- Raspberry Pi 5 speeds: [Stratosphere Linux IPS — LLM performance on Raspberry Pi 5](https://stratospherelinuxips.readthedocs.io/en/develop/immune/research_rpi_llm_performance.html), [bestllmfor — Local LLM on Raspberry Pi 5](https://bestllmfor.com/best/raspberry-pi-5-llm/)
+- Jetson Orin Nano Super: [ComputingForGeeks — Edge LLM: Jetson Orin vs AI HAT+ 2 vs Hailo-10H](https://computingforgeeks.com/edge-llm-jetson-orin-vs-ai-hat-2-vs-hailo-10h/), [AI Made Tools — How to run LLMs on Raspberry Pi 5 (2026)](https://www.aimadetools.com/blog/how-to-run-llms-on-raspberry-pi-5-2026/)
+- Mac memory guidance: [Starmorph — Best Mac mini for local LLMs](https://blog.starmorph.com/blog/best-mac-mini-for-local-llms)
+- RTX 3060 build: [jpk.io — Fully local voice assistant with Home Assistant Voice PE and Ollama](https://jpk.io/home-automation/home-assistant-voice-pe-local-llm/)
+- Voice Preview Edition: [CNX Software — $59 Voice Preview Edition](https://www.cnx-software.com/2024/12/20/59-voice-preview-edition-adds-an-offline-smart-speaker-to-your-home-assistant-server/)
+
+---
+
+# Run an LLM on a Raspberry Pi 5
+
+> What a Raspberry Pi 5 can run — measured tokens per second for 1–3B models, which models to pick for a voice assistant, why cooling matters, and how to install Ollama.
+
+Source: https://pleeply.vercel.app/info/raspberry-pi-5-llm/ · Updated 2026-10-24
+
+A Raspberry Pi 5 can run small language models locally. In Ollama tests with 4-bit models it generates about 11 tokens per second with 1B models and about 5 with 3B models — enough for short voice answers, too slow for long conversation. Use the 8 GB or 16 GB board and an active cooler.
+
+## Measured speeds
+
+| Model | Quantization | Tokens per second |
+|---|---|---|
+| Gemma 3 1B | Q4_K_M | 11.5 |
+| Llama 3.2 1B | Q4_K_M | 11.2 |
+| Qwen 2.5 1.5B | Q4_K_M | 10.0 |
+| SmolLM2 1.7B | Q4_K_M | 8.2 |
+| Granite 3.1 2B | Q4_K_M | 5.8 |
+| Qwen 2.5 3B | Q4_K_M | 5.2 |
+| Llama 3.2 3B | Q4_K_M | 4.7 |
+
+Measured with Ollama on a Raspberry Pi 5 by the Stratosphere Linux IPS project. Larger models are much slower: about 1.5–2.5 tokens per second for 7B models on the 16 GB board.
+
+## Which model to pick
+
+- **For a voice assistant:** a 1–1.5B model (Gemma 3 1B, Llama 3.2 1B, Qwen 2.5 1.5B) keeps answers to a few seconds.
+- **For better answers:** a 3B model (Qwen 2.5 3B, Llama 3.2 3B) is about half as fast but follows instructions better.
+- **7B and up:** it fits on the 16 GB board, but at 1.5–2.5 tokens per second a one-paragraph answer takes close to a minute.
+
+## Install Ollama
+
+1. Install 64-bit Raspberry Pi OS and update it.
+2. Install Ollama with its official script:
+
+```bash
+curl -fsSL https://ollama.com/install.sh | sh
+```
+
+3. Download and start a small model:
+
+```bash
+ollama run llama3.2:1b
+```
+
+4. Try a larger one with `ollama run llama3.2:3b`. Type `/bye` to exit.
+
+Ollama also serves an API on port 11434, which Home Assistant and other apps can use — see [Use a local LLM with Home Assistant](https://pleeply.vercel.app/info/home-assistant-local-llm/).
+
+## Tips for speed
+
+- **Cooling.** Without active cooling the chip throttles under sustained load, which can roughly halve throughput. The official Active Cooler is enough.
+- **AI HAT accelerators.** Hailo-based AI HATs speed up vision and some speech workloads, but independent tests found they don't speed up token generation for language models; the Pi's CPU is faster at it.
+- **Keep the model loaded** between requests so it isn't read from storage each time.
+- **Storage.** An NVMe SSD loads models faster than a microSD card.
+
+## Is a Pi 5 enough for a voice assistant?
+
+For commands and short answers, yes: guides report about 5–8 seconds per request with a small model, Whisper and Piper. For natural back-and-forth it's slow; faster hardware helps most at the language-model step. Compare options in [Choose your hardware](https://pleeply.vercel.app/info/run-ai-at-home/).
+
+## FAQ
+
+### Can a Raspberry Pi 5 run Llama?
+
+Yes. Llama 3.2 1B runs at about 11 tokens per second and Llama 3.2 3B at about 4.7 tokens per second with 4-bit quantization in Ollama.
+
+### What is the best LLM for a Raspberry Pi 5?
+
+For speed, Gemma 3 1B or Llama 3.2 1B at about 11 tokens per second. For better answers at a usable speed, Qwen 2.5 3B or Llama 3.2 3B at about 5 tokens per second.
+
+### Can a Raspberry Pi 5 run a 7B model?
+
+On the 16 GB board, yes, but slowly — about 1.5–2.5 tokens per second.
+
+### Does the Raspberry Pi AI HAT speed up LLMs?
+
+Independent tests found it doesn't speed up token generation for language models. It helps with vision and some speech workloads.
+
+## Sources
+
+- Speed table: [Stratosphere Linux IPS — LLM performance on Raspberry Pi 5](https://stratospherelinuxips.readthedocs.io/en/develop/immune/research_rpi_llm_performance.html)
+- 7B speeds, cooling and AI HAT: [bestllmfor — Local LLM on Raspberry Pi 5](https://bestllmfor.com/best/raspberry-pi-5-llm/)
+- AI HAT+ 2 decode tests: [ComputingForGeeks — Edge LLM: Jetson Orin vs AI HAT+ 2 vs Hailo-10H](https://computingforgeeks.com/edge-llm-jetson-orin-vs-ai-hat-2-vs-hailo-10h/)
+- End-to-end latency: [PromptQuorum — Build a local voice assistant (2026)](https://www.promptquorum.com/power-local-llm/build-local-voice-assistant-2026)
+- Install script: [Ollama — Download for Linux](https://ollama.com/download/linux)
+
+---
+
+# Use a local LLM with Home Assistant
+
+> How to connect Home Assistant's Assist to a local language model with Ollama, what the Voice Preview Edition does, which settings matter, and how to keep commands fast.
+
+Source: https://pleeply.vercel.app/info/home-assistant-local-llm/ · Updated 2026-10-24
+
+Home Assistant can use a local language model as its conversation agent through the built-in Ollama integration. You run Ollama on a machine in your network, point Home Assistant at it, and Assist answers questions and — as an experimental feature — controls the devices you expose, with no cloud AI service involved.
+
+## What you need
+
+- A Home Assistant server.
+- Ollama on the same machine or another one on your network (it listens on port 11434). For quick answers use a machine with a GPU or Apple Silicon; a Raspberry Pi works with small models, slowly.
+- Local speech: the Whisper (speech-to-text) and Piper (text-to-speech) add-ons. If your server is too weak, Home Assistant can send speech to its paid cloud instead.
+- A voice device, such as the Home Assistant Voice Preview Edition.
+
+## Set it up
+
+1. Install Ollama and download a model that supports tool calling, for example `ollama pull qwen2.5:7b`. If Ollama runs on another machine, make it listen on the network with `OLLAMA_HOST=0.0.0.0`.
+2. In Home Assistant, open **Settings → Devices & services → Add integration**, choose **Ollama** and enter the server URL, for example `http://192.168.1.20:11434`.
+3. Pick the model. Home Assistant downloads it if it isn't there yet.
+4. Open **Settings → Voice assistants**, edit your assistant and set the conversation agent to Ollama. Choose Whisper and Piper for speech.
+5. Optionally allow it to control Home Assistant (experimental) and expose only the devices it needs — Home Assistant recommends fewer than 25.
+
+## Settings that matter
+
+| Setting | What it does | Recommendation |
+|---|---|---|
+| Model | The Ollama model that answers | Must support tools to control devices; larger models make fewer mistakes |
+| Context window size | How many tokens the model sees | Home Assistant defaults to 8k (Ollama's own default is 2k); bigger homes need more, smaller values save RAM |
+| Max history messages | How much of the conversation is kept | Fewer is faster and lighter |
+| Keep alive | How long the model stays in memory | Keep it loaded for quick replies |
+| Think before responding | Lets reasoning models think first | Slower; off by default |
+
+## Keep commands fast
+
+Small local models can struggle to chat and control devices at the same time. Two patterns help:
+
+- **Let Home Assistant handle plain commands itself.** Its built-in intent matching handles "turn off the kitchen lights" instantly; only requests it doesn't understand need the language model.
+- **Use two agents.** Home Assistant's docs suggest two Ollama configurations with the same model: one for conversation without device control, one with control enabled for commands.
+
+## What the Voice Preview Edition is
+
+The Home Assistant Voice Preview Edition is a $59 voice satellite: an ESP32-S3 with a dual-microphone array, an XMOS XU316 audio processor for echo cancellation and noise suppression, a small speaker for prompts, a 3.5 mm output and a hardware mute switch. It needs a Home Assistant server — speech recognition and the language model run there, either locally or through Home Assistant Cloud.
+
+## FAQ
+
+### Can Home Assistant voice work without the internet?
+
+Yes, if speech-to-text, the language model and text-to-speech all run on your own machines — Whisper, Ollama and Piper. With a weaker server, Home Assistant can send speech to its cloud service instead.
+
+### Which Ollama model should I use with Home Assistant?
+
+One that supports tool calling, as large as your hardware can run quickly. Home Assistant notes that smaller models make more mistakes when controlling devices.
+
+### Does the Voice Preview Edition run the AI itself?
+
+No. It captures audio and plays answers; speech processing and the language model run on your Home Assistant server and your Ollama machine.
+
+### How many devices should I expose to the LLM?
+
+Home Assistant recommends exposing fewer than 25 entities to keep local models accurate.
+
+## Sources
+
+- [Home Assistant — Ollama integration](https://www.home-assistant.io/integrations/ollama/)
+- [Home Assistant — The era of open voice assistants has arrived (Voice Preview Edition)](https://www.home-assistant.io/blog/2024/12/19/voice-preview-edition-the-era-of-open-voice/)
+- [CNX Software — $59 Voice Preview Edition adds an offline smart speaker to your Home Assistant server](https://www.cnx-software.com/2024/12/20/59-voice-preview-edition-adds-an-offline-smart-speaker-to-your-home-assistant-server/)
+- [jpk.io — Building a fully local voice assistant with Home Assistant Voice PE and Ollama](https://jpk.io/home-automation/home-assistant-voice-pe-local-llm/)
+
+---
+
+# How much RAM do you need to run a local LLM?
+
+> Memory sets the largest model you can run at home. Rules of thumb for 8, 16, 24 and 48 GB, what 4-bit quantization does, and how the context window adds to it.
+
+Source: https://pleeply.vercel.app/info/local-llm-memory/ · Updated 2026-10-24
+
+Memory decides which language models you can run locally. As a rule of thumb, 8 GB runs small 1–3B models, 16 GB runs 7–8B models at 4-bit quantization, 24 GB or more opens 14–32B models, and the largest open models need 48 GB or more.
+
+## Rules of thumb
+
+| Memory | What fits comfortably | Good for |
+|---|---|---|
+| 8 GB | 1–3B models, up to about 3.8B | Commands, timers, short answers |
+| 16 GB | 7–8B at 4-bit | Everyday conversation and summaries |
+| 24–32 GB | 14–32B at 4-bit | Better reasoning and writing |
+| 48 GB or more | Larger models | Closest to cloud quality |
+
+## How to estimate
+
+A model's weights take roughly parameters × bits per weight ÷ 8 bytes.
+
+- An 8B model at 4 bits: 8 billion × 4 ÷ 8 ≈ 4 GB. Llama 3.1 8B at Q4 is about 4.9 GB on disk.
+- Keep the model to about 60–70% of total memory, leaving room for the operating system, the context and other apps.
+- On a Mac, leave 4–8 GB for macOS and your apps.
+
+## What quantization means
+
+Quantization stores each weight with fewer bits — for example 4 instead of 16 — so the model needs about a quarter of the memory. Q4_K_M is a common 4-bit format in llama.cpp and Ollama that keeps quality close to the original for most everyday tasks. Lower-bit formats save more memory and lose more quality.
+
+## The context window uses memory too
+
+The context window is how much text the model considers at once. Its memory grows with its length, so long conversations and large smart homes cost RAM. Home Assistant, for example, sets an 8k-token context for Ollama by default, up from Ollama's own 2k.
+
+## Apple Silicon vs a PC
+
+Apple Silicon Macs use unified memory shared by the CPU and GPU, so most of the RAM is available to the model. On a PC with a graphics card, the model should fit in the card's own memory (VRAM) to run fast; a 12 GB card runs 7–8B models well.
+
+## FAQ
+
+### Can 8 GB of RAM run Llama?
+
+Yes, the small versions. Llama 3.2 1B and 3B run on 8 GB. An 8B model at 4-bit technically fits, but leaves only about 3 GB for everything else and tends to swap.
+
+### How much RAM does a 7B model need?
+
+About 4–5 GB for the weights at 4-bit quantization, so a machine with 16 GB runs it comfortably.
+
+### How much memory does a 70B model need?
+
+Roughly 35–40 GB at 4-bit for the weights alone, so plan for 48 GB or more.
+
+### Does a longer context window use more RAM?
+
+Yes. Context memory grows with its length, so a 32k context needs noticeably more than the default 2k–8k.
+
+## Sources
+
+- [Refurb.me — Run local AI on a Mac](https://www.refurb.me/blog/run-local-ai-on-mac)
+- [Starmorph — Best Mac mini for local LLMs](https://blog.starmorph.com/blog/best-mac-mini-for-local-llms)
+- [LocalClaw — Best local LLMs for Mac mini M4](https://localclaw.io/guides/best-local-llms-for-mac-mini-m4)
+- [Home Assistant — Ollama integration (context window defaults)](https://www.home-assistant.io/integrations/ollama/)
+
+---
+
+# Private alternatives to Alexa
+
+> Voice assistants that don't send your voice to Amazon — Home Assistant Assist with local AI, open-source assistants, DIY Raspberry Pi builds and local AI devices — compared on privacy, cost and effort.
+
+Source: https://pleeply.vercel.app/info/alexa-alternatives/ · Updated 2026-10-24
+
+If you want a voice assistant that doesn't send your voice to Amazon, the main options are Home Assistant's Assist with local speech and an Ollama model, an open-source assistant such as OpenVoiceOS, a DIY Raspberry Pi build, or a device that runs its AI on board. Each trades some convenience for privacy.
+
+## Comparison
+
+| Option | Where your voice is processed | Up front | Ongoing | Effort |
+|---|---|---|---|---|
+| Amazon Alexa+ | Amazon's cloud | An Echo device | $19.99 a month, or included with Prime | Lowest |
+| Google speaker with Gemini | Google's cloud | A Google speaker | Paid Gemini plan after a trial, reportedly about $10 a month | Low |
+| Home Assistant Voice PE + local AI | Your own servers | $59 plus a server for Home Assistant and Ollama | None | Medium to high |
+| OpenVoiceOS | Your device | A Raspberry Pi, microphones and a speaker | None | High |
+| DIY Raspberry Pi (Whisper + Ollama + Piper) | Your device | A Raspberry Pi 5, microphones and a speaker | None | High |
+| pleeply (in development) | On the speaker | Expected $299 (One), $549 (Pro) or $499 (Pocket prototype) | Not announced | Low (planned) |
+
+## How to choose
+
+- **You want it to just work:** a cloud speaker is the easiest, but your requests are processed by the provider.
+- **You already run Home Assistant:** add the Voice Preview Edition and the Ollama integration — the strongest local option today. See [Use a local LLM with Home Assistant](https://pleeply.vercel.app/info/home-assistant-local-llm/).
+- **You like building things:** a Raspberry Pi 5 with Whisper, a 1–3B model and Piper. See [Run an LLM on a Raspberry Pi 5](https://pleeply.vercel.app/info/raspberry-pi-5-llm/).
+- **You want local AI without assembling it:** a device built for it, such as [pleeply](https://pleeply.vercel.app/info/pleeply/).
+
+## What you give up by going local
+
+- Small local models are less capable than Alexa+'s cloud models on complex questions.
+- Fewer ready-made integrations, such as shopping and some music services, and setup takes time.
+- Smart-home control runs through your own hub rather than Amazon's ecosystem.
+
+## FAQ
+
+### Is there an Alexa alternative that works offline?
+
+Yes. Home Assistant's Assist can run fully offline with local Whisper, Piper and an Ollama model, and so can a DIY build on a Raspberry Pi 5. An Echo stops working without internet.
+
+### Is there an Alexa alternative without a subscription?
+
+Local setups have none: Home Assistant, OpenVoiceOS and DIY Raspberry Pi assistants are free software, and you pay only for hardware. Alexa+ costs $19.99 a month unless you have Prime.
+
+### What is the most private smart speaker?
+
+One that processes speech and runs its language model locally, so audio never leaves your home. Today that means Home Assistant's Voice Preview Edition with local processing, or a DIY build.
+
+### Can I use Alexa with Home Assistant and stay private?
+
+You can use an Echo as a front end for Home Assistant, but your voice requests are still processed by Amazon. For privacy, use Home Assistant's own Assist with local speech processing.
+
+## Sources
+
+- [Android Authority — Alexa+ pricing](https://androidauthority.com/alexa-plus-pricing-3530655)
+- [The Next Web — Google's first speaker in six years is really a $10-a-month Gemini subscription](https://thenextweb.com/news/google-home-speaker-gemini-99-subscription)
+- [Home Assistant — Voice Preview Edition announcement](https://www.home-assistant.io/blog/2024/12/19/voice-preview-edition-the-era-of-open-voice/)
+- [TechCrunch — Amazon's Echo will send all voice recordings to the cloud, starting March 28](https://techcrunch.com/2025/03/15/amazons-echo-will-send-all-voice-recordings-to-the-cloud-starting-march-28)
+- [Open Voice OS — About](https://www.openvoiceos.org/about)
+
+---
+
+# Open-source voice assistants compared
+
+> Home Assistant Assist, OpenVoiceOS, Neon AI, Rhasspy and Mycroft — what each one is, whether it runs offline, and which projects are still active.
+
+Source: https://pleeply.vercel.app/info/open-source-voice-assistants/ · Updated 2026-10-24
+
+The most active open-source voice assistant today is Home Assistant's Assist, which can run speech and language models locally and powers the Voice Preview Edition. OpenVoiceOS and Neon AI carry on the Mycroft codebase, Rhasspy is a fully offline toolkit, and Mycroft AI itself stopped development in early 2023.
+
+## Comparison
+
+| Project | What it is | Offline | Status |
+|---|---|---|---|
+| Home Assistant Assist | The voice assistant built into Home Assistant; plugs in voice services such as Whisper and Piper over the Wyoming protocol | Yes, with local speech and an Ollama model | Active; Voice Preview Edition hardware since December 2024 |
+| OpenVoiceOS (OVOS) | Community fork of Mycroft from November 2021, now run by a nonprofit foundation | Can be configured fully offline | Active |
+| Neon AI | Conversational AI platform built on Mycroft and OVOS code; took over Mark II software support | Partly | Active |
+| Rhasspy | Toolkit of offline voice services for home automation | Yes | Its creator, Mike Hansen, has led Home Assistant's voice work since late 2022 |
+| Mycroft | The original open-source assistant and Mark II speaker | Mostly cloud, with user control | Development stopped in early 2023; code lives on in OVOS and Neon |
+
+## Which one to choose
+
+- **You run Home Assistant:** use Assist. It has the most momentum, local speech and an Ollama integration.
+- **You want a standalone assistant rather than a smart-home hub:** try OpenVoiceOS.
+- **You're building a custom offline voice interface:** combine Wyoming services — openWakeWord, Whisper and Piper — the way Rhasspy pioneered.
+
+## What is the Wyoming protocol?
+
+Wyoming is a simple protocol for connecting voice services — wake word, speech-to-text, text-to-speech — over the network. Nabu Casa created it for Home Assistant, so you can run Whisper or Piper on another machine and plug them into Assist. Rhasspy 3 uses it too.
+
+## FAQ
+
+### Is Mycroft still alive?
+
+Mycroft AI, the company, stopped development in early 2023. Sources disagree on the cause — funding problems and a patent dispute are both cited. Its software continues in community projects: OpenVoiceOS leads development and Neon AI supports the Mark II.
+
+### What's the difference between OpenVoiceOS and Mycroft?
+
+OpenVoiceOS is a community fork of Mycroft started in November 2021. It describes itself as a full voice operating system, is maintained by a nonprofit foundation, and kept going after Mycroft AI stopped.
+
+### Is Rhasspy still maintained?
+
+Rhasspy's creator, Mike Hansen, joined Nabu Casa in late 2022 to lead Home Assistant's voice work, and many of Rhasspy's ideas now live in Home Assistant's voice stack and the Wyoming protocol. Check Rhasspy's repository for current releases.
+
+### Which open-source voice assistant works offline?
+
+Home Assistant Assist with local Whisper, Piper and Ollama; Rhasspy; and OpenVoiceOS can all run fully offline.
+
+## Sources
+
+- [Home Assistant — 2023: Home Assistant's year of Voice](https://www.home-assistant.io/blog/2022/12/20/year-of-voice/)
+- [Home Assistant — Year of the Voice, Chapter 2 (Wyoming)](https://www.home-assistant.io/blog/2023/04/27/year-of-the-voice-chapter-2/)
+- [Home Assistant — Voice Preview Edition announcement](https://www.home-assistant.io/blog/2024/12/19/voice-preview-edition-the-era-of-open-voice/)
+- [Open Voice OS — A brief history of Open Voice OS](https://blog.openvoiceos.org/posts/2023-02-15-a-brief-history-of-open-voice-os)
+- [Mycroft Community — FAQ: OVOS, Neon and the future of the Mycroft voice assistant](https://community.mycroft.ai/t/faq-ovos-neon-and-the-future-of-the-mycroft-voice-assistant)
+- [Wikipedia — Mycroft (software)](https://en.wikipedia.org/wiki/Mycroft_(software))
+
+---
+
+# What is pleeply?
+
+> pleeply is a home speaker with a computer inside that runs open AI models on the device, keeps a private memory and works without the cloud. It's in development — here is what's planned.
+
+Source: https://pleeply.vercel.app/info/pleeply/ · Updated 2026-10-25
+
+pleeply is a speaker with a computer inside. It runs open-weight AI models on the device, keeps a private memory of you at home and works without the cloud. pleeply is in development and not for sale yet; the waitlist is open at [pleeply.vercel.app](https://pleeply.vercel.app/).
+
+> **Status: in development**
+> Prices below are expected prices and specs are planned — both may change during development. Reserving is free and doesn't commit you to anything.
+
+## How it works
+
+1. **You talk.** Ask anything, set timers, control your home, think out loud.
+2. **It thinks on the device.** An open language model runs on the computer inside the speaker — no round trip to a cloud server.
+3. **It remembers, privately.** Your personal memory lives on the device. See it, edit it, delete it anytime.
+
+## Planned lineup
+
+| | pleeply Pocket | pleeply One | pleeply Pro |
+|---|---|---|---|
+| What it is | A pocket-size device with a Raspberry Pi 5, a battery and a push-to-talk button | A speaker with a built-in computer and microphone array | A speaker with more memory and compute |
+| Models | Compact open models, 1–3B | Compact open models, up to about 8B | Larger models, up to about 32B |
+| Hardware | Built in, with a 3000 mAh battery charged over USB-C | Built in | Built in |
+| Expected price | $499 | $299 | $549 |
+
+## Principles
+
+- **Private by design.** Your voice is processed by the chip inside the speaker.
+- **Your own AI.** Your device, your data, your rules — no big-tech account required.
+- **Local intelligence.** Models run in your home, so answers don't wait on a server on another continent.
+- **No cloud required.** Core features work without internet; connect online services only if you choose to.
+- **Open models.** Run compatible open models — Llama, Qwen, Mistral, Gemma — and swap them as they get better.
+
+## pleeply vs a typical smart speaker
+
+| | Typical cloud smart speaker | pleeply |
+|---|---|---|
+| Where your voice goes | To company servers | Stays on the device |
+| Without internet | Stops working | Core features keep working |
+| Memory of you | In the provider's account | On the device, where you can edit it |
+| Models | The provider's own | Open models you can swap |
+
+## FAQ
+
+### Is pleeply available to buy?
+
+Not yet. pleeply is in development. You can reserve one for free on the waitlist, and we'll email you when reservations open.
+
+### How much will pleeply cost?
+
+Expected prices are $499 for pleeply Pocket (a hand-assembled, pocket-size device with a Raspberry Pi 5), $299 for the pleeply One speaker and $549 for pleeply Pro. Prices and specs may change during development.
+
+### Does pleeply work offline?
+
+That's the design goal: core features — talking to it, answers from the on-device model and your memory — work without internet. Online services are optional.
+
+### Which AI models does pleeply run?
+
+Compatible open-weight models such as Llama, Qwen, Mistral and Gemma. The One is planned for compact models up to about 8B parameters, the Pro for larger models up to about 32B.
+
+### Where is my data stored?
+
+On the device. Your voice is processed by the computer inside the speaker, and your personal memory lives there too. You can see, edit or delete it anytime.
+
+### How is pleeply different from Alexa?
+
+Alexa processes requests in Amazon's cloud — since March 28, 2025 there has been no setting to keep them on the device. pleeply runs its model on the speaker and keeps your memory at home.
+
+## Sources
+
+- [pleeply — home page and waitlist](https://pleeply.vercel.app/)
+- [TechCrunch — Amazon's Echo will send all voice recordings to the cloud, starting March 28](https://techcrunch.com/2025/03/15/amazons-echo-will-send-all-voice-recordings-to-the-cloud-starting-march-28)

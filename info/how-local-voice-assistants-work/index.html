@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How a local voice assistant works · pleeply docs</title>
+<meta name="description" content="The four stages of an offline voice assistant — wake word, speech-to-text, language model, text-to-speech — which open-source software does each, and how long each step takes on small hardware.">
+<link rel="canonical" href="https://pleeply.vercel.app/info/how-local-voice-assistants-work/">
+<link rel="alternate" type="text/markdown" href="/info/how-local-voice-assistants-work.md" title="How a local voice assistant works (Markdown)">
+<meta property="article:modified_time" content="2026-10-24">
+<meta property="og:type" content="article">
+<meta property="og:title" content="How a local voice assistant works · pleeply docs">
+<meta property="og:description" content="The four stages of an offline voice assistant — wake word, speech-to-text, language model, text-to-speech — which open-source software does each, and how long each step takes on small hardware.">
+<meta property="og:url" content="https://pleeply.vercel.app/info/how-local-voice-assistants-work/">
+<meta property="og:image" content="https://pleeply.vercel.app/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#111111">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/info/docs.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://pleeply.vercel.app/#org","name":"pleeply","url":"https://pleeply.vercel.app/","logo":"https://pleeply.vercel.app/icon-512.png"},{"@type":"TechArticle","@id":"https://pleeply.vercel.app/info/how-local-voice-assistants-work/#article","headline":"How a local voice assistant works","description":"The four stages of an offline voice assistant — wake word, speech-to-text, language model, text-to-speech — which open-source software does each, and how long each step takes on small hardware.","datePublished":"2026-10-24","dateModified":"2026-10-24","inLanguage":"en","mainEntityOfPage":"https://pleeply.vercel.app/info/how-local-voice-assistants-work/","author":{"@id":"https://pleeply.vercel.app/#org"},"publisher":{"@id":"https://pleeply.vercel.app/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"pleeply","item":"https://pleeply.vercel.app/"},{"@type":"ListItem","position":2,"name":"Docs","item":"https://pleeply.vercel.app/info/"},{"@type":"ListItem","position":3,"name":"How local voice assistants work","item":"https://pleeply.vercel.app/info/how-local-voice-assistants-work/"}]},{"@type":"FAQPage","@id":"https://pleeply.vercel.app/info/how-local-voice-assistants-work/#faq","mainEntity":[{"@type":"Question","name":"Can Whisper run on a Raspberry Pi?","acceptedAnswer":{"@type":"Answer","text":"Yes. Small Whisper models run on a Raspberry Pi 5: the \"small\" model in int8 takes about 2–4 seconds per sentence. Larger models such as \"medium\" use too much of the Pi's memory to be practical."}},{"@type":"Question","name":"What is the best offline text-to-speech?","acceptedAnswer":{"@type":"Answer","text":"Piper is the most widely used offline text-to-speech for home assistants. It runs faster than real time on a Raspberry Pi 5 CPU and has voices in many languages. Its development moved to the OHF-Voice/piper1-gpl repository under the GPL-3.0 license, which matters if you ship it in a product."}},{"@type":"Question","name":"Why are local voice assistants slower than Alexa?","acceptedAnswer":{"@type":"Answer","text":"Because the language model runs on small hardware in your home instead of on data-center GPUs. On a Raspberry Pi 5 a request takes about 5–8 seconds end to end; a board with a GPU or an Apple Silicon Mac generates short answers several times faster."}},{"@type":"Question","name":"Does the wake word detector record everything?","acceptedAnswer":{"@type":"Answer","text":"In a typical design, no. The wake word model checks a short rolling audio buffer on the device and discards it; transcription starts only after it hears the trigger phrase. In a local assistant even the audio after the wake word stays on the device."}}]}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="/info/" aria-label="pleeply docs"><span class="mark">pleeply<i></i></span><span class="docs">docs</span></a>
+    <nav class="top-links" aria-label="Site">
+      <a href="/info/" aria-current="page">Docs</a>
+      <a href="/community">Community</a>
+      <a href="/">Product</a>
+      <a class="btn" href="/#reserve"><span class="dot"></span>Join waitlist</a>
+    </nav>
+  </div>
+</header>
+<div class="shell">
+  <aside class="side">
+    <details class="navbox" open>
+      <summary>Menu</summary>
+      <input class="filter" type="search" placeholder="Filter pages" aria-label="Filter pages">
+      <nav aria-label="Docs"><div class="nav-group"><p class="nav-title">Start here</p><ul><li><a href="/info/">Overview</a></li></ul></div><div class="nav-group"><p class="nav-title">Learn</p><ul><li><a href="/info/local-ai-assistant/">What is a local AI assistant?</a></li><li><a href="/info/how-local-voice-assistants-work/" aria-current="page">How local voice assistants work</a></li><li><a href="/info/smart-speaker-privacy/">Smart speaker privacy</a></li></ul></div><div class="nav-group"><p class="nav-title">Run it yourself</p><ul><li><a href="/info/run-ai-at-home/">Choose your hardware</a></li><li><a href="/info/raspberry-pi-5-llm/">LLM on a Raspberry Pi 5</a></li><li><a href="/info/home-assistant-local-llm/">Home Assistant + local LLM</a></li><li><a href="/info/local-llm-memory/">How much RAM you need</a></li></ul></div><div class="nav-group"><p class="nav-title">Compare</p><ul><li><a href="/info/alexa-alternatives/">Private Alexa alternatives</a></li><li><a href="/info/open-source-voice-assistants/">Open-source voice assistants</a></li></ul></div><div class="nav-group"><p class="nav-title">pleeply</p><ul><li><a href="/info/pleeply/">What is pleeply?</a></li></ul></div></nav>
+    </details>
+  </aside>
+  <main id="main" class="doc">
+    <article>
+      <p class="crumb">Learn</p>
+      <h1>How a local voice assistant works</h1>
+      <div class="meta">
+        <span>Updated <time datetime="2026-10-24">Oct 24, 2026</time></span><span>3 min read</span>
+        <span class="meta-actions"><button class="copy-md" type="button" data-md="/info/how-local-voice-assistants-work.md">Copy as Markdown</button><a href="/info/how-local-voice-assistants-work.md">View .md</a></span>
+      </div>
+      <div class="prose">
+<p>An offline voice assistant turns your speech into a spoken answer in four stages that all run on one machine: a wake word detector, speech-to-text, a language model and text-to-speech. On a Raspberry Pi 5 the whole loop takes several seconds, and most of that time is the language model writing its answer.</p>
+<h2 id="the-pipeline">The pipeline<a class="anchor" href="#the-pipeline" aria-label="Link to this section">#</a></h2>
+<div class="table"><table><thead><tr><th>Stage</th><th>What it does</th><th>Common open-source choice</th></tr></thead><tbody><tr><td>1. Wake word</td><td>Listens for a trigger phrase and ignores everything else</td><td>openWakeWord, microWakeWord</td></tr><tr><td>2. Speech-to-text</td><td>Turns your sentence into text</td><td>Whisper (faster-whisper, whisper.cpp)</td></tr><tr><td>3. Language model</td><td>Understands the request and writes the answer</td><td>Llama, Qwen or Gemma through Ollama or llama.cpp</td></tr><tr><td>4. Text-to-speech</td><td>Speaks the answer</td><td>Piper</td></tr></tbody></table></div>
+<p>In front of all four sits the audio hardware: a microphone array with echo cancellation and noise suppression, so the assistant can hear you over its own speaker and the room. Home Assistant's Voice Preview Edition, for example, uses an XMOS XU316 chip for this.</p>
+<h2 id="where-the-time-goes">Where the time goes<a class="anchor" href="#where-the-time-goes" aria-label="Link to this section">#</a></h2>
+<p>Reported timings on a Raspberry Pi 5:</p>
+<ul><li><strong>Speech-to-text:</strong> Whisper &quot;small&quot; in int8 takes about 2–4 seconds, depending on sentence length.</li><li><strong>Language model:</strong> with 4-bit models in Ollama, a 1B model generates about 11 tokens per second and a 3B model about 4.7. A one-sentence answer of about 25 tokens therefore takes roughly 2–5 seconds, plus the time to read the prompt.</li><li><strong>Text-to-speech:</strong> Piper synthesizes faster than real time on the Pi 5's CPU.</li></ul>
+<p>End to end, guides report about 5–8 seconds per request on a Pi 5 with a small model. That works for hands-free questions but feels slow in conversation. Faster hardware mostly shortens the language-model step — see <a href="/info/run-ai-at-home/">Choose your hardware</a>.</p>
+<h2 id="how-to-make-it-feel-faster">How to make it feel faster<a class="anchor" href="#how-to-make-it-feel-faster" aria-label="Link to this section">#</a></h2>
+<ul><li><strong>Stream the answer.</strong> Start speaking the first sentence while the model writes the rest.</li><li><strong>Send simple commands around the model.</strong> &quot;Turn off the kitchen lights&quot; can go to a fast intent matcher; only open questions need the language model. Home Assistant supports this pattern.</li><li><strong>Keep the model loaded.</strong> Loading a model from disk adds seconds; Ollama's keep-alive setting keeps it in memory.</li><li><strong>Use the smallest model that does the job.</strong> 1–3B for commands and short answers, 7–8B and up for conversation.</li><li><strong>Cool the board.</strong> A Raspberry Pi 5 throttles under sustained load without active cooling, which can roughly halve language-model throughput.</li></ul>
+<h2 id="what-works-offline">What works offline<a class="anchor" href="#what-works-offline" aria-label="Link to this section">#</a></h2>
+<p>Timers and alarms, conversions, questions the model can answer from what it learned in training, your notes and memory, and control of smart-home devices on your network. Anything that needs fresh data — weather, news, sports scores — needs an internet lookup, which a local assistant can make on request without sending your audio anywhere.</p>
+<h2 id="faq">FAQ<a class="anchor" href="#faq" aria-label="Link to this section">#</a></h2>
+<h3 id="can-whisper-run-on-a-raspberry-pi">Can Whisper run on a Raspberry Pi?<a class="anchor" href="#can-whisper-run-on-a-raspberry-pi" aria-label="Link to this section">#</a></h3>
+<p>Yes. Small Whisper models run on a Raspberry Pi 5: the &quot;small&quot; model in int8 takes about 2–4 seconds per sentence. Larger models such as &quot;medium&quot; use too much of the Pi's memory to be practical.</p>
+<h3 id="what-is-the-best-offline-text-to-speech">What is the best offline text-to-speech?<a class="anchor" href="#what-is-the-best-offline-text-to-speech" aria-label="Link to this section">#</a></h3>
+<p>Piper is the most widely used offline text-to-speech for home assistants. It runs faster than real time on a Raspberry Pi 5 CPU and has voices in many languages. Its development moved to the OHF-Voice/piper1-gpl repository under the GPL-3.0 license, which matters if you ship it in a product.</p>
+<h3 id="why-are-local-voice-assistants-slower-than-alexa">Why are local voice assistants slower than Alexa?<a class="anchor" href="#why-are-local-voice-assistants-slower-than-alexa" aria-label="Link to this section">#</a></h3>
+<p>Because the language model runs on small hardware in your home instead of on data-center GPUs. On a Raspberry Pi 5 a request takes about 5–8 seconds end to end; a board with a GPU or an Apple Silicon Mac generates short answers several times faster.</p>
+<h3 id="does-the-wake-word-detector-record-everything">Does the wake word detector record everything?<a class="anchor" href="#does-the-wake-word-detector-record-everything" aria-label="Link to this section">#</a></h3>
+<p>In a typical design, no. The wake word model checks a short rolling audio buffer on the device and discards it; transcription starts only after it hears the trigger phrase. In a local assistant even the audio after the wake word stays on the device.</p>
+<h2 id="sources">Sources<a class="anchor" href="#sources" aria-label="Link to this section">#</a></h2>
+<ul><li>Pi 5 language-model speeds: <a href="https://stratospherelinuxips.readthedocs.io/en/develop/immune/research_rpi_llm_performance.html" rel="noopener" target="_blank">Stratosphere Linux IPS — LLM performance on Raspberry Pi 5</a></li><li>Whisper on a Pi 5: <a href="https://raspberry.tips/en/smart-home/local-voice-assistant-replace-alexa-with-home-assistant-and-raspberry-pi-5" rel="noopener" target="_blank">raspberry.tips — Local voice assistant with Home Assistant and Raspberry Pi 5</a></li><li>End-to-end latency: <a href="https://www.promptquorum.com/power-local-llm/build-local-voice-assistant-2026" rel="noopener" target="_blank">PromptQuorum — Build a local voice assistant (2026)</a></li><li>Piper speed and license: <a href="https://aivideosensei.com/guides/piper-tts-offline-voice-guide" rel="noopener" target="_blank">Piper TTS: fast offline voice synthesis on a Raspberry Pi</a></li><li>Throttling without cooling: <a href="https://bestllmfor.com/best/raspberry-pi-5-llm/" rel="noopener" target="_blank">bestllmfor — Local LLM on Raspberry Pi 5</a></li><li>Command routing and keep-alive: <a href="https://www.home-assistant.io/integrations/ollama/" rel="noopener" target="_blank">Home Assistant — Ollama integration</a></li><li>Audio front-end: <a href="https://www.home-assistant.io/blog/2024/12/19/voice-preview-edition-the-era-of-open-voice/" rel="noopener" target="_blank">Home Assistant — Voice Preview Edition announcement</a></li></ul>
+      </div>
+      <section class="join" aria-labelledby="join-title">
+        <p class="join-kicker">pleeply Community</p>
+        <h2 id="join-title">Keep going with the community</h2>
+        <p>Running AI at home is easier with people who've already done it. On the pleeply forum you can:</p>
+        <ul>
+          <li>ask about local models, hardware and Home Assistant, and get answers from people running them;</li>
+          <li>vote on what pleeply should do first;</li>
+          <li>show your own local-AI setup and get feedback;</li>
+          <li>hear first about test builds and reservations.</li>
+        </ul>
+        <div class="join-actions"><a class="btn btn-lg" href="/community/signup?next=%2Fcommunity">Join the community →</a><a class="join-more" href="/community">See top topics</a></div>
+        <p class="join-micro">Free · no email needed</p>
+      </section>
+      <p class="ai-note">This page is also available as <a href="/info/how-local-voice-assistants-work.md">Markdown</a>. For the full docs index, see <a href="/llms.txt">llms.txt</a>.</p>
+      <nav class="pager" aria-label="Previous and next">
+        <a class="prev" href="/info/local-ai-assistant/"><span>Previous</span>What is a local AI assistant?</a>
+        <a class="next" href="/info/smart-speaker-privacy/"><span>Next</span>Smart speaker privacy</a>
+      </nav>
+    </article>
+  </main>
+  <aside class="toc" aria-label="On this page"><p>On this page</p><ul><li><a href="#the-pipeline">The pipeline</a></li><li><a href="#where-the-time-goes">Where the time goes</a></li><li><a href="#how-to-make-it-feel-faster">How to make it feel faster</a></li><li><a href="#what-works-offline">What works offline</a></li><li><a href="#faq">FAQ</a></li><li><a href="#sources">Sources</a></li></ul></aside>
+</div>
+<footer class="foot">
+  <div class="foot-in"><span class="mark">pleeply<i></i></span><span>© 2026 pleeply. In development.</span><span class="foot-links"><a href="/community">Community</a><a href="/llms.txt">llms.txt</a></span></div>
+</footer>
+<script defer src="/_vercel/insights/script.js"></script>
+<script>
+(function () {
+  var box = document.querySelector('.navbox');
+  if (box && window.matchMedia('(max-width: 899px)').matches) box.removeAttribute('open');
+  var f = document.querySelector('.filter');
+  if (f) f.addEventListener('input', function () {
+    var q = f.value.trim().toLowerCase();
+    document.querySelectorAll('.nav-group').forEach(function (g) {
+      var any = false;
+      g.querySelectorAll('li').forEach(function (li) {
+        var hit = !q || li.textContent.toLowerCase().indexOf(q) !== -1;
+        li.hidden = !hit; if (hit) any = true;
+      });
+      g.hidden = !any;
+    });
+  });
+  var b = document.querySelector('.copy-md');
+  if (b) b.addEventListener('click', function () {
+    fetch(b.dataset.md).then(function (r) { return r.text(); })
+      .then(function (t) { return navigator.clipboard.writeText(t); })
+      .then(function () { b.textContent = 'Copied'; }, function () { location.href = b.dataset.md; })
+      .then(function () { setTimeout(function () { b.textContent = 'Copy as Markdown'; }, 1600); });
+  });
+})();
+</script>
+</body>
+</html>

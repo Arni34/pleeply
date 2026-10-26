@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Use a local LLM with Home Assistant · pleeply docs</title>
+<meta name="description" content="How to connect Home Assistant's Assist to a local language model with Ollama, what the Voice Preview Edition does, which settings matter, and how to keep commands fast.">
+<link rel="canonical" href="https://pleeply.vercel.app/info/home-assistant-local-llm/">
+<link rel="alternate" type="text/markdown" href="/info/home-assistant-local-llm.md" title="Use a local LLM with Home Assistant (Markdown)">
+<meta property="article:modified_time" content="2026-10-24">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Use a local LLM with Home Assistant · pleeply docs">
+<meta property="og:description" content="How to connect Home Assistant's Assist to a local language model with Ollama, what the Voice Preview Edition does, which settings matter, and how to keep commands fast.">
+<meta property="og:url" content="https://pleeply.vercel.app/info/home-assistant-local-llm/">
+<meta property="og:image" content="https://pleeply.vercel.app/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#111111">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/info/docs.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://pleeply.vercel.app/#org","name":"pleeply","url":"https://pleeply.vercel.app/","logo":"https://pleeply.vercel.app/icon-512.png"},{"@type":"TechArticle","@id":"https://pleeply.vercel.app/info/home-assistant-local-llm/#article","headline":"Use a local LLM with Home Assistant","description":"How to connect Home Assistant's Assist to a local language model with Ollama, what the Voice Preview Edition does, which settings matter, and how to keep commands fast.","datePublished":"2026-10-24","dateModified":"2026-10-24","inLanguage":"en","mainEntityOfPage":"https://pleeply.vercel.app/info/home-assistant-local-llm/","author":{"@id":"https://pleeply.vercel.app/#org"},"publisher":{"@id":"https://pleeply.vercel.app/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"pleeply","item":"https://pleeply.vercel.app/"},{"@type":"ListItem","position":2,"name":"Docs","item":"https://pleeply.vercel.app/info/"},{"@type":"ListItem","position":3,"name":"Home Assistant + local LLM","item":"https://pleeply.vercel.app/info/home-assistant-local-llm/"}]},{"@type":"FAQPage","@id":"https://pleeply.vercel.app/info/home-assistant-local-llm/#faq","mainEntity":[{"@type":"Question","name":"Can Home Assistant voice work without the internet?","acceptedAnswer":{"@type":"Answer","text":"Yes, if speech-to-text, the language model and text-to-speech all run on your own machines — Whisper, Ollama and Piper. With a weaker server, Home Assistant can send speech to its cloud service instead."}},{"@type":"Question","name":"Which Ollama model should I use with Home Assistant?","acceptedAnswer":{"@type":"Answer","text":"One that supports tool calling, as large as your hardware can run quickly. Home Assistant notes that smaller models make more mistakes when controlling devices."}},{"@type":"Question","name":"Does the Voice Preview Edition run the AI itself?","acceptedAnswer":{"@type":"Answer","text":"No. It captures audio and plays answers; speech processing and the language model run on your Home Assistant server and your Ollama machine."}},{"@type":"Question","name":"How many devices should I expose to the LLM?","acceptedAnswer":{"@type":"Answer","text":"Home Assistant recommends exposing fewer than 25 entities to keep local models accurate."}}]}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="/info/" aria-label="pleeply docs"><span class="mark">pleeply<i></i></span><span class="docs">docs</span></a>
+    <nav class="top-links" aria-label="Site">
+      <a href="/info/" aria-current="page">Docs</a>
+      <a href="/community">Community</a>
+      <a href="/">Product</a>
+      <a class="btn" href="/#reserve"><span class="dot"></span>Join waitlist</a>
+    </nav>
+  </div>
+</header>
+<div class="shell">
+  <aside class="side">
+    <details class="navbox" open>
+      <summary>Menu</summary>
+      <input class="filter" type="search" placeholder="Filter pages" aria-label="Filter pages">
+      <nav aria-label="Docs"><div class="nav-group"><p class="nav-title">Start here</p><ul><li><a href="/info/">Overview</a></li></ul></div><div class="nav-group"><p class="nav-title">Learn</p><ul><li><a href="/info/local-ai-assistant/">What is a local AI assistant?</a></li><li><a href="/info/how-local-voice-assistants-work/">How local voice assistants work</a></li><li><a href="/info/smart-speaker-privacy/">Smart speaker privacy</a></li></ul></div><div class="nav-group"><p class="nav-title">Run it yourself</p><ul><li><a href="/info/run-ai-at-home/">Choose your hardware</a></li><li><a href="/info/raspberry-pi-5-llm/">LLM on a Raspberry Pi 5</a></li><li><a href="/info/home-assistant-local-llm/" aria-current="page">Home Assistant + local LLM</a></li><li><a href="/info/local-llm-memory/">How much RAM you need</a></li></ul></div><div class="nav-group"><p class="nav-title">Compare</p><ul><li><a href="/info/alexa-alternatives/">Private Alexa alternatives</a></li><li><a href="/info/open-source-voice-assistants/">Open-source voice assistants</a></li></ul></div><div class="nav-group"><p class="nav-title">pleeply</p><ul><li><a href="/info/pleeply/">What is pleeply?</a></li></ul></div></nav>
+    </details>
+  </aside>
+  <main id="main" class="doc">
+    <article>
+      <p class="crumb">Run it yourself</p>
+      <h1>Use a local LLM with Home Assistant</h1>
+      <div class="meta">
+        <span>Updated <time datetime="2026-10-24">Oct 24, 2026</time></span><span>3 min read</span>
+        <span class="meta-actions"><button class="copy-md" type="button" data-md="/info/home-assistant-local-llm.md">Copy as Markdown</button><a href="/info/home-assistant-local-llm.md">View .md</a></span>
+      </div>
+      <div class="prose">
+<p>Home Assistant can use a local language model as its conversation agent through the built-in Ollama integration. You run Ollama on a machine in your network, point Home Assistant at it, and Assist answers questions and — as an experimental feature — controls the devices you expose, with no cloud AI service involved.</p>
+<h2 id="what-you-need">What you need<a class="anchor" href="#what-you-need" aria-label="Link to this section">#</a></h2>
+<ul><li>A Home Assistant server.</li><li>Ollama on the same machine or another one on your network (it listens on port 11434). For quick answers use a machine with a GPU or Apple Silicon; a Raspberry Pi works with small models, slowly.</li><li>Local speech: the Whisper (speech-to-text) and Piper (text-to-speech) add-ons. If your server is too weak, Home Assistant can send speech to its paid cloud instead.</li><li>A voice device, such as the Home Assistant Voice Preview Edition.</li></ul>
+<h2 id="set-it-up">Set it up<a class="anchor" href="#set-it-up" aria-label="Link to this section">#</a></h2>
+<ol><li>Install Ollama and download a model that supports tool calling, for example <code>ollama pull qwen2.5:7b</code>. If Ollama runs on another machine, make it listen on the network with <code>OLLAMA_HOST=0.0.0.0</code>.</li><li>In Home Assistant, open <strong>Settings → Devices &amp; services → Add integration</strong>, choose <strong>Ollama</strong> and enter the server URL, for example <code>http://192.168.1.20:11434</code>.</li><li>Pick the model. Home Assistant downloads it if it isn't there yet.</li><li>Open <strong>Settings → Voice assistants</strong>, edit your assistant and set the conversation agent to Ollama. Choose Whisper and Piper for speech.</li><li>Optionally allow it to control Home Assistant (experimental) and expose only the devices it needs — Home Assistant recommends fewer than 25.</li></ol>
+<h2 id="settings-that-matter">Settings that matter<a class="anchor" href="#settings-that-matter" aria-label="Link to this section">#</a></h2>
+<div class="table"><table><thead><tr><th>Setting</th><th>What it does</th><th>Recommendation</th></tr></thead><tbody><tr><td>Model</td><td>The Ollama model that answers</td><td>Must support tools to control devices; larger models make fewer mistakes</td></tr><tr><td>Context window size</td><td>How many tokens the model sees</td><td>Home Assistant defaults to 8k (Ollama's own default is 2k); bigger homes need more, smaller values save RAM</td></tr><tr><td>Max history messages</td><td>How much of the conversation is kept</td><td>Fewer is faster and lighter</td></tr><tr><td>Keep alive</td><td>How long the model stays in memory</td><td>Keep it loaded for quick replies</td></tr><tr><td>Think before responding</td><td>Lets reasoning models think first</td><td>Slower; off by default</td></tr></tbody></table></div>
+<h2 id="keep-commands-fast">Keep commands fast<a class="anchor" href="#keep-commands-fast" aria-label="Link to this section">#</a></h2>
+<p>Small local models can struggle to chat and control devices at the same time. Two patterns help:</p>
+<ul><li><strong>Let Home Assistant handle plain commands itself.</strong> Its built-in intent matching handles &quot;turn off the kitchen lights&quot; instantly; only requests it doesn't understand need the language model.</li><li><strong>Use two agents.</strong> Home Assistant's docs suggest two Ollama configurations with the same model: one for conversation without device control, one with control enabled for commands.</li></ul>
+<h2 id="what-the-voice-preview-edition-is">What the Voice Preview Edition is<a class="anchor" href="#what-the-voice-preview-edition-is" aria-label="Link to this section">#</a></h2>
+<p>The Home Assistant Voice Preview Edition is a $59 voice satellite: an ESP32-S3 with a dual-microphone array, an XMOS XU316 audio processor for echo cancellation and noise suppression, a small speaker for prompts, a 3.5 mm output and a hardware mute switch. It needs a Home Assistant server — speech recognition and the language model run there, either locally or through Home Assistant Cloud.</p>
+<h2 id="faq">FAQ<a class="anchor" href="#faq" aria-label="Link to this section">#</a></h2>
+<h3 id="can-home-assistant-voice-work-without-the-internet">Can Home Assistant voice work without the internet?<a class="anchor" href="#can-home-assistant-voice-work-without-the-internet" aria-label="Link to this section">#</a></h3>
+<p>Yes, if speech-to-text, the language model and text-to-speech all run on your own machines — Whisper, Ollama and Piper. With a weaker server, Home Assistant can send speech to its cloud service instead.</p>
+<h3 id="which-ollama-model-should-i-use-with-home-assistant">Which Ollama model should I use with Home Assistant?<a class="anchor" href="#which-ollama-model-should-i-use-with-home-assistant" aria-label="Link to this section">#</a></h3>
+<p>One that supports tool calling, as large as your hardware can run quickly. Home Assistant notes that smaller models make more mistakes when controlling devices.</p>
+<h3 id="does-the-voice-preview-edition-run-the-ai-itself">Does the Voice Preview Edition run the AI itself?<a class="anchor" href="#does-the-voice-preview-edition-run-the-ai-itself" aria-label="Link to this section">#</a></h3>
+<p>No. It captures audio and plays answers; speech processing and the language model run on your Home Assistant server and your Ollama machine.</p>
+<h3 id="how-many-devices-should-i-expose-to-the-llm">How many devices should I expose to the LLM?<a class="anchor" href="#how-many-devices-should-i-expose-to-the-llm" aria-label="Link to this section">#</a></h3>
+<p>Home Assistant recommends exposing fewer than 25 entities to keep local models accurate.</p>
+<h2 id="sources">Sources<a class="anchor" href="#sources" aria-label="Link to this section">#</a></h2>
+<ul><li><a href="https://www.home-assistant.io/integrations/ollama/" rel="noopener" target="_blank">Home Assistant — Ollama integration</a></li><li><a href="https://www.home-assistant.io/blog/2024/12/19/voice-preview-edition-the-era-of-open-voice/" rel="noopener" target="_blank">Home Assistant — The era of open voice assistants has arrived (Voice Preview Edition)</a></li><li><a href="https://www.cnx-software.com/2024/12/20/59-voice-preview-edition-adds-an-offline-smart-speaker-to-your-home-assistant-server/" rel="noopener" target="_blank">CNX Software — $59 Voice Preview Edition adds an offline smart speaker to your Home Assistant server</a></li><li><a href="https://jpk.io/home-automation/home-assistant-voice-pe-local-llm/" rel="noopener" target="_blank">jpk.io — Building a fully local voice assistant with Home Assistant Voice PE and Ollama</a></li></ul>
+      </div>
+      <section class="join" aria-labelledby="join-title">
+        <p class="join-kicker">pleeply Community</p>
+        <h2 id="join-title">Keep going with the community</h2>
+        <p>Running AI at home is easier with people who've already done it. On the pleeply forum you can:</p>
+        <ul>
+          <li>ask about local models, hardware and Home Assistant, and get answers from people running them;</li>
+          <li>vote on what pleeply should do first;</li>
+          <li>show your own local-AI setup and get feedback;</li>
+          <li>hear first about test builds and reservations.</li>
+        </ul>
+        <div class="join-actions"><a class="btn btn-lg" href="/community/signup?next=%2Fcommunity">Join the community →</a><a class="join-more" href="/community">See top topics</a></div>
+        <p class="join-micro">Free · no email needed</p>
+      </section>
+      <p class="ai-note">This page is also available as <a href="/info/home-assistant-local-llm.md">Markdown</a>. For the full docs index, see <a href="/llms.txt">llms.txt</a>.</p>
+      <nav class="pager" aria-label="Previous and next">
+        <a class="prev" href="/info/raspberry-pi-5-llm/"><span>Previous</span>LLM on a Raspberry Pi 5</a>
+        <a class="next" href="/info/local-llm-memory/"><span>Next</span>How much RAM you need</a>
+      </nav>
+    </article>
+  </main>
+  <aside class="toc" aria-label="On this page"><p>On this page</p><ul><li><a href="#what-you-need">What you need</a></li><li><a href="#set-it-up">Set it up</a></li><li><a href="#settings-that-matter">Settings that matter</a></li><li><a href="#keep-commands-fast">Keep commands fast</a></li><li><a href="#what-the-voice-preview-edition-is">What the Voice Preview Edition is</a></li><li><a href="#faq">FAQ</a></li><li><a href="#sources">Sources</a></li></ul></aside>
+</div>
+<footer class="foot">
+  <div class="foot-in"><span class="mark">pleeply<i></i></span><span>© 2026 pleeply. In development.</span><span class="foot-links"><a href="/community">Community</a><a href="/llms.txt">llms.txt</a></span></div>
+</footer>
+<script defer src="/_vercel/insights/script.js"></script>
+<script>
+(function () {
+  var box = document.querySelector('.navbox');
+  if (box && window.matchMedia('(max-width: 899px)').matches) box.removeAttribute('open');
+  var f = document.querySelector('.filter');
+  if (f) f.addEventListener('input', function () {
+    var q = f.value.trim().toLowerCase();
+    document.querySelectorAll('.nav-group').forEach(function (g) {
+      var any = false;
+      g.querySelectorAll('li').forEach(function (li) {
+        var hit = !q || li.textContent.toLowerCase().indexOf(q) !== -1;
+        li.hidden = !hit; if (hit) any = true;
+      });
+      g.hidden = !any;
+    });
+  });
+  var b = document.querySelector('.copy-md');
+  if (b) b.addEventListener('click', function () {
+    fetch(b.dataset.md).then(function (r) { return r.text(); })
+      .then(function (t) { return navigator.clipboard.writeText(t); })
+      .then(function () { b.textContent = 'Copied'; }, function () { location.href = b.dataset.md; })
+      .then(function () { setTimeout(function () { b.textContent = 'Copy as Markdown'; }, 1600); });
+  });
+})();
+</script>
+</body>
+</html>

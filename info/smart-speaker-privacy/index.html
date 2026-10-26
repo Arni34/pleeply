@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Do smart speakers send your voice to the cloud? · pleeply docs</title>
+<meta name="description" content="Mainstream smart speakers send your requests to company servers. What changed for Amazon Echo on March 28, 2025, what Alexa+ means for privacy, and how a local assistant differs.">
+<link rel="canonical" href="https://pleeply.vercel.app/info/smart-speaker-privacy/">
+<link rel="alternate" type="text/markdown" href="/info/smart-speaker-privacy.md" title="Do smart speakers send your voice to the cloud? (Markdown)">
+<meta property="article:modified_time" content="2026-10-24">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Do smart speakers send your voice to the cloud? · pleeply docs">
+<meta property="og:description" content="Mainstream smart speakers send your requests to company servers. What changed for Amazon Echo on March 28, 2025, what Alexa+ means for privacy, and how a local assistant differs.">
+<meta property="og:url" content="https://pleeply.vercel.app/info/smart-speaker-privacy/">
+<meta property="og:image" content="https://pleeply.vercel.app/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#111111">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/info/docs.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://pleeply.vercel.app/#org","name":"pleeply","url":"https://pleeply.vercel.app/","logo":"https://pleeply.vercel.app/icon-512.png"},{"@type":"TechArticle","@id":"https://pleeply.vercel.app/info/smart-speaker-privacy/#article","headline":"Do smart speakers send your voice to the cloud?","description":"Mainstream smart speakers send your requests to company servers. What changed for Amazon Echo on March 28, 2025, what Alexa+ means for privacy, and how a local assistant differs.","datePublished":"2026-10-24","dateModified":"2026-10-24","inLanguage":"en","mainEntityOfPage":"https://pleeply.vercel.app/info/smart-speaker-privacy/","author":{"@id":"https://pleeply.vercel.app/#org"},"publisher":{"@id":"https://pleeply.vercel.app/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"pleeply","item":"https://pleeply.vercel.app/"},{"@type":"ListItem","position":2,"name":"Docs","item":"https://pleeply.vercel.app/info/"},{"@type":"ListItem","position":3,"name":"Smart speaker privacy","item":"https://pleeply.vercel.app/info/smart-speaker-privacy/"}]},{"@type":"FAQPage","@id":"https://pleeply.vercel.app/info/smart-speaker-privacy/#faq","mainEntity":[{"@type":"Question","name":"Does Alexa record everything I say?","acceptedAnswer":{"@type":"Answer","text":"No. An Echo listens on the device for the wake word and sends audio to Amazon only after it hears it. Since March 28, 2025 every request is processed in Amazon's cloud; you can choose not to save recordings, but the audio still goes to Amazon."}},{"@type":"Question","name":"Can I stop Alexa from sending recordings to Amazon?","acceptedAnswer":{"@type":"Answer","text":"No. The only option that kept requests on the device was removed on March 28, 2025. You can choose not to save recordings, delete your voice history or mute the microphones, but requests are still processed in Amazon's cloud."}},{"@type":"Question","name":"Is there a smart speaker that doesn't send audio to the cloud?","acceptedAnswer":{"@type":"Answer","text":"Yes, if it runs speech recognition and the language model locally. Home Assistant's Voice Preview Edition does this when paired with a Home Assistant server powerful enough to process speech locally, and pleeply is being built to do it on the speaker itself."}},{"@type":"Question","name":"Is Alexa+ private?","acceptedAnswer":{"@type":"Answer","text":"Alexa+ processes your requests on Amazon's servers, under Amazon's privacy policy. Whether that is acceptable is your call, but it is not local processing."}}]}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="/info/" aria-label="pleeply docs"><span class="mark">pleeply<i></i></span><span class="docs">docs</span></a>
+    <nav class="top-links" aria-label="Site">
+      <a href="/info/" aria-current="page">Docs</a>
+      <a href="/community">Community</a>
+      <a href="/">Product</a>
+      <a class="btn" href="/#reserve"><span class="dot"></span>Join waitlist</a>
+    </nav>
+  </div>
+</header>
+<div class="shell">
+  <aside class="side">
+    <details class="navbox" open>
+      <summary>Menu</summary>
+      <input class="filter" type="search" placeholder="Filter pages" aria-label="Filter pages">
+      <nav aria-label="Docs"><div class="nav-group"><p class="nav-title">Start here</p><ul><li><a href="/info/">Overview</a></li></ul></div><div class="nav-group"><p class="nav-title">Learn</p><ul><li><a href="/info/local-ai-assistant/">What is a local AI assistant?</a></li><li><a href="/info/how-local-voice-assistants-work/">How local voice assistants work</a></li><li><a href="/info/smart-speaker-privacy/" aria-current="page">Smart speaker privacy</a></li></ul></div><div class="nav-group"><p class="nav-title">Run it yourself</p><ul><li><a href="/info/run-ai-at-home/">Choose your hardware</a></li><li><a href="/info/raspberry-pi-5-llm/">LLM on a Raspberry Pi 5</a></li><li><a href="/info/home-assistant-local-llm/">Home Assistant + local LLM</a></li><li><a href="/info/local-llm-memory/">How much RAM you need</a></li></ul></div><div class="nav-group"><p class="nav-title">Compare</p><ul><li><a href="/info/alexa-alternatives/">Private Alexa alternatives</a></li><li><a href="/info/open-source-voice-assistants/">Open-source voice assistants</a></li></ul></div><div class="nav-group"><p class="nav-title">pleeply</p><ul><li><a href="/info/pleeply/">What is pleeply?</a></li></ul></div></nav>
+    </details>
+  </aside>
+  <main id="main" class="doc">
+    <article>
+      <p class="crumb">Learn</p>
+      <h1>Do smart speakers send your voice to the cloud?</h1>
+      <div class="meta">
+        <span>Updated <time datetime="2026-10-24">Oct 24, 2026</time></span><span>2 min read</span>
+        <span class="meta-actions"><button class="copy-md" type="button" data-md="/info/smart-speaker-privacy.md">Copy as Markdown</button><a href="/info/smart-speaker-privacy.md">View .md</a></span>
+      </div>
+      <div class="prose">
+<p>Yes. Mainstream smart speakers send what you say after the wake word to the company's servers to be processed. Amazon switched off the last Echo setting that kept requests on the device on March 28, 2025, so every Alexa request now goes to Amazon's cloud. A local assistant processes your voice on the device instead.</p>
+<h2 id="what-changed-for-alexa-in-2025">What changed for Alexa in 2025<a class="anchor" href="#what-changed-for-alexa-in-2025" aria-label="Link to this section">#</a></h2>
+<ul><li>A few Echo models — the Echo Dot (4th generation), Echo Show 10 and Echo Show 15 — had a &quot;Do Not Send Voice Recordings&quot; option that processed requests on the device.</li><li>Amazon ended support for that option on March 28, 2025. In its email to customers it said it was expanding Alexa with generative AI features that rely on cloud processing, and had &quot;decided to no longer support this feature&quot;.</li><li>You can still tell Alexa not to save recordings, but requests are processed in Amazon's cloud either way.</li></ul>
+<h2 id="alexa-runs-in-the-cloud">Alexa+ runs in the cloud<a class="anchor" href="#alexa-runs-in-the-cloud" aria-label="Link to this section">#</a></h2>
+<p>Alexa+, Amazon's generative-AI assistant, processes requests on Amazon's servers. It costs $19.99 a month, or is included with Amazon Prime. Google's Nest speakers also send requests to Google's servers.</p>
+<h2 id="how-to-limit-what-alexa-keeps">How to limit what Alexa keeps<a class="anchor" href="#how-to-limit-what-alexa-keeps" aria-label="Link to this section">#</a></h2>
+<ol><li>In the Alexa app, open the Alexa Privacy settings and choose not to save voice recordings.</li><li>In the same place, review and delete your voice history.</li><li>Press the microphone-off button when you don't need the speaker.</li></ol>
+<p>These reduce what is stored. They don't change where requests are processed.</p>
+<h2 id="what-local-means">What &quot;local&quot; means<a class="anchor" href="#what-local-means" aria-label="Link to this section">#</a></h2>
+<div class="table"><table><thead><tr><th>Question</th><th>Cloud smart speaker</th><th>Local assistant</th></tr></thead><tbody><tr><td>Does audio leave the house?</td><td>Yes, after the wake word</td><td>No</td></tr><tr><td>Who handles the transcript?</td><td>The provider's servers</td><td>Only the device in your home</td></tr><tr><td>Works when the internet is down?</td><td>No</td><td>Yes, for core features</td></tr><tr><td>Can processing move to the cloud later?</td><td>Yes — Echo's local option was removed in 2025</td><td>Only if the device's software changes; open-source software lets you check</td></tr></tbody></table></div>
+<h2 id="faq">FAQ<a class="anchor" href="#faq" aria-label="Link to this section">#</a></h2>
+<h3 id="does-alexa-record-everything-i-say">Does Alexa record everything I say?<a class="anchor" href="#does-alexa-record-everything-i-say" aria-label="Link to this section">#</a></h3>
+<p>No. An Echo listens on the device for the wake word and sends audio to Amazon only after it hears it. Since March 28, 2025 every request is processed in Amazon's cloud; you can choose not to save recordings, but the audio still goes to Amazon.</p>
+<h3 id="can-i-stop-alexa-from-sending-recordings-to-amazon">Can I stop Alexa from sending recordings to Amazon?<a class="anchor" href="#can-i-stop-alexa-from-sending-recordings-to-amazon" aria-label="Link to this section">#</a></h3>
+<p>No. The only option that kept requests on the device was removed on March 28, 2025. You can choose not to save recordings, delete your voice history or mute the microphones, but requests are still processed in Amazon's cloud.</p>
+<h3 id="is-there-a-smart-speaker-that-doesn-t-send-audio-to-the-cloud">Is there a smart speaker that doesn't send audio to the cloud?<a class="anchor" href="#is-there-a-smart-speaker-that-doesn-t-send-audio-to-the-cloud" aria-label="Link to this section">#</a></h3>
+<p>Yes, if it runs speech recognition and the language model locally. Home Assistant's Voice Preview Edition does this when paired with a Home Assistant server powerful enough to process speech locally, and pleeply is being built to do it on the speaker itself.</p>
+<h3 id="is-alexa-private">Is Alexa+ private?<a class="anchor" href="#is-alexa-private" aria-label="Link to this section">#</a></h3>
+<p>Alexa+ processes your requests on Amazon's servers, under Amazon's privacy policy. Whether that is acceptable is your call, but it is not local processing.</p>
+<h2 id="sources">Sources<a class="anchor" href="#sources" aria-label="Link to this section">#</a></h2>
+<ul><li><a href="https://techcrunch.com/2025/03/15/amazons-echo-will-send-all-voice-recordings-to-the-cloud-starting-march-28" rel="noopener" target="_blank">TechCrunch — Amazon's Echo will send all voice recordings to the cloud, starting March 28</a></li><li><a href="https://alternativeto.net/news/2025/3/amazon-echo-to-remove-do-not-send-voice-recordings-to-the-cloud-option-weakening-privacy" rel="noopener" target="_blank">AlternativeTo — Amazon Echo removes the &quot;Do Not Send Voice Recordings&quot; option</a></li><li><a href="https://androidauthority.com/alexa-plus-pricing-3530655" rel="noopener" target="_blank">Android Authority — Alexa+ pricing</a></li><li><a href="https://www.home-assistant.io/blog/2024/12/19/voice-preview-edition-the-era-of-open-voice/" rel="noopener" target="_blank">Home Assistant — Voice Preview Edition announcement</a></li></ul>
+      </div>
+      <section class="join" aria-labelledby="join-title">
+        <p class="join-kicker">pleeply Community</p>
+        <h2 id="join-title">Keep going with the community</h2>
+        <p>Running AI at home is easier with people who've already done it. On the pleeply forum you can:</p>
+        <ul>
+          <li>ask about local models, hardware and Home Assistant, and get answers from people running them;</li>
+          <li>vote on what pleeply should do first;</li>
+          <li>show your own local-AI setup and get feedback;</li>
+          <li>hear first about test builds and reservations.</li>
+        </ul>
+        <div class="join-actions"><a class="btn btn-lg" href="/community/signup?next=%2Fcommunity">Join the community →</a><a class="join-more" href="/community">See top topics</a></div>
+        <p class="join-micro">Free · no email needed</p>
+      </section>
+      <p class="ai-note">This page is also available as <a href="/info/smart-speaker-privacy.md">Markdown</a>. For the full docs index, see <a href="/llms.txt">llms.txt</a>.</p>
+      <nav class="pager" aria-label="Previous and next">
+        <a class="prev" href="/info/how-local-voice-assistants-work/"><span>Previous</span>How local voice assistants work</a>
+        <a class="next" href="/info/run-ai-at-home/"><span>Next</span>Choose your hardware</a>
+      </nav>
+    </article>
+  </main>
+  <aside class="toc" aria-label="On this page"><p>On this page</p><ul><li><a href="#what-changed-for-alexa-in-2025">What changed for Alexa in 2025</a></li><li><a href="#alexa-runs-in-the-cloud">Alexa+ runs in the cloud</a></li><li><a href="#how-to-limit-what-alexa-keeps">How to limit what Alexa keeps</a></li><li><a href="#what-local-means">What &quot;local&quot; means</a></li><li><a href="#faq">FAQ</a></li><li><a href="#sources">Sources</a></li></ul></aside>
+</div>
+<footer class="foot">
+  <div class="foot-in"><span class="mark">pleeply<i></i></span><span>© 2026 pleeply. In development.</span><span class="foot-links"><a href="/community">Community</a><a href="/llms.txt">llms.txt</a></span></div>
+</footer>
+<script defer src="/_vercel/insights/script.js"></script>
+<script>
+(function () {
+  var box = document.querySelector('.navbox');
+  if (box && window.matchMedia('(max-width: 899px)').matches) box.removeAttribute('open');
+  var f = document.querySelector('.filter');
+  if (f) f.addEventListener('input', function () {
+    var q = f.value.trim().toLowerCase();
+    document.querySelectorAll('.nav-group').forEach(function (g) {
+      var any = false;
+      g.querySelectorAll('li').forEach(function (li) {
+        var hit = !q || li.textContent.toLowerCase().indexOf(q) !== -1;
+        li.hidden = !hit; if (hit) any = true;
+      });
+      g.hidden = !any;
+    });
+  });
+  var b = document.querySelector('.copy-md');
+  if (b) b.addEventListener('click', function () {
+    fetch(b.dataset.md).then(function (r) { return r.text(); })
+      .then(function (t) { return navigator.clipboard.writeText(t); })
+      .then(function () { b.textContent = 'Copied'; }, function () { location.href = b.dataset.md; })
+      .then(function () { setTimeout(function () { b.textContent = 'Copy as Markdown'; }, 1600); });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,190 @@
+{
+  "updated": "2026-10-24",
+  "site": "https://pleeply.vercel.app",
+  "note": "prompts — how people phrase the question in a chat; fanout — searches an AI engine is likely to run while answering (modeled from web research on 2026-10-24, replace with extracted ChatGPT fan-outs when available); page — the /info page that answers the cluster.",
+  "engines": ["chatgpt", "perplexity", "google-ai-overviews", "gemini", "claude", "copilot"],
+  "clusters": [
+    {
+      "id": "privacy",
+      "topic": "Smart speaker privacy",
+      "stage": "problem-aware",
+      "page": "/info/smart-speaker-privacy/",
+      "prompts": [
+        "Does Alexa record everything I say?",
+        "Is there a smart speaker that doesn't send my voice to the cloud?",
+        "How do I stop Alexa from sending recordings to Amazon?",
+        "Is Alexa+ private?",
+        "Can a smart speaker work without internet?"
+      ],
+      "fanout": [
+        "alexa do not send voice recordings setting removed march 28 2025",
+        "alexa+ cloud processing voice requests",
+        "alexa privacy settings delete voice recordings",
+        "google home gemini voice data",
+        "smart speaker local voice processing offline",
+        "smart speaker that works without internet"
+      ]
+    },
+    {
+      "id": "category",
+      "topic": "Local AI assistant (what it is)",
+      "stage": "solution-aware",
+      "page": "/info/local-ai-assistant/",
+      "prompts": [
+        "What is a local AI assistant?",
+        "Can I have something like ChatGPT at home without the cloud?",
+        "On-device AI vs cloud AI — what's the difference?",
+        "Is a local AI assistant as smart as ChatGPT?"
+      ],
+      "fanout": [
+        "on-device llm vs cloud llm privacy latency",
+        "open-weight models llama qwen gemma mistral run locally",
+        "local ai assistant offline features",
+        "private ai assistant memory stored locally",
+        "small language model quality vs gpt"
+      ]
+    },
+    {
+      "id": "pipeline",
+      "topic": "How a local voice assistant works",
+      "stage": "solution-aware",
+      "page": "/info/how-local-voice-assistants-work/",
+      "prompts": [
+        "How does an offline voice assistant work?",
+        "What do I need to build a local voice assistant?",
+        "Why are local voice assistants slow?"
+      ],
+      "fanout": [
+        "wake word detection openwakeword",
+        "whisper speech to text offline raspberry pi",
+        "piper text to speech offline",
+        "local voice assistant latency seconds",
+        "microphone array echo cancellation voice assistant"
+      ]
+    },
+    {
+      "id": "hardware",
+      "topic": "Hardware to run AI at home",
+      "stage": "solution-aware",
+      "page": "/info/run-ai-at-home/",
+      "prompts": [
+        "What hardware do I need to run AI at home?",
+        "Best device to run a local LLM 24/7",
+        "Raspberry Pi vs Jetson vs Mac mini for local AI"
+      ],
+      "fanout": [
+        "jetson orin nano super tokens per second 3b",
+        "mac mini local llm 16gb",
+        "raspberry pi 5 llm performance",
+        "mini pc gpu local llm rtx 3060",
+        "home assistant voice preview edition requirements"
+      ]
+    },
+    {
+      "id": "raspberry-pi",
+      "topic": "LLM on Raspberry Pi 5",
+      "stage": "solution-aware",
+      "page": "/info/raspberry-pi-5-llm/",
+      "prompts": [
+        "Can a Raspberry Pi 5 run an LLM?",
+        "Which LLM runs best on a Raspberry Pi 5?",
+        "Is a Raspberry Pi 5 fast enough for a voice assistant?"
+      ],
+      "fanout": [
+        "raspberry pi 5 ollama tokens per second llama 3.2 3b",
+        "raspberry pi 5 active cooler throttling llm",
+        "hailo ai hat llm speed",
+        "raspberry pi 5 16gb 7b model"
+      ]
+    },
+    {
+      "id": "home-assistant",
+      "topic": "Local LLM with Home Assistant",
+      "stage": "solution-aware",
+      "page": "/info/home-assistant-local-llm/",
+      "prompts": [
+        "How do I use a local LLM with Home Assistant?",
+        "Can Home Assistant voice work without the internet?",
+        "Home Assistant Voice Preview Edition with Ollama"
+      ],
+      "fanout": [
+        "home assistant ollama integration setup",
+        "home assistant assist pipeline whisper piper",
+        "home assistant voice preview edition local processing",
+        "expose entities to llm home assistant",
+        "ollama models tool calling home assistant"
+      ]
+    },
+    {
+      "id": "memory",
+      "topic": "Memory (RAM) for local models",
+      "stage": "solution-aware",
+      "page": "/info/local-llm-memory/",
+      "prompts": [
+        "How much RAM do I need to run a local LLM?",
+        "Can 8GB of RAM run Llama?",
+        "What does Q4 quantization mean?"
+      ],
+      "fanout": [
+        "7b model q4 memory size gb",
+        "quantization q4_k_m explained",
+        "context window ram usage llm",
+        "unified memory apple silicon llm"
+      ]
+    },
+    {
+      "id": "alternatives",
+      "topic": "Private alternatives to Alexa",
+      "stage": "solution-aware",
+      "page": "/info/alexa-alternatives/",
+      "prompts": [
+        "What's a private alternative to Alexa?",
+        "Alexa alternative without a subscription",
+        "Smart speaker that works offline"
+      ],
+      "fanout": [
+        "alexa+ price per month without prime",
+        "gemini for home subscription price",
+        "home assistant voice preview edition review",
+        "open source alexa alternative",
+        "local ai speaker"
+      ]
+    },
+    {
+      "id": "open-source",
+      "topic": "Open-source voice assistants",
+      "stage": "solution-aware",
+      "page": "/info/open-source-voice-assistants/",
+      "prompts": [
+        "Best open-source voice assistant",
+        "Is Mycroft still alive?",
+        "OpenVoiceOS vs Rhasspy vs Home Assistant Assist"
+      ],
+      "fanout": [
+        "openvoiceos vs mycroft",
+        "rhasspy vs home assistant assist",
+        "wyoming protocol home assistant",
+        "mycroft ai shut down"
+      ]
+    },
+    {
+      "id": "brand",
+      "topic": "pleeply",
+      "stage": "product-aware",
+      "page": "/info/pleeply/",
+      "prompts": [
+        "What is pleeply?",
+        "How much does pleeply cost?",
+        "Does pleeply work offline?",
+        "pleeply vs Alexa",
+        "Which models does pleeply run?"
+      ],
+      "fanout": [
+        "pleeply speaker",
+        "pleeply official site",
+        "site:pleeply.vercel.app",
+        "pleeply release date price"
+      ]
+    }
+  ]
+}

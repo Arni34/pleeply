@@ -1,0 +1,10 @@
+.vercel
+.env
+.env.*
+node_modules
+.env*
+.DS_Store
+.ruff_cache/
+# Установленные копии навыков — восстанавливаются по skills-lock.json
+.claude/
+.agents/

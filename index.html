@@ -1,0 +1,695 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>pleeply – your own AI, at home</title>
+<meta name="description" content="pleeply is a speaker with a computer inside. It runs open AI models on the device, keeps a private memory of you, and doesn't need the cloud.">
+<meta property="og:title" content="pleeply – your own AI. It lives at home.">
+<meta property="og:description" content="A speaker with a computer inside. Open models, private memory, no cloud required. Join the waitlist.">
+<meta property="og:image" content="https://pleeply.vercel.app/og.png">
+<meta property="og:url" content="https://pleeply.vercel.app/">
+<meta name="twitter:image" content="https://pleeply.vercel.app/og.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://pleeply.vercel.app/">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#ffffff">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+  {"@type":"Organization","@id":"https://pleeply.vercel.app/#org","name":"pleeply","url":"https://pleeply.vercel.app/","logo":{"@type":"ImageObject","url":"https://pleeply.vercel.app/icon-512.png","width":512,"height":512}},
+  {"@type":"WebSite","@id":"https://pleeply.vercel.app/#website","name":"pleeply","url":"https://pleeply.vercel.app/","publisher":{"@id":"https://pleeply.vercel.app/#org"}}
+]}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@900&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
+<link rel="preload" href="/assets/pocket.glb" as="fetch" crossorigin>
+<style>
+  /* Палитра прежняя: белый, тёплые серые, почти чёрный и зелёная точка логотипа */
+  :root {
+    --bg: #ffffff; --card: #f4f3ef; --card-2: #ebe9e3; --ink: #1f1f1d; --text: #3a3a37; --muted: #6b6b66; --soft: #9a9a94;
+    --line: rgba(31,31,29,.12); --panel: #0e0f0d; --green: #75a24c; --green-hover: #6a9444; --green-ink: #4f7531;
+    --r: 16px; --r-btn: 8px; --wrap: 1376px; --pad: clamp(16px, 2.4vw, 32px);
+    --sans: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --serif: "Instrument Serif", Georgia, serif;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 400 16px/1.6 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  a { color: inherit; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  img { display: block; max-width: 100%; height: auto; }
+  .wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 var(--pad); }
+  h1, h2, h3 { margin: 0; color: var(--ink); font-weight: 500; letter-spacing: -0.01em; line-height: 1.1; }
+  h2 { font-size: clamp(32px, 3.4vw, 48px); text-wrap: balance; }
+  em { font-family: var(--serif); font-style: italic; font-weight: 400; letter-spacing: 0; }
+
+  .mark { font-family: "Inter Tight", var(--sans); font-weight: 900; letter-spacing: -0.055em; line-height: 1; white-space: nowrap; text-decoration: none; color: var(--ink); }
+  .mark i { display: inline-block; width: .2em; height: .2em; border-radius: 50%; background: var(--green); margin-left: .06em; vertical-align: .08em; }
+
+  /* Кнопки как у island.io: скругление 8px и стрелка ↳ */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: var(--r-btn); padding: 10px 16px;
+    font-size: 15px; font-weight: 500; line-height: 1.4; text-decoration: none; white-space: nowrap; transition: background .2s ease, color .2s ease, box-shadow .2s ease; }
+  .btn::after { content: "↳"; }
+  .btn-main { background: var(--green); color: #0e0f0d; }
+  .btn-main:hover { background: var(--green-hover); }
+  .btn-dark { background: var(--panel); color: #fff; }
+  .btn-dark:hover { background: #2a2b28; }
+  .btn-light { background: #fff; color: var(--ink); }
+  .btn-light:hover { background: var(--card); }
+  .btn-line { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); }
+  .btn-line:hover { box-shadow: inset 0 0 0 1px var(--ink); }
+  .btn:focus-visible, .chip input:focus-visible + span, .seg input:focus-visible + span { outline: 2px solid var(--green); outline-offset: 3px; }
+  .ctas { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* Шапка: знак слева, справа две плашки */
+  .nav { position: fixed; inset: 0 0 auto 0; z-index: 30; height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 var(--pad); }
+  .nav::before { content: ""; position: absolute; inset: 0 0 -16px 0; z-index: -1; pointer-events: none; background: linear-gradient(#fff 55%, rgba(255,255,255,0)); }
+  .nav .mark { font-size: 24px; }
+  .nav-right { display: flex; align-items: center; gap: 8px; }
+  .nav-group { display: flex; align-items: center; gap: 2px; padding: 4px; border-radius: 10px; background: rgba(244,243,239,.92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+  .nav-group a { padding: 6px 12px; border-radius: 6px; font-size: 14px; text-decoration: none; color: var(--ink); transition: background .2s ease; }
+  .nav-group a:hover { background: #fff; }
+  .lang button { border: 0; background: none; padding: 6px 9px; border-radius: 6px; font-size: 13px; font-weight: 500; color: var(--muted); }
+  .lang button[aria-pressed="true"] { background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgba(20,20,18,.08); }
+  .nav .btn { padding: 6px 12px; font-size: 14px; }
+
+  /* Первый экран и устройство в 3D: текст слева, Pocket справа; прокрутка открывает корпус */
+  .pin { position: relative; height: 430vh; }
+  .sticky { position: sticky; top: 0; height: 100vh; height: 100svh; display: flex; flex-direction: column; padding: 64px 12px 12px; }
+  .stage { position: relative; flex: 1; border-radius: var(--r); overflow: hidden; isolation: isolate; color: #f3f2ec;
+    background: radial-gradient(90% 90% at 68% 46%, #2c2e2a 0%, #161714 46%, #0b0c0a 100%); }
+  .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: pan-y; cursor: grab; }
+  .stage canvas:active { cursor: grabbing; }
+  .stage .fallback { position: absolute; right: 5%; top: 50%; width: min(50%, 720px); transform: translateY(-50%); display: none; filter: drop-shadow(0 40px 50px rgba(0,0,0,.45)); }
+  .stage.no-gl .fallback { display: block; }
+  .stage.no-gl canvas, .stage.no-gl .loading { display: none; }
+
+  .hero-copy { position: absolute; z-index: 2; left: clamp(24px, 5.4vw, 88px); top: 50%; width: min(560px, 44%);
+    opacity: var(--hero, 1); transform: translateY(calc(-50% - (1 - var(--hero, 1)) * 40px)); }
+  .stage.past-hero .hero-copy { visibility: hidden; }
+  .hero-copy h1 { color: #fff; font-size: clamp(40px, 4.4vw, 64px); }
+  .hero-copy .sub { color: rgba(243,242,236,.78); font-size: clamp(16px, 1.25vw, 18px); margin: 20px 0 28px; max-width: 42ch; }
+  .hero-copy .note { margin: 16px 0 0; font-size: 13px; color: rgba(243,242,236,.55); }
+  .scroll-hint { position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%); margin: 0; font-size: 13px; color: rgba(243,242,236,.55); opacity: var(--hero, 1); pointer-events: none; white-space: nowrap; }
+
+  .stage-top { position: absolute; inset: 22px 24px auto 24px; display: flex; justify-content: space-between; gap: 16px; font-size: 13px; font-weight: 500; pointer-events: none; }
+  .stage-top .hint { color: rgba(243,242,236,.55); text-align: right; }
+  .bar { position: absolute; left: 24px; right: 24px; top: 54px; height: 2px; background: rgba(243,242,236,.12); border-radius: 2px; overflow: hidden; pointer-events: none; }
+  .bar i { display: block; height: 100%; width: 0; background: var(--green); }
+  .stage-top, .bar { opacity: 0; transition: opacity .5s ease; }
+  .stage.opened .stage-top, .stage.opened .bar { opacity: 1; }
+  .loading { position: absolute; right: 22%; top: 50%; transform: translateY(-50%); font-size: 13px; color: rgba(243,242,236,.5); transition: opacity .5s ease; pointer-events: none; }
+  .stage.ready .loading { opacity: 0; }
+
+  .caps { position: absolute; right: 24px; bottom: 24px; width: min(360px, calc(100% - 48px)); height: 150px; pointer-events: none; }
+  .cap { position: absolute; inset: auto 0 0 0; padding: 18px 20px; border-radius: 12px; background: #fff; color: var(--ink);
+    opacity: 0; transform: translateY(14px); transition: opacity .45s ease, transform .45s cubic-bezier(.2,.7,.2,1); }
+  .cap.on { opacity: 1; transform: none; }
+  .cap h3 { font-size: 20px; margin: 0 0 4px; }
+  .cap p { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.45; }
+
+  /* Разделы */
+  .sec { padding-top: clamp(80px, 9vw, 128px); }
+  .sec-head { text-align: center; max-width: 760px; margin: 0 auto clamp(32px, 4vw, 48px); }
+  .head-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; flex-wrap: wrap; margin-bottom: clamp(32px, 4vw, 48px); }
+  .head-row h2 { max-width: 30ch; text-wrap: balance; }
+
+  /* Модели — на месте логотипов клиентов */
+  .runs { padding-top: clamp(56px, 6vw, 80px); text-align: center; }
+  .runs p { margin: 0 0 26px; color: var(--ink); font-weight: 500; }
+  .runs ul { list-style: none; margin: 0; padding: 0; display: flex; justify-content: center; flex-wrap: wrap; gap: 12px clamp(40px, 7vw, 112px); }
+  .runs li { font-size: clamp(24px, 2.4vw, 34px); font-weight: 600; letter-spacing: -0.03em; color: #a6a6a0; }
+
+  /* Линейка */
+  .prod-hero { border-radius: var(--r); background: linear-gradient(180deg, #e7e5df 0%, #f1f0ec 55%, #f6f5f2 100%); text-align: center; padding: clamp(40px, 5vw, 72px) var(--pad) 0; overflow: hidden; }
+  .tag { display: block; font-size: 14px; font-weight: 500; color: var(--muted); margin-bottom: 10px; }
+  .prod-hero h3 { font-size: clamp(40px, 4.6vw, 64px); }
+  .prod-hero > p:not(.price-line) { max-width: 46ch; margin: 16px auto 0; }
+  .price-line { margin: 18px 0 24px; font-size: 15px; color: var(--muted); }
+  .price-line b { color: var(--ink); font-weight: 600; font-size: 18px; margin-right: 4px; }
+  .prod-hero .ctas { justify-content: center; }
+  .prod-hero img { width: min(760px, 94%); margin: clamp(28px, 4vw, 52px) auto -7%; filter: drop-shadow(0 40px 46px rgba(20,20,18,.16)); }
+  .prod-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+  .prod { border-radius: var(--r); background: var(--card); padding: clamp(28px, 3.4vw, 48px); display: flex; flex-direction: column; min-height: 380px; }
+  .prod h3 { font-size: clamp(32px, 3.2vw, 44px); }
+  .prod > p { margin: 14px 0 0; max-width: 40ch; }
+  .prod .price-line { margin-top: auto; padding-top: 32px; }
+  .fine { font-size: 13px; color: var(--soft); text-align: center; margin: 20px auto 0; max-width: 70ch; }
+
+  /* Цитата с источником, как отзыв у island.io */
+  .quote { text-align: center; max-width: 1040px; margin: 0 auto; }
+  .quote blockquote { margin: 0; font-size: clamp(30px, 3.4vw, 48px); line-height: 1.15; letter-spacing: -0.01em; color: var(--ink); font-weight: 500; }
+  .quote p { max-width: 58ch; margin: 24px auto 28px; color: var(--muted); }
+
+  /* «Встроено, а не прикручено»: карточки с маленькими интерфейсами */
+  .feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px 20px; }
+  .feat-art { aspect-ratio: 1 / 1; border-radius: var(--r); background: var(--card); display: grid; place-items: center; padding: 28px; overflow: hidden; }
+  .feat h3 { font-size: 17px; line-height: 1.4; letter-spacing: 0; margin-top: 16px; max-width: 34ch; }
+  .ui { width: min(100%, 330px); display: grid; gap: 8px; font-size: 14px; line-height: 1.35; color: var(--ink); }
+  .ui-card { background: #fff; border-radius: 10px; padding: 12px 14px; box-shadow: 0 1px 2px rgba(20,20,18,.06), 0 10px 24px -14px rgba(20,20,18,.22); }
+  .ui-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; background: #fff; border-radius: 8px; box-shadow: 0 1px 2px rgba(20,20,18,.06); }
+  .ui-h { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); padding: 0 2px; }
+  .bub { max-width: 84%; padding: 9px 12px; border-radius: 14px; }
+  .bub.q { justify-self: start; background: #fff; border-bottom-left-radius: 4px; box-shadow: 0 1px 2px rgba(20,20,18,.06); }
+  .bub.a { justify-self: end; background: var(--panel); color: #fff; border-bottom-right-radius: 4px; }
+  .pill { justify-self: center; display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; color: var(--muted); padding: 4px 9px; border-radius: 999px; background: #fff; }
+  .pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+  .ok { color: var(--green-ink); font-weight: 600; font-size: 12px; white-space: nowrap; }
+  .toggle { flex: none; width: 30px; height: 18px; border-radius: 999px; background: #d6d4ce; position: relative; }
+  .toggle::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.2); }
+  .toggle.on { background: var(--green); }
+  .toggle.on::after { left: 14px; }
+  .input { margin: 8px 0; padding: 9px 12px; border-radius: 8px; box-shadow: inset 0 0 0 1px var(--line); background: #fff; }
+  .ui-btn { background: var(--panel); color: #fff; text-align: center; padding: 9px; border-radius: 8px; font-weight: 500; }
+  .muted { color: var(--muted); }
+
+  /* Тёмный баннер «Как это работает» */
+  .banner { border-radius: var(--r); overflow: hidden; color: #f3f2ec; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); align-items: center; gap: 24px;
+    padding: clamp(32px, 5vw, 72px); min-height: 520px; background: radial-gradient(80% 100% at 74% 50%, #2c2e2a 0%, #161714 50%, #0b0c0a 100%); }
+  .banner .label { font-size: 14px; font-weight: 500; color: rgba(243,242,236,.65); margin: 0 0 14px; }
+  .banner h2 { color: #fff; }
+  .banner p { color: rgba(243,242,236,.72); margin: 18px 0 28px; max-width: 44ch; }
+  .banner img { width: 100%; max-width: 620px; justify-self: center; filter: drop-shadow(0 30px 40px rgba(0,0,0,.45)); }
+
+  /* Следующий шаг */
+  .next { border-radius: var(--r); background: var(--panel); display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; padding: 24px 28px; }
+  .next h2 { color: #fff; font-size: clamp(24px, 2.4vw, 32px); }
+
+  /* Сценарии: слева заголовок и снимок, справа плитки */
+  .uses { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 12px; align-items: stretch; }
+  .uses-side { display: flex; flex-direction: column; gap: 28px; }
+  .uses-img { flex: 1; border-radius: var(--r); background: var(--card); display: grid; place-items: center; padding: 32px 24px; min-height: 260px; }
+  .uses-img img { filter: drop-shadow(0 26px 30px rgba(20,20,18,.16)); }
+  .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .tile { position: relative; border-radius: var(--r); background: var(--card); min-height: 188px; padding: 24px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+    text-align: center; text-decoration: none; overflow: hidden; transition: background .25s ease; }
+  .tile h3 { font-size: 18px; letter-spacing: 0; transition: transform .4s cubic-bezier(.2,.7,.2,1); }
+  .tile .d { position: absolute; left: 24px; right: 24px; bottom: 20px; margin: 0; font-size: 14px; line-height: 1.45; color: var(--muted);
+    opacity: 0; transform: translateY(8px); transition: opacity .3s ease, transform .4s cubic-bezier(.2,.7,.2,1); }
+  .tile:hover, .tile:focus-visible { background: var(--card-2); }
+  .tile:hover h3, .tile:focus-visible h3 { transform: translateY(-30px); }
+  .tile:hover .d, .tile:focus-visible .d { opacity: 1; transform: none; }
+  @media (hover: none) {
+    .tile { justify-content: flex-start; align-items: flex-start; text-align: left; min-height: 0; }
+    .tile .d { position: static; opacity: 1; transform: none; margin-top: 8px; }
+  }
+
+  /* Гайды */
+  .guide { border-radius: var(--r); background: var(--card); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; align-items: center; padding: clamp(32px, 5vw, 64px); overflow: hidden; }
+  .guide p { margin: 16px 0 28px; max-width: 44ch; }
+  .docs { display: grid; gap: 10px; justify-items: end; }
+  .doc { width: min(400px, 100%); background: #fff; border-radius: 12px; padding: 16px 20px; box-shadow: 0 1px 2px rgba(20,20,18,.06), 0 12px 28px -18px rgba(20,20,18,.3); text-decoration: none; transition: transform .35s cubic-bezier(.2,.7,.2,1); }
+  .doc:nth-child(2) { margin-right: 6%; }
+  .doc:hover { transform: translateX(-4px); }
+  .doc small { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .doc b { display: block; font-weight: 500; color: var(--ink); line-height: 1.35; }
+
+  /* Ещё почитать */
+  .res { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .res a { display: block; text-decoration: none; }
+  .thumb { position: relative; aspect-ratio: 16 / 10; border-radius: var(--r); background: var(--card); display: grid; place-items: center; padding: 24px; overflow: hidden; transition: background .25s ease; }
+  .res a:hover .thumb { background: var(--card-2); }
+  .thumb img { position: absolute; inset: 22px; width: calc(100% - 44px); height: calc(100% - 44px); object-fit: contain; filter: drop-shadow(0 18px 22px rgba(20,20,18,.14)); }
+  .chip-tag { display: inline-block; margin-top: 14px; font-size: 12px; font-weight: 500; padding: 2px 8px; border-radius: 4px; background: var(--card-2); color: var(--ink); }
+  .res h3 { margin-top: 10px; font-size: 18px; line-height: 1.35; letter-spacing: 0; }
+
+  /* Подвал, как у island.io: тёмный, колонки и плашка со следующим шагом */
+  footer { background: var(--panel); color: rgba(243,242,236,.72); margin-top: clamp(80px, 9vw, 128px); }
+  .foot { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 1.3fr); gap: 32px; padding-top: 56px; padding-bottom: 40px; }
+  .foot h4 { margin: 0 0 16px; color: #fff; font-size: 14px; font-weight: 500; }
+  .foot ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; font-size: 14px; }
+  .foot a { text-decoration: none; }
+  .foot a:hover { color: #fff; }
+  .foot .mark { color: #fff; font-size: 30px; }
+  .foot .about p { font-size: 14px; margin: 14px 0 0; max-width: 32ch; }
+  .foot-bar { background: #f6f5f2; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding: 20px 24px; }
+  .foot-bar h2 { font-size: clamp(22px, 2vw, 28px); }
+  .foot-bottom { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-top: 28px; padding-bottom: 32px; font-size: 13px; }
+  .foot-bottom a { text-decoration: none; }
+  .foot-bottom a:hover { color: #fff; }
+
+  /* Окно заявки */
+  dialog { border: 0; padding: 0; border-radius: var(--r); width: min(560px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); background: #fff; color: var(--ink); box-shadow: 0 40px 80px -30px rgba(0,0,0,.45); }
+  dialog::backdrop { background: rgba(14,15,13,.5); backdrop-filter: blur(4px); }
+  .dlg { padding: 28px 28px 26px; }
+  .dlg-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+  .dlg h3 { font-size: 28px; margin: 0; }
+  .dlg .lead { margin: 6px 0 22px; color: var(--muted); font-size: 15px; }
+  .x { border: 0; background: var(--card); width: 34px; height: 34px; border-radius: 8px; font-size: 20px; line-height: 1; flex: none; }
+  .field { margin-bottom: 20px; }
+  .field > label, .field > .lbl { display: block; font-weight: 500; font-size: 15px; margin-bottom: 9px; }
+  input[type=email] { width: 100%; font: inherit; font-size: 16px; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--line); background: #fff; color: var(--ink); }
+  input[type=email]:focus { outline: none; border-color: var(--ink); }
+  .err { color: #a3402e; font-size: 14px; margin-top: 7px; display: none; }
+  .err.on { display: block; }
+  .chips, .seg { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip input, .seg input { position: absolute; opacity: 0; pointer-events: none; }
+  .chip span, .seg span { display: inline-block; padding: 8px 12px; border-radius: 8px; background: var(--card); font-size: 14px; cursor: pointer; user-select: none; transition: background .15s ease, color .15s ease; }
+  .chip input:checked + span, .seg input:checked + span { background: var(--panel); color: #fff; }
+  select { width: 100%; font: inherit; font-size: 15px; padding: 11px 12px; border-radius: 8px; border: 1px solid var(--line); background: #fff; color: var(--ink); }
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .dlg form .btn { width: 100%; margin-top: 4px; padding: 13px 16px; }
+  .small { font-size: 13px; color: var(--soft); text-align: center; margin: 12px 0 0; }
+  .done { display: none; text-align: center; padding: 18px 0 6px; }
+  .done .big { width: 56px; height: 56px; border-radius: 50%; background: var(--green); margin: 0 auto 18px; display: grid; place-items: center; color: #fff; font-size: 26px; font-weight: 700; }
+  .done p { color: var(--muted); margin: 10px auto 20px; max-width: 34ch; }
+  .share { display: flex; gap: 8px; }
+  .share input { flex: 1; min-width: 0; font: inherit; font-size: 14px; padding: 11px 12px; border-radius: 8px; border: 1px solid var(--line); background: #fff; color: var(--muted); }
+  .done .btn { margin-top: 10px; }
+  form.sent { display: none; }
+  form.sent + .done { display: block; }
+
+  /* Появление при прокрутке (класс in ставит app.js) */
+  .rv { opacity: 0; transform: translateY(18px); transition: opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); }
+  .rv.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .rv { opacity: 1; transform: none; }
+    html { scroll-behavior: auto; }
+  }
+
+  @media (max-width: 1080px) {
+    .nav-links { display: none; }
+    .uses { grid-template-columns: 1fr; }
+    .uses-img { min-height: 220px; }
+    .foot { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .foot .about { grid-column: 1 / -1; grid-row: 1; }
+  }
+  /* На узком экране текст первого экрана сверху, Pocket под ним (порог тот же, что в pocket3d.js) */
+  @media (max-width: 899px) {
+    .hero-copy { left: 20px; right: 20px; top: 26px; width: auto; transform: translateY(calc((1 - var(--hero, 1)) * -30px)); }
+    .hero-copy h1 { font-size: clamp(34px, 7.4vw, 52px); }
+    .hero-copy .sub { margin: 14px 0 20px; font-size: 16px; }
+    .stage .fallback { right: 50%; top: auto; bottom: 8%; width: 82%; transform: translateX(50%); }
+    .loading { right: 50%; top: auto; bottom: 22%; transform: translateX(50%); }
+    .prod-row, .banner, .guide { grid-template-columns: 1fr; }
+    .feats { grid-template-columns: 1fr 1fr; }
+    .res { grid-template-columns: 1fr; }
+    .docs { justify-items: stretch; }
+    .doc:nth-child(2) { margin-right: 0; }
+  }
+  @media (max-width: 640px) {
+    .nav .btn { display: none; }
+    .sticky { padding: 64px 8px 8px; }
+    .hero-copy .note { display: none; }
+    .stage-top { inset: 16px 16px auto 16px; font-size: 12px; }
+    .stage-top .hint { display: none; }
+    .bar { left: 16px; right: 16px; top: 42px; }
+    .caps { left: 12px; right: 12px; bottom: 12px; width: auto; }
+    .cap { padding: 14px 16px; }
+    .cap h3 { font-size: 18px; }
+    .feats { grid-template-columns: 1fr; }
+    .feat-art { aspect-ratio: 4 / 3; }
+    .tiles { grid-template-columns: 1fr; }
+    .prod { min-height: 0; }
+    .foot { grid-template-columns: 1fr 1fr; }
+    .next { padding: 22px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <a class="mark" href="#top" aria-label="pleeply">pleeply<i></i></a>
+  <div class="nav-right">
+    <nav class="nav-group nav-links" aria-label="Main">
+      <a href="#reserve" data-i="nav.l1">Lineup</a>
+      <a href="#how" data-i="nav.l2">How it works</a>
+      <a href="/info/" data-i="nav.l3">Guides</a>
+      <a href="/community" data-i="nav.l4">Community</a>
+    </nav>
+    <div class="nav-group">
+      <div class="lang" role="group" aria-label="Language">
+        <button type="button" data-lang="en" aria-pressed="true">EN</button>
+        <button type="button" data-lang="ru" aria-pressed="false">RU</button>
+      </div>
+      <button class="btn btn-main" type="button" data-open="nav" data-i="nav.cta">Join waitlist</button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+  <!-- Первый экран: заявление слева, Pocket справа; дальше прокрутка открывает корпус -->
+  <section class="pin" id="inside" data-pin aria-label="pleeply Pocket">
+    <div class="sticky">
+      <div class="stage" data-stage>
+        <canvas aria-hidden="true"></canvas>
+        <img class="fallback" src="/assets/stills/pocket-hero.webp" alt="pleeply Pocket prototype" width="1400" height="1050">
+        <div class="hero-copy">
+          <h1 id="headline">Your own AI.<br>It lives at home.</h1>
+          <p class="sub" data-i="hero.sub">pleeply is a speaker with a computer inside. It runs open AI models right on the device, keeps a private memory of you, and doesn't need the cloud.</p>
+          <div class="ctas"><a class="btn btn-main" href="#reserve" data-i="hero.cta1">Reserve yours</a></div>
+          <p class="note" data-i="hero.note">In development. No payment today. We'll email you when reservations open.</p>
+        </div>
+        <p class="scroll-hint" data-i="p.scroll">Scroll to look inside</p>
+        <div class="stage-top">
+          <span data-i="p.label">pleeply Pocket · prototype design</span>
+          <span class="hint" data-i="p.hint">Drag to rotate · Scroll to open</span>
+        </div>
+        <div class="bar"><i data-progress></i></div>
+        <div class="loading" data-i="p.loading">Loading 3D</div>
+        <div class="caps">
+          <article class="cap" data-cap="0.17,0.31"><h3 data-i="cap1.t">Raspberry Pi 5 inside</h3><p data-i="cap1.d">With an Active Cooler. Open language models run right on the device.</p></article>
+          <article class="cap" data-cap="0.31,0.45"><h3 data-i="cap2.t">3000 mAh battery</h3><p data-i="cap2.d">Charges over USB-C. A slide switch turns it on and off.</p></article>
+          <article class="cap" data-cap="0.45,0.59"><h3 data-i="cap3.t">Speaker and microphone</h3><p data-i="cap3.d">A 40 mm speaker and an I2S microphone sit right behind the bottom panel.</p></article>
+          <article class="cap" data-cap="0.59,0.73"><h3 data-i="cap4.t">Push to talk</h3><p data-i="cap4.d">The button is recessed so a table can't press it. The volume rocker sits on the top edge.</p></article>
+          <article class="cap" data-cap="0.86,1.01"><h3 data-i="cap5.t">It speaks through its name</h3><p data-i="cap5.d">The speaker plays through the dot-matrix “pleeply.” cut into the bottom.</p></article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Модели вместо логотипов клиентов -->
+  <section class="runs wrap" aria-labelledby="runs-h">
+    <p id="runs-h" data-i="runs.h">Runs the open models you already know.</p>
+    <ul><li>Llama</li><li>Qwen</li><li>Mistral</li><li>Gemma</li></ul>
+  </section>
+
+  <!-- Линейка -->
+  <section class="sec wrap" id="reserve">
+    <div class="sec-head rv"><h2 data-i="price.h">Pick the one you'd actually buy.</h2></div>
+    <div id="tiers">
+      <article class="prod-hero rv">
+        <span class="tag" data-i="pocket.tag">Prototype</span>
+        <h3>pleeply Pocket</h3>
+        <p data-i="pocket.d">A pocket-size AI with a battery and a push-to-talk button. The first units are assembled by hand.</p>
+        <p class="price-line"><b>$499</b> <span data-i="pocket.spec">Raspberry Pi 5 · compact models, 1–3B · 3000 mAh battery</span></p>
+        <div class="ctas">
+          <button class="btn btn-dark" type="button" data-tier="pocket" data-i="reserve">Reserve for free</button>
+          <a class="btn btn-line" href="#inside" data-i="pocket.more">See it in 3D</a>
+        </div>
+        <img src="/assets/stills/pocket-hero.webp" alt="pleeply Pocket, closed" width="1400" height="1050" loading="lazy">
+      </article>
+      <div class="prod-row">
+        <article class="prod rv">
+          <span class="tag" data-i="one.tag">Speaker</span>
+          <h3>pleeply One</h3>
+          <p data-i="one.d">The speaker. Fast with compact open models for everyday help, home control and memory.</p>
+          <p class="price-line"><b>$299</b> <span data-i="one.spec">Built-in computer and mic array · models up to ~8B · works offline</span></p>
+          <div class="ctas">
+            <button class="btn btn-dark" type="button" data-tier="one" data-i="reserve">Reserve for free</button>
+            <a class="btn btn-line" href="/info/pleeply/" data-i="more">Learn more</a>
+          </div>
+        </article>
+        <article class="prod rv">
+          <span class="tag" data-i="pro.tag">Speaker+</span>
+          <h3>pleeply Pro</h3>
+          <p data-i="pro.d">More memory and compute for larger, smarter models.</p>
+          <p class="price-line"><b>$549</b> <span data-i="pro.spec">Everything in One · models up to ~32B · longer memory</span></p>
+          <div class="ctas">
+            <button class="btn btn-dark" type="button" data-tier="pro" data-i="reserve">Reserve for free</button>
+            <a class="btn btn-line" href="/info/pleeply/" data-i="more">Learn more</a>
+          </div>
+        </article>
+      </div>
+    </div>
+    <p class="fine rv" data-i="price.fine">Expected prices. Specs are planned and may change during development. Reserving is free and doesn't commit you to anything.</p>
+  </section>
+
+  <!-- Факт с источником -->
+  <section class="sec wrap">
+    <figure class="quote rv">
+      <blockquote data-i="proof.q">On March 28, 2025, Amazon removed the Echo setting that kept <em>voice requests off its cloud</em>.</blockquote>
+      <p data-i="proof.p">TechCrunch, March 15, 2025. pleeply is built the other way around: the model runs on the device, in your home.</p>
+      <a class="btn btn-main" href="https://techcrunch.com/2025/03/15/amazons-echo-will-send-all-voice-recordings-to-the-cloud-starting-march-28" target="_blank" rel="noopener" data-i="proof.link">Read the story</a>
+    </figure>
+  </section>
+
+  <!-- Встроено, а не прикручено -->
+  <section class="sec wrap" id="built">
+    <div class="head-row">
+      <h2 class="rv" data-i="rules.h">Privacy is built in, not bolted on.</h2>
+      <a class="btn btn-dark rv" href="#inside" data-i="built.cta">Show me the device</a>
+    </div>
+    <div class="feats">
+      <div class="feat rv">
+        <div class="feat-art"><div class="ui">
+          <div class="bub q" data-i="bubble.q">What did I say about Mom's birthday?</div>
+          <div class="bub a" data-i="art1.a">Tulips, on the 12th.</div>
+          <span class="pill" data-i="art.ondevice">On device</span>
+        </div></div>
+        <h3 data-i="feat1.t">Your voice is processed in the room, not on a server.</h3>
+      </div>
+      <div class="feat rv">
+        <div class="feat-art"><div class="ui">
+          <div class="ui-row"><span data-i="art2.r1">Wake word</span><span class="ok">✓</span></div>
+          <div class="ui-row"><span data-i="art2.r2">Speech to text</span><span class="ok">✓</span></div>
+          <div class="ui-row"><span data-i="art2.r3">Language model</span><span class="ok">✓</span></div>
+          <div class="ui-row"><span data-i="art2.r4">Voice</span><span class="ok">✓</span></div>
+          <span class="pill" data-i="art.ondevice">On device</span>
+        </div></div>
+        <h3 data-i="feat2.t">Every step runs on the device: wake word, speech, model and voice.</h3>
+      </div>
+      <div class="feat rv">
+        <div class="feat-art"><div class="ui">
+          <div class="ui-row"><span data-i="art3.net">Internet</span><span class="toggle" aria-hidden="true"></span></div>
+          <div class="bub q" data-i="art3.q">Set a timer for 10 minutes</div>
+          <div class="bub a" data-i="art3.a">Timer set for 10 minutes.</div>
+        </div></div>
+        <h3 data-i="feat3.t">It keeps working when the internet is down.</h3>
+      </div>
+      <div class="feat rv">
+        <div class="feat-art"><div class="ui">
+          <span class="ui-h" data-i="art4.h">Memory</span>
+          <div class="ui-row"><span data-i="art4.r1">Mom's birthday: tulips, the 12th</span><span class="muted">✎</span></div>
+          <div class="ui-row"><span data-i="art4.r2">Coffee: oat milk, no sugar</span><span class="muted">✎</span></div>
+          <div class="ui-row"><span data-i="art4.r3">Kids' bedtime: 9 pm</span><span class="muted">✎</span></div>
+        </div></div>
+        <h3 data-i="feat4.t">Your memory lives on the device, where you can edit it.</h3>
+      </div>
+      <div class="feat rv">
+        <div class="feat-art"><div class="ui">
+          <span class="ui-h" data-i="art5.h">Model</span>
+          <div class="ui-row"><span>Llama 3.2 · 3B</span><span class="toggle on" aria-hidden="true"></span></div>
+          <div class="ui-row"><span>Qwen2.5 · 3B</span><span class="toggle" aria-hidden="true"></span></div>
+          <div class="ui-row"><span>Gemma 3 · 4B</span><span class="toggle" aria-hidden="true"></span></div>
+        </div></div>
+        <h3 data-i="feat5.t">Swap open models as better ones come out.</h3>
+      </div>
+      <div class="feat rv">
+        <div class="feat-art"><div class="ui">
+          <div class="ui-card">
+            <span class="ui-h" data-i="art6.h">Name your speaker</span>
+            <div class="input" data-i="art6.v">Kitchen</div>
+            <div class="ui-btn" data-i="art6.btn">Continue</div>
+          </div>
+          <span class="pill" data-i="art6.note">No email or account needed</span>
+        </div></div>
+        <h3 data-i="feat6.t">No account and no sign-up.</h3>
+      </div>
+    </div>
+  </section>
+
+  <!-- Как это работает -->
+  <section class="sec wrap" id="how">
+    <div class="banner rv">
+      <div>
+        <p class="label" data-i="how.eyebrow">How it works</p>
+        <h2 data-i="how.h">Talk. It thinks. It remembers.</h2>
+        <p data-i="how.p">You talk. An open language model on the computer inside thinks. Your memory stays on the device, where you can see, edit or delete it.</p>
+        <a class="btn btn-light" href="/info/how-local-voice-assistants-work/" data-i="how.cta">How a local assistant works</a>
+      </div>
+      <img src="/assets/stills/pocket-explode.webp" alt="pleeply Pocket taken apart: Raspberry Pi 5, battery, speaker and the case" width="1600" height="1261" loading="lazy">
+    </div>
+  </section>
+
+  <!-- Следующий шаг -->
+  <section class="sec wrap">
+    <div class="next rv">
+      <h2 data-i="next.h">Take your next step.</h2>
+      <div class="ctas">
+        <button class="btn btn-main" type="button" data-open="next" data-i="next.cta1">Join the waitlist</button>
+        <a class="btn btn-light" href="/community/signup?next=%2Fcommunity" data-i="next.cta2">Join the community</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Сценарии -->
+  <section class="sec wrap" id="uses">
+    <div class="uses">
+      <div class="uses-side">
+        <h2 class="rv" data-i="uses.h">Built for how you live.</h2>
+        <div class="uses-img rv"><img src="/assets/stills/pocket-side.webp" alt="pleeply Pocket from the side" width="1400" height="611" loading="lazy"></div>
+      </div>
+      <div class="tiles">
+        <a class="tile rv" href="/info/how-local-voice-assistants-work/"><h3 data-i="use1.t">Private assistant</h3><p class="d" data-i="use1.d">Ask questions, set timers, think out loud. Answers are computed in the room.</p></a>
+        <a class="tile rv" href="/info/pleeply/"><h3 data-i="use2.t">Notes &amp; memory</h3><p class="d" data-i="use2.d">Tell it what matters. Your memory lives on the device, where you can see, edit or delete it.</p></a>
+        <a class="tile rv" href="/info/home-assistant-local-llm/"><h3 data-i="use3.t">Smart home</h3><p class="d" data-i="use3.d">Control your home by voice without a round trip to the cloud.</p></a>
+        <a class="tile rv" href="/info/smart-speaker-privacy/"><h3 data-i="use4.t">Kids &amp; family</h3><p class="d" data-i="use4.d">A speaker at home that doesn't send your family's voices to company servers.</p></a>
+        <a class="tile rv" href="/info/local-ai-assistant/"><h3 data-i="use5.t">Work &amp; documents</h3><p class="d" data-i="use5.d">Think through work out loud and keep your notes on a device you own.</p></a>
+        <a class="tile rv" href="/info/local-llm-memory/"><h3 data-i="use6.t">Your own models</h3><p class="d" data-i="use6.d">Run Llama, Qwen, Mistral or Gemma, and swap them as better ones come out.</p></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Гайды -->
+  <section class="sec wrap">
+    <div class="guide rv">
+      <div>
+        <h2 data-i="guide.h">Get the local AI guide.</h2>
+        <p data-i="guide.p">Free guides on running AI at home: hardware, models, memory, privacy and smart home. Each one cites its sources.</p>
+        <a class="btn btn-dark" href="/info/" data-i="guide.cta">Open the guides</a>
+      </div>
+      <div class="docs">
+        <a class="doc" href="/info/local-llm-memory/"><small data-i="doc.hw">Hardware</small><b>How much RAM do you need to run a local LLM?</b></a>
+        <a class="doc" href="/info/run-ai-at-home/"><small data-i="doc.hw">Hardware</small><b>Run AI at home: choose your hardware</b></a>
+        <a class="doc" href="/info/smart-speaker-privacy/"><small data-i="doc.privacy">Privacy</small><b>Do smart speakers send your voice to the cloud?</b></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ещё почитать -->
+  <section class="sec wrap" id="learn">
+    <div class="head-row">
+      <h2 class="rv" data-i="res.h">There's lots more to learn.</h2>
+      <a class="btn btn-line rv" href="/info/" data-i="res.all">All guides</a>
+    </div>
+    <div class="res">
+      <a class="rv" href="/info/raspberry-pi-5-llm/">
+        <div class="thumb"><img src="/assets/stills/pocket-explode.webp" alt="" width="1600" height="1261" loading="lazy"></div>
+        <span class="chip-tag" data-i="res1.type">Guide</span><h3 data-i="res1.t">Run an LLM on a Raspberry Pi 5</h3>
+      </a>
+      <a class="rv" href="/info/open-source-voice-assistants/">
+        <div class="thumb"><div class="ui">
+          <div class="ui-row"><span>Home Assistant Assist</span></div>
+          <div class="ui-row"><span>OpenVoiceOS</span></div>
+          <div class="ui-row"><span>Rhasspy</span></div>
+        </div></div>
+        <span class="chip-tag" data-i="res2.type">Comparison</span><h3 data-i="res2.t">Open-source voice assistants compared</h3>
+      </a>
+      <a class="rv" href="/info/alexa-alternatives/">
+        <div class="thumb"><img src="/assets/stills/pocket-bottom.webp" alt="" width="1400" height="770" loading="lazy"></div>
+        <span class="chip-tag" data-i="res3.type">Explainer</span><h3 data-i="res3.t">Private alternatives to Alexa</h3>
+      </a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div>
+        <h4 data-i="foot.products">Products</h4>
+        <ul><li><a href="#reserve">pleeply Pocket</a></li><li><a href="#reserve">pleeply One</a></li><li><a href="#reserve">pleeply Pro</a></li></ul>
+      </div>
+      <div>
+        <h4 data-i="foot.learn">Learn</h4>
+        <ul><li><a href="/info/" data-i="foot.guides">Guides</a></li><li><a href="/info/pleeply/" data-i="foot.faq">What is pleeply?</a></li><li><a href="/info/run-ai-at-home/" data-i="foot.hw">Choose your hardware</a></li></ul>
+      </div>
+      <div>
+        <h4 data-i="foot.community">Community</h4>
+        <ul><li><a href="/community" data-i="foot.forum">Forum</a></li><li><a href="/community/signup?next=%2Fcommunity" data-i="foot.join">Join</a></li></ul>
+      </div>
+      <div class="about">
+        <span class="mark">pleeply<i></i></span>
+        <p data-i="foot.about">A speaker with a computer inside. Open models, private memory, no cloud required. In development.</p>
+      </div>
+    </div>
+    <div class="foot-bar">
+      <h2 data-i="final.h">Your AI should live with you.</h2>
+      <div class="ctas">
+        <button class="btn btn-dark" type="button" data-open="final" data-i="final.cta">Join the waitlist</button>
+        <a class="btn btn-line" href="/community" data-i="com.cta">Visit the community</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span data-i="footer">© 2026 pleeply. In development.</span>
+      <a href="#top" data-i="foot.top">Back to top ↑</a>
+    </div>
+  </div>
+</footer>
+
+<dialog id="dlg" aria-labelledby="dlg-title">
+  <div class="dlg">
+    <div class="dlg-head">
+      <div>
+        <h3 id="dlg-title" data-i="f.h">Join the waitlist</h3>
+        <p class="lead" data-i="f.lead">Takes 20 seconds. No payment.</p>
+      </div>
+      <button class="x" type="button" data-close aria-label="Close">×</button>
+    </div>
+
+    <form id="form" novalidate>
+      <div class="field">
+        <label for="email" data-i="f.email">Email</label>
+        <input id="email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required>
+        <div class="err" id="email-err" data-i="f.err">Check your email address.</div>
+      </div>
+
+      <div class="field">
+        <span class="lbl" data-i="f.tier">Which one would you buy?</span>
+        <div class="seg">
+          <label><input type="radio" name="tier" value="pocket"><span>Pocket · $499</span></label>
+          <label><input type="radio" name="tier" value="one" checked><span>One · $299</span></label>
+          <label><input type="radio" name="tier" value="pro"><span>Pro · $549</span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="lbl" data-i="f.uses">What would you use it for?</span>
+        <div class="chips">
+          <label class="chip"><input type="checkbox" name="uses" value="assistant"><span data-i="u.assistant">Private assistant</span></label>
+          <label class="chip"><input type="checkbox" name="uses" value="memory"><span data-i="u.memory">Notes & memory</span></label>
+          <label class="chip"><input type="checkbox" name="uses" value="home"><span data-i="u.home">Smart home</span></label>
+          <label class="chip"><input type="checkbox" name="uses" value="family"><span data-i="u.family">Kids & family</span></label>
+          <label class="chip"><input type="checkbox" name="uses" value="work"><span data-i="u.work">Work & documents</span></label>
+          <label class="chip"><input type="checkbox" name="uses" value="models"><span data-i="u.models">Running my own models</span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="current" data-i="f.current">What do you use now?</label>
+        <select id="current" name="current">
+          <option value="" data-i="c.pick">Choose one</option>
+          <option value="alexa">Alexa / Echo</option>
+          <option value="google">Google / Nest</option>
+          <option value="apple">Siri / HomePod</option>
+          <option value="ai_app" data-i="c.ai">ChatGPT or another AI app</option>
+          <option value="local" data-i="c.local">My own local setup</option>
+          <option value="none" data-i="c.none">Nothing yet</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <span class="lbl" data-i="f.deposit">Would you put down a fully refundable $49 deposit to get one of the first units?</span>
+        <div class="seg">
+          <label><input type="radio" name="deposit" value="yes"><span data-i="d.yes">Yes</span></label>
+          <label><input type="radio" name="deposit" value="maybe"><span data-i="d.maybe">Maybe</span></label>
+          <label><input type="radio" name="deposit" value="no"><span data-i="d.no">No</span></label>
+        </div>
+      </div>
+
+      <div class="hp" aria-hidden="true"><label>Company <input type="text" name="company" tabindex="-1" autocomplete="off"></label></div>
+
+      <button class="btn btn-main" type="submit" data-i="f.submit">Join the waitlist</button>
+      <p class="small" data-i="f.small">We'll only email you about pleeply.</p>
+    </form>
+
+    <div class="done" role="status">
+      <div class="big">✓</div>
+      <h3 data-i="s.h">You're on the list.</h3>
+      <p data-i="s.p">Know someone who'd want one? Share your link.</p>
+      <div class="share">
+        <input id="share-url" type="text" readonly aria-label="Share link">
+        <button class="btn btn-dark" type="button" id="copy" data-i="s.copy">Copy</button>
+      </div>
+      <a class="btn btn-line" id="share-x" target="_blank" rel="noopener" data-i="s.x">Share on X</a>
+      <a class="btn btn-main" href="/community/signup?next=%2Fcommunity" data-i="s.community">Join the community</a>
+    </div>
+  </div>
+</dialog>
+
+<script type="importmap">
+{ "imports": { "three": "/assets/vendor/three/three.module.min.js", "three/addons/": "/assets/vendor/three/addons/" } }
+</script>
+<script type="module" src="/assets/pocket3d.js"></script>
+<script src="app.js"></script>
+<!-- Vercel Web Analytics: запасной счётчик визитов, если таблица не ответит. -->
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

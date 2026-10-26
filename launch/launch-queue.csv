@@ -1,0 +1,142 @@
+id,status,platform,publish_at,topic,text,image_url,link,posted_at,post_url,note
+1,draft,x,2026-10-28T14:00:00Z,Запуск: сообщество и гайд,"We opened the pleeply Community, a forum for running AI at home: local models, voice assistants, private smart homes. Plus an open guide with real numbers for Pi 5, Mac mini and Home Assistant. https://pleeply.vercel.app/community?utm_source=x&utm_medium=social&utm_campaign=launch",,https://pleeply.vercel.app/community?utm_source=x&utm_medium=social&utm_campaign=launch,,,
+2,draft,threads,2026-10-28T14:00:00Z,Запуск: сообщество и гайд,"We opened the pleeply Community, a forum for people who run AI at home.
+
+Ask about local models, hardware and Home Assistant, share your setup, and vote on what pleeply should do first. Next to it there's an open guide with sourced numbers for Raspberry Pi 5, Mac mini and Home Assistant.
+
+https://pleeply.vercel.app/community?utm_source=threads&utm_medium=social&utm_campaign=launch",,https://pleeply.vercel.app/community?utm_source=threads&utm_medium=social&utm_campaign=launch,,,
+3,draft,bluesky,2026-10-28T14:00:00Z,Запуск: сообщество и гайд,"We opened the pleeply Community, a forum for running AI at home: local models, voice assistants, private smart homes. Plus an open guide with real numbers for Pi 5, Mac mini and Home Assistant. https://pleeply.vercel.app/community?utm_source=bluesky&utm_medium=social&utm_campaign=launch",,https://pleeply.vercel.app/community?utm_source=bluesky&utm_medium=social&utm_campaign=launch,,,
+4,draft,linkedin,2026-10-28T14:00:00Z,Запуск: сообщество и гайд,"Today we opened the pleeply Community, a forum for people who run AI at home.
+
+We're building pleeply, a speaker with a small computer inside that runs open models on the device and keeps its memory at home. It's in development, so the most useful thing we can do right now is learn from people who already run local AI, and let them shape what we build.
+
+On the forum you can ask about local models, hardware and Home Assistant, post your own setup, and vote on what pleeply should do first. We also published an open guide with sourced numbers: what a Raspberry Pi 5 really runs, how much memory a 7B model needs, and how Home Assistant works with a local model.
+
+If you've replaced a cloud assistant with something local, I'd like to hear what made you switch.
+
+https://pleeply.vercel.app/community?utm_source=linkedin&utm_medium=social&utm_campaign=launch",,https://pleeply.vercel.app/community?utm_source=linkedin&utm_medium=social&utm_campaign=launch,,,
+5,draft,facebook,2026-10-28T14:00:00Z,Запуск: сообщество и гайд,"We opened the pleeply Community, a forum for people who run AI at home.
+
+Ask about local models, hardware and Home Assistant, share your setup, and vote on what pleeply should do first. Next to it there's an open guide with sourced numbers for Raspberry Pi 5, Mac mini and Home Assistant.
+
+https://pleeply.vercel.app/community?utm_source=facebook&utm_medium=social&utm_campaign=launch",,https://pleeply.vercel.app/community?utm_source=facebook&utm_medium=social&utm_campaign=launch,,,
+6,draft,instagram,2026-10-28T14:00:00Z,Запуск: сообщество и гайд,"We opened the pleeply Community, a forum for people who run AI at home.
+
+Ask about local models, hardware and Home Assistant, share your setup, and vote on what pleeply should do first. Next to it there's an open guide with sourced numbers for Raspberry Pi 5, Mac mini and Home Assistant.
+
+Link in bio.",https://pleeply.vercel.app/press/og-1200x630.png,https://pleeply.vercel.app/community?utm_source=instagram&utm_medium=social&utm_campaign=launch,,,
+7,draft,telegram,2026-10-28T14:00:00Z,Запуск: сообщество и гайд,"Открыли сообщество pleeply: форум для тех, кто запускает ИИ дома.
+
+Можно спросить про локальные модели, железо и Home Assistant, показать свою сборку и проголосовать, что pleeply должен уметь первым делом. Рядом — открытый гайд с цифрами из источников: что тянет Raspberry Pi 5, сколько памяти нужно модели на 7B и как подружить Home Assistant с локальной моделью.
+
+https://pleeply.vercel.app/community?utm_source=telegram&utm_medium=social&utm_campaign=launch",,https://pleeply.vercel.app/community?utm_source=telegram&utm_medium=social&utm_campaign=launch,,,
+8,draft,x,2026-10-29T14:00:00Z,Цифры: LLM на Raspberry Pi 5,"A Raspberry Pi 5 runs 1B models at about 11 tokens/s and 3B at about 5 (Ollama, Q4_K_M). Good enough for timers and short answers, slow for conversation. Sourced table: https://pleeply.vercel.app/info/raspberry-pi-5-llm/?utm_source=x&utm_medium=social&utm_campaign=launch",,https://pleeply.vercel.app/info/raspberry-pi-5-llm/?utm_source=x&utm_medium=social&utm_campaign=launch,,,
+9,draft,threads,2026-10-29T14:00:00Z,Цифры: LLM на Raspberry Pi 5,"How fast does a Raspberry Pi 5 run local language models?
+
+With Ollama and 4-bit models: Gemma 3 1B about 11.5 tokens/s, Llama 3.2 1B about 11.2, Qwen 2.5 3B about 5.2, Llama 3.2 3B about 4.7. A spoken answer takes 5 to 8 seconds end to end. Without active cooling the Pi throttles and roughly halves that.
+
+Full table with sources: https://pleeply.vercel.app/info/raspberry-pi-5-llm/?utm_source=threads&utm_medium=social&utm_campaign=launch",,https://pleeply.vercel.app/info/raspberry-pi-5-llm/?utm_source=threads&utm_medium=social&utm_campaign=launch,,,
+10,draft,bluesky,2026-10-29T14:00:00Z,Цифры: LLM на Raspberry Pi 5,"A Raspberry Pi 5 runs 1B models at about 11 tokens/s and 3B at about 5 (Ollama, Q4_K_M). Good enough for timers and short answers, slow for conversation. Sourced table: https://pleeply.vercel.app/info/raspberry-pi-5-llm/?utm_source=bluesky&utm_medium=social&utm_campaign=launch",,https://pleeply.vercel.app/info/raspberry-pi-5-llm/?utm_source=bluesky&utm_medium=social&utm_campaign=launch,,,
+11,draft,linkedin,2026-10-29T14:00:00Z,Цифры: LLM на Raspberry Pi 5,"We haven't benchmarked our own prototype yet, so we did the next best thing: collected published results for running language models on a Raspberry Pi 5, with sources.
+
+With Ollama and 4-bit models, a 1B model generates about 11 tokens per second and a 3B model about 5. For a voice assistant that means 5 to 8 seconds per spoken answer. Fine for timers and short questions, slow for a conversation. Two surprises: AI HAT accelerators don't speed up token generation in independent tests, and without active cooling the Pi throttles enough to halve throughput.
+
+If you run models on a Pi 5, post your numbers in our community benchmark thread and we'll add them to the table.
+
+https://pleeply.vercel.app/info/raspberry-pi-5-llm/?utm_source=linkedin&utm_medium=social&utm_campaign=launch",,https://pleeply.vercel.app/info/raspberry-pi-5-llm/?utm_source=linkedin&utm_medium=social&utm_campaign=launch,,,
+12,draft,facebook,2026-10-29T14:00:00Z,Цифры: LLM на Raspberry Pi 5,"How fast does a Raspberry Pi 5 run local language models?
+
+With Ollama and 4-bit models: Gemma 3 1B about 11.5 tokens/s, Llama 3.2 1B about 11.2, Qwen 2.5 3B about 5.2, Llama 3.2 3B about 4.7. A spoken answer takes 5 to 8 seconds end to end. Without active cooling the Pi throttles and roughly halves that.
+
+Full table with sources: https://pleeply.vercel.app/info/raspberry-pi-5-llm/?utm_source=facebook&utm_medium=social&utm_campaign=launch",,https://pleeply.vercel.app/info/raspberry-pi-5-llm/?utm_source=facebook&utm_medium=social&utm_campaign=launch,,,
+13,draft,instagram,2026-10-29T14:00:00Z,Цифры: LLM на Raspberry Pi 5,"How fast does a Raspberry Pi 5 run local language models?
+
+With Ollama and 4-bit models: Gemma 3 1B about 11.5 tokens/s, Llama 3.2 1B about 11.2, Qwen 2.5 3B about 5.2, Llama 3.2 3B about 4.7. A spoken answer takes 5 to 8 seconds end to end. Without active cooling the Pi throttles and roughly halves that.
+
+Full table with sources. Link in bio.",https://pleeply.vercel.app/press/og-1200x630.png,https://pleeply.vercel.app/info/raspberry-pi-5-llm/?utm_source=instagram&utm_medium=social&utm_campaign=launch,,,
+14,draft,telegram,2026-10-29T14:00:00Z,Цифры: LLM на Raspberry Pi 5,"Сколько токенов в секунду выдаёт Raspberry Pi 5 на локальных моделях?
+
+Ollama, 4-битные модели: Gemma 3 1B — около 11,5 токена/с, Llama 3.2 1B — 11,2, Qwen 2.5 3B — 5,2, Llama 3.2 3B — 4,7. Голосовой ответ целиком занимает 5–8 секунд. Без активного охлаждения Pi троттлит и скорость падает примерно вдвое.
+
+Таблица с источниками: https://pleeply.vercel.app/info/raspberry-pi-5-llm/?utm_source=telegram&utm_medium=social&utm_campaign=launch",,https://pleeply.vercel.app/info/raspberry-pi-5-llm/?utm_source=telegram&utm_medium=social&utm_campaign=launch,,,
+15,draft,x,2026-10-31T14:00:00Z,Вопрос аудитории: голосование за функции,"If a home AI never sent your voice to the cloud, what would you use it for every day? We're letting the community decide what pleeply does first. Vote here: https://pleeply.vercel.app/community/t/3/what-should-pleeply-do-first-vote-with?utm_source=x&utm_medium=social&utm_campaign=launch",,https://pleeply.vercel.app/community/t/3/what-should-pleeply-do-first-vote-with?utm_source=x&utm_medium=social&utm_campaign=launch,,,
+16,draft,threads,2026-10-31T14:00:00Z,Вопрос аудитории: голосование за функции,"If a home assistant never sent your voice to anyone's servers, what would you actually use it for every day?
+
+Private questions and reminders, notes that it remembers, smart-home control, something for the kids, work documents, or running your own models. We're letting the community decide what pleeply should be great at first.
+
+Vote here: https://pleeply.vercel.app/community/t/3/what-should-pleeply-do-first-vote-with?utm_source=threads&utm_medium=social&utm_campaign=launch",,https://pleeply.vercel.app/community/t/3/what-should-pleeply-do-first-vote-with?utm_source=threads&utm_medium=social&utm_campaign=launch,,,
+17,draft,bluesky,2026-10-31T14:00:00Z,Вопрос аудитории: голосование за функции,"If a home AI never sent your voice to the cloud, what would you use it for every day? We're letting the community decide what pleeply does first. Vote here: https://pleeply.vercel.app/community/t/3/what-should-pleeply-do-first-vote-with?utm_source=bluesky&utm_medium=social&utm_campaign=launch",,https://pleeply.vercel.app/community/t/3/what-should-pleeply-do-first-vote-with?utm_source=bluesky&utm_medium=social&utm_campaign=launch,,,
+18,draft,linkedin,2026-10-31T14:00:00Z,Вопрос аудитории: голосование за функции,"A question I keep asking people: if a home assistant never sent your voice to anyone's servers, what would you use it for every day?
+
+Private reminders and notes, smart-home control, something for the kids, or a quiet box for your own open models. We'd rather build the right first version than guess, so we opened a vote on the pleeply Community. Reply with the one you'd use daily and like the answers you agree with.
+
+https://pleeply.vercel.app/community/t/3/what-should-pleeply-do-first-vote-with?utm_source=linkedin&utm_medium=social&utm_campaign=launch",,https://pleeply.vercel.app/community/t/3/what-should-pleeply-do-first-vote-with?utm_source=linkedin&utm_medium=social&utm_campaign=launch,,,
+19,draft,facebook,2026-10-31T14:00:00Z,Вопрос аудитории: голосование за функции,"If a home assistant never sent your voice to anyone's servers, what would you actually use it for every day?
+
+Private questions and reminders, notes that it remembers, smart-home control, something for the kids, work documents, or running your own models. We're letting the community decide what pleeply should be great at first.
+
+Vote here: https://pleeply.vercel.app/community/t/3/what-should-pleeply-do-first-vote-with?utm_source=facebook&utm_medium=social&utm_campaign=launch",,https://pleeply.vercel.app/community/t/3/what-should-pleeply-do-first-vote-with?utm_source=facebook&utm_medium=social&utm_campaign=launch,,,
+20,draft,instagram,2026-10-31T14:00:00Z,Вопрос аудитории: голосование за функции,"If a home assistant never sent your voice to anyone's servers, what would you actually use it for every day?
+
+Private questions and reminders, notes that it remembers, smart-home control, something for the kids, work documents, or running your own models. We're letting the community decide what pleeply should be great at first.
+
+Vote here. Link in bio.",https://pleeply.vercel.app/press/og-1200x630.png,https://pleeply.vercel.app/community/t/3/what-should-pleeply-do-first-vote-with?utm_source=instagram&utm_medium=social&utm_campaign=launch,,,
+21,draft,telegram,2026-10-31T14:00:00Z,Вопрос аудитории: голосование за функции,"Если бы домашний ассистент никогда не отправлял ваш голос на чужие серверы, для чего бы вы пользовались им каждый день?
+
+Личные вопросы и напоминания, заметки, которые он помнит, управление умным домом, что-то для детей, рабочие документы или свои модели на тихом железе. Что pleeply должен уметь первым делом — решает сообщество.
+
+Голосовать: https://pleeply.vercel.app/community/t/3/what-should-pleeply-do-first-vote-with?utm_source=telegram&utm_medium=social&utm_campaign=launch",,https://pleeply.vercel.app/community/t/3/what-should-pleeply-do-first-vote-with?utm_source=telegram&utm_medium=social&utm_campaign=launch,,,
+22,draft,x,2026-11-02T14:00:00Z,Local AI weekly #1 (дайджест бота),"First issue of Local AI weekly on the pleeply Community: this week's news on open models, voice assistants and hardware for running AI at home, each with a source. https://pleeply.vercel.app/community/latest?utm_source=x&utm_medium=social&utm_campaign=launch",,https://pleeply.vercel.app/community/latest?utm_source=x&utm_medium=social&utm_campaign=launch,,,
+23,draft,threads,2026-11-02T14:00:00Z,Local AI weekly #1 (дайджест бота),"Local AI weekly is live on the pleeply Community.
+
+Every Monday our AI helper (clearly labeled as a bot) collects the week's news on open-weight models, voice assistants, smart-home privacy and small hardware for AI, each item with a source, and ends with a question for discussion.
+
+Read and join the thread: https://pleeply.vercel.app/community/latest?utm_source=threads&utm_medium=social&utm_campaign=launch",,https://pleeply.vercel.app/community/latest?utm_source=threads&utm_medium=social&utm_campaign=launch,,,
+24,draft,bluesky,2026-11-02T14:00:00Z,Local AI weekly #1 (дайджест бота),"First issue of Local AI weekly on the pleeply Community: this week's news on open models, voice assistants and hardware for running AI at home, each with a source. https://pleeply.vercel.app/community/latest?utm_source=bluesky&utm_medium=social&utm_campaign=launch",,https://pleeply.vercel.app/community/latest?utm_source=bluesky&utm_medium=social&utm_campaign=launch,,,
+25,draft,linkedin,2026-11-02T14:00:00Z,Local AI weekly #1 (дайджест бота),"Every Monday the pleeply Community now gets Local AI weekly: the week's news on open-weight models, voice assistants, smart-home privacy and small hardware for AI.
+
+It's written by our AI helper, which is labeled as a bot on every post and links a source for every item. The useful part is the thread under it, where people who run this stuff at home add what they've tried.
+
+https://pleeply.vercel.app/community/latest?utm_source=linkedin&utm_medium=social&utm_campaign=launch",,https://pleeply.vercel.app/community/latest?utm_source=linkedin&utm_medium=social&utm_campaign=launch,,,
+26,draft,facebook,2026-11-02T14:00:00Z,Local AI weekly #1 (дайджест бота),"Local AI weekly is live on the pleeply Community.
+
+Every Monday our AI helper (clearly labeled as a bot) collects the week's news on open-weight models, voice assistants, smart-home privacy and small hardware for AI, each item with a source, and ends with a question for discussion.
+
+Read and join the thread: https://pleeply.vercel.app/community/latest?utm_source=facebook&utm_medium=social&utm_campaign=launch",,https://pleeply.vercel.app/community/latest?utm_source=facebook&utm_medium=social&utm_campaign=launch,,,
+27,draft,instagram,2026-11-02T14:00:00Z,Local AI weekly #1 (дайджест бота),"Local AI weekly is live on the pleeply Community.
+
+Every Monday our AI helper (clearly labeled as a bot) collects the week's news on open-weight models, voice assistants, smart-home privacy and small hardware for AI, each item with a source, and ends with a question for discussion.
+
+Read and join the thread. Link in bio.",https://pleeply.vercel.app/press/og-1200x630.png,https://pleeply.vercel.app/community/latest?utm_source=instagram&utm_medium=social&utm_campaign=launch,,,
+28,draft,telegram,2026-11-02T14:00:00Z,Local AI weekly #1 (дайджест бота),"В сообществе pleeply вышел первый Local AI weekly.
+
+Каждый понедельник наш ИИ-помощник (он везде подписан как бот) собирает новости недели: открытые модели, голосовые ассистенты, приватность умного дома и железо для ИИ. У каждой новости есть источник, а в конце — вопрос для обсуждения.
+
+Читать и обсуждать: https://pleeply.vercel.app/community/latest?utm_source=telegram&utm_medium=social&utm_campaign=launch",,https://pleeply.vercel.app/community/latest?utm_source=telegram&utm_medium=social&utm_campaign=launch,,,
+29,draft,x,2026-11-04T14:00:00Z,Founding member для первых 100 (нужно твоё «да» на значок),"The first 100 members of the pleeply Community get a Founding member badge next to their name, for good. Join, say hi and tell us what you'd run at home: https://pleeply.vercel.app/community/signup?utm_source=x&utm_medium=social&utm_campaign=launch",,https://pleeply.vercel.app/community/signup?utm_source=x&utm_medium=social&utm_campaign=launch,,,
+30,draft,threads,2026-11-04T14:00:00Z,Founding member для первых 100 (нужно твоё «да» на значок),"The first 100 members of the pleeply Community get a Founding member badge next to their name, for good.
+
+It takes a username and a password, no email. Introduce yourself, post your setup or ask anything about running AI at home.
+
+https://pleeply.vercel.app/community/signup?utm_source=threads&utm_medium=social&utm_campaign=launch",,https://pleeply.vercel.app/community/signup?utm_source=threads&utm_medium=social&utm_campaign=launch,,,
+31,draft,bluesky,2026-11-04T14:00:00Z,Founding member для первых 100 (нужно твоё «да» на значок),"The first 100 members of the pleeply Community get a Founding member badge next to their name, for good. Join, say hi and tell us what you'd run at home: https://pleeply.vercel.app/community/signup?utm_source=bluesky&utm_medium=social&utm_campaign=launch",,https://pleeply.vercel.app/community/signup?utm_source=bluesky&utm_medium=social&utm_campaign=launch,,,
+32,draft,linkedin,2026-11-04T14:00:00Z,Founding member для первых 100 (нужно твоё «да» на значок),"A small thank-you to the people who join early: the first 100 members of the pleeply Community get a Founding member badge next to their name, permanently.
+
+Joining takes a username and a password, no email. The forum is for anyone running AI at home, whether or not you ever buy a pleeply.
+
+https://pleeply.vercel.app/community/signup?utm_source=linkedin&utm_medium=social&utm_campaign=launch",,https://pleeply.vercel.app/community/signup?utm_source=linkedin&utm_medium=social&utm_campaign=launch,,,
+33,draft,facebook,2026-11-04T14:00:00Z,Founding member для первых 100 (нужно твоё «да» на значок),"The first 100 members of the pleeply Community get a Founding member badge next to their name, for good.
+
+It takes a username and a password, no email. Introduce yourself, post your setup or ask anything about running AI at home.
+
+https://pleeply.vercel.app/community/signup?utm_source=facebook&utm_medium=social&utm_campaign=launch",,https://pleeply.vercel.app/community/signup?utm_source=facebook&utm_medium=social&utm_campaign=launch,,,
+34,draft,instagram,2026-11-04T14:00:00Z,Founding member для первых 100 (нужно твоё «да» на значок),"The first 100 members of the pleeply Community get a Founding member badge next to their name, for good.
+
+It takes a username and a password, no email. Introduce yourself, post your setup or ask anything about running AI at home.
+
+Link in bio.",https://pleeply.vercel.app/press/og-1200x630.png,https://pleeply.vercel.app/community/signup?utm_source=instagram&utm_medium=social&utm_campaign=launch,,,
+35,draft,telegram,2026-11-04T14:00:00Z,Founding member для первых 100 (нужно твоё «да» на значок),"Первые 100 участников сообщества pleeply получают значок Founding member рядом с именем — навсегда.
+
+Регистрация — только имя и пароль, без почты. Представьтесь, покажите свою сборку или спросите что угодно про ИИ дома.
+
+https://pleeply.vercel.app/community/signup?utm_source=telegram&utm_medium=social&utm_campaign=launch",,https://pleeply.vercel.app/community/signup?utm_source=telegram&utm_medium=social&utm_campaign=launch,,,

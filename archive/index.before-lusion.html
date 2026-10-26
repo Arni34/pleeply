@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>pleeply – your own AI, at home</title>
+<meta name="description" content="pleeply is a speaker with a computer inside. It runs open AI models on the device, keeps a private memory of you, and doesn't need the cloud.">
+<meta property="og:title" content="pleeply – your own AI. It lives at home.">
+<meta property="og:description" content="A speaker with a computer inside. Open models, private memory, no cloud required. Join the waitlist.">
+<meta property="og:image" content="https://pleeply.vercel.app/og.png">
+<meta property="og:url" content="https://pleeply.vercel.app/">
+<meta name="twitter:image" content="https://pleeply.vercel.app/og.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://pleeply.vercel.app/">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#111111">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+  {"@type":"Organization","@id":"https://pleeply.vercel.app/#org","name":"pleeply","url":"https://pleeply.vercel.app/","logo":{"@type":"ImageObject","url":"https://pleeply.vercel.app/icon-512.png","width":512,"height":512}},
+  {"@type":"WebSite","@id":"https://pleeply.vercel.app/#website","name":"pleeply","url":"https://pleeply.vercel.app/","publisher":{"@id":"https://pleeply.vercel.app/#org"}}
+]}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f7f5;
+    --ink: #111111;
+    --muted: #666665;
+    --soft: #898988;
+    --line: #d6d6d4;
+    --card: #ffffff;
+    --green: #75a24c;
+    --green-ink: #4f7531;
+    --radius: 22px;
+    --wrap: 1120px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Inter Tight", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 17px; line-height: 1.5; -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  .wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 24px; }
+
+  /* Wordmark — повторяет логотип: жирный гротеск + зелёная точка */
+  .mark { font-weight: 900; letter-spacing: -0.055em; line-height: 1; white-space: nowrap; }
+  .mark i {
+    display: inline-block; width: 0.2em; height: 0.2em; border-radius: 50%;
+    background: var(--green); margin-left: 0.06em; vertical-align: 0.08em;
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    border: 0; border-radius: 999px; padding: 15px 26px; font-weight: 600; font-size: 16px;
+    text-decoration: none; transition: transform .2s ease, background .2s ease, box-shadow .2s ease;
+  }
+  .btn-dark { background: var(--ink); color: #fff; }
+  .btn-dark:hover { transform: translateY(-1px); box-shadow: 0 10px 24px -12px rgba(0,0,0,.5); }
+  .btn-ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); }
+  .btn-ghost:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
+  .btn .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+  .btn:focus-visible, .chip input:focus-visible + span, .seg input:focus-visible + span { outline: 2px solid var(--green); outline-offset: 3px; }
+
+  /* Nav */
+  .nav { position: sticky; top: 0; z-index: 20; background: rgba(247,247,245,.86); backdrop-filter: saturate(1.4) blur(12px); -webkit-backdrop-filter: saturate(1.4) blur(12px); }
+  .nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 68px; }
+  .nav .mark { font-size: 28px; text-decoration: none; }
+  .nav-right { display: flex; align-items: center; gap: 14px; }
+  .lang { display: flex; border-radius: 999px; box-shadow: inset 0 0 0 1.5px var(--line); padding: 3px; }
+  .lang button { border: 0; background: none; padding: 6px 11px; border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--muted); }
+  .lang button[aria-pressed="true"] { background: var(--ink); color: #fff; }
+  .nav .btn { padding: 11px 18px; font-size: 15px; }
+
+  /* Hero */
+  .hero { padding: 56px 0 40px; }
+  .hero .wrap { display: grid; grid-template-columns: 1.1fr .9fr; gap: 48px; align-items: center; }
+  .kicker { display: inline-flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; color: var(--muted); }
+  .kicker .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 0 rgba(117,162,76,.5); animation: ping 2.4s infinite; }
+  h1 { font-size: clamp(44px, 6.8vw, 88px); line-height: .98; letter-spacing: -0.035em; font-weight: 900; margin: 18px 0 22px; text-wrap: balance; }
+  .sub { font-size: clamp(18px, 1.9vw, 21px); color: #333332; max-width: 34ch; margin: 0 0 30px; }
+  .ctas { display: flex; flex-wrap: wrap; gap: 12px; }
+  .note { margin-top: 16px; font-size: 14px; color: var(--soft); }
+
+  /* Device illustration */
+  .device { position: relative; height: 470px; display: grid; place-items: center; }
+  .speaker {
+    position: relative; width: 250px; height: 330px; border-radius: 125px 125px 70px 70px;
+    background:
+      radial-gradient(circle, rgba(0,0,0,.13) 1.15px, transparent 1.6px) 0 0 / 8px 8px,
+      linear-gradient(180deg, #ecece9 0%, #dddcd8 100%);
+    box-shadow: inset -18px -10px 40px rgba(0,0,0,.08), inset 14px 10px 30px rgba(255,255,255,.7), 0 40px 60px -30px rgba(0,0,0,.35);
+  }
+  .speaker::before {
+    content: ""; position: absolute; left: 50%; top: 22px; transform: translateX(-50%);
+    width: 150px; height: 26px; border-radius: 50%;
+    background: linear-gradient(180deg, #1a1a1a, #2b2b2b); box-shadow: inset 0 2px 4px rgba(255,255,255,.12);
+  }
+  .led { position: absolute; left: 50%; top: 31px; width: 9px; height: 9px; margin-left: -4.5px; border-radius: 50%; background: var(--green); box-shadow: 0 0 12px 3px rgba(117,162,76,.75); animation: breathe 3.2s ease-in-out infinite; }
+  .speaker-label { position: absolute; bottom: 22px; left: 0; right: 0; text-align: center; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .bubble {
+    position: absolute; max-width: 250px; padding: 13px 16px; border-radius: 18px; font-size: 15px; line-height: 1.35;
+    background: var(--card); box-shadow: 0 12px 30px -16px rgba(0,0,0,.35); opacity: 0; transform: translateY(8px);
+    animation: rise .7s ease forwards;
+  }
+  .bubble.q { top: 46px; left: 0; border-bottom-left-radius: 6px; animation-delay: .5s; }
+  .bubble.a { bottom: 70px; right: 0; border-bottom-right-radius: 6px; background: var(--ink); color: #fff; animation-delay: 1.4s; }
+  .bubble.a b { color: #a8d27f; font-weight: 600; }
+
+  /* Strip */
+  .strip { border-top: 1.5px solid var(--line); border-bottom: 1.5px solid var(--line); }
+  .strip .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 28px; padding-top: 20px; padding-bottom: 20px; font-weight: 600; font-size: 15px; }
+  .strip span { display: inline-flex; align-items: center; gap: 10px; }
+  .strip span::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+
+  /* Sections */
+  section.block { padding: 110px 0 0; }
+  .eyebrow { font-size: 13px; letter-spacing: .1em; text-transform: uppercase; font-weight: 600; color: var(--soft); margin: 0 0 14px; }
+  h2 { font-size: clamp(34px, 5vw, 58px); line-height: 1.02; letter-spacing: -0.03em; font-weight: 900; margin: 0 0 44px; max-width: 16ch; }
+
+  .rules { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
+  .rule { background: var(--card); border-radius: var(--radius); padding: 24px 22px 26px; min-height: 230px; display: flex; flex-direction: column; }
+  .rule .n { font-size: 13px; font-weight: 600; color: var(--green-ink); margin-bottom: auto; }
+  .rule h3 { font-size: 21px; letter-spacing: -0.025em; line-height: 1.1; margin: 28px 0 10px; font-weight: 800; }
+  .rule p { margin: 0; font-size: 15px; color: var(--muted); }
+
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .lane { border-radius: var(--radius); padding: 30px; }
+  .lane.them { background: #ebebe8; }
+  .lane.us { background: var(--ink); color: #fff; }
+  .lane h3 { margin: 0 0 22px; font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
+  .flow { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .flow li { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-radius: 14px; font-weight: 500; }
+  .them .flow li { background: #f7f7f5; }
+  .us .flow li { background: #1f1f1f; }
+  .flow li .i { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700; flex: none; }
+  .them .flow li .i { background: var(--line); color: var(--muted); }
+  .us .flow li .i { background: var(--green); color: #fff; }
+  .flow li.cloud { color: #a3402e; }
+  .lane .end { margin: 18px 0 0; font-size: 15px; color: var(--muted); }
+  .us .end { color: #b9b9b7; }
+  .fact { margin-top: 14px; background: var(--card); border-radius: var(--radius); padding: 22px 26px; display: flex; gap: 18px; align-items: baseline; }
+  .fact b { font-size: 14px; white-space: nowrap; }
+  .fact p { margin: 0; color: #333332; }
+  .fact a { color: var(--muted); font-size: 14px; white-space: nowrap; }
+
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; counter-reset: s; }
+  .step { border-top: 2px solid var(--ink); padding-top: 22px; }
+  .step h3 { margin: 0 0 10px; font-size: 24px; letter-spacing: -0.03em; font-weight: 800; }
+  .step h3::before { counter-increment: s; content: counter(s, decimal-leading-zero); display: block; font-size: 13px; color: var(--green-ink); font-weight: 600; letter-spacing: 0; margin-bottom: 14px; }
+  .step p { margin: 0; color: var(--muted); }
+
+  /* Pricing fake door */
+  .tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .tier { background: var(--card); border-radius: var(--radius); padding: 30px 26px 26px; display: flex; flex-direction: column; box-shadow: inset 0 0 0 1.5px transparent; transition: box-shadow .2s ease, transform .2s ease; }
+  .tier:hover { box-shadow: inset 0 0 0 1.5px var(--ink); transform: translateY(-2px); }
+  .tier .tag { font-size: 13px; font-weight: 600; color: var(--soft); text-transform: uppercase; letter-spacing: .08em; }
+  .tier h3 { font-size: 26px; letter-spacing: -0.035em; font-weight: 900; margin: 10px 0 6px; }
+  .price { font-size: 44px; font-weight: 900; letter-spacing: -0.04em; line-height: 1; margin: 12px 0 4px; }
+  .price small { font-size: 15px; font-weight: 500; color: var(--muted); letter-spacing: 0; }
+  .tier p { color: var(--muted); font-size: 15px; margin: 10px 0 18px; }
+  .tier ul { list-style: none; padding: 0; margin: 0 0 26px; display: grid; gap: 9px; font-size: 15px; }
+  .tier li { display: flex; gap: 10px; }
+  .tier li::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--green); margin-top: 9px; flex: none; }
+  .tier .btn { margin-top: auto; width: 100%; }
+  .fine { margin-top: 18px; font-size: 14px; color: var(--soft); }
+
+
+  .final { padding: 130px 0 120px; text-align: center; }
+  .final h2 { margin: 0 auto 30px; max-width: 14ch; }
+  footer { border-top: 1.5px solid var(--line); }
+  footer .wrap { display: flex; justify-content: space-between; align-items: center; padding-top: 26px; padding-bottom: 34px; font-size: 14px; color: var(--soft); gap: 16px; flex-wrap: wrap; }
+  footer .mark { font-size: 22px; color: var(--ink); }
+  footer .foot-links { display: flex; gap: 18px; }
+  footer .foot-links a { text-decoration: none; }
+  footer .foot-links a:hover { color: var(--ink); }
+
+  /* Waitlist dialog */
+  dialog { border: 0; padding: 0; border-radius: 26px; width: min(560px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); background: var(--bg); color: var(--ink); box-shadow: 0 40px 80px -30px rgba(0,0,0,.5); }
+  dialog::backdrop { background: rgba(17,17,17,.45); backdrop-filter: blur(4px); }
+  .dlg { padding: 30px 30px 28px; }
+  .dlg-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+  .dlg h3 { font-size: 30px; letter-spacing: -0.04em; font-weight: 900; margin: 0; line-height: 1.05; }
+  .dlg .lead { margin: 6px 0 22px; color: var(--muted); font-size: 15px; }
+  .x { border: 0; background: #ebebe8; width: 36px; height: 36px; border-radius: 50%; font-size: 20px; line-height: 1; flex: none; }
+  .field { margin-bottom: 20px; }
+  .field > label, .field > .lbl { display: block; font-weight: 600; font-size: 15px; margin-bottom: 9px; }
+  input[type=email] { width: 100%; font: inherit; font-size: 16px; padding: 14px 16px; border-radius: 14px; border: 1.5px solid var(--line); background: #fff; color: var(--ink); }
+  input[type=email]:focus { outline: none; border-color: var(--ink); }
+  .err { color: #a3402e; font-size: 14px; margin-top: 7px; display: none; }
+  .err.on { display: block; }
+  .chips, .seg { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip input, .seg input { position: absolute; opacity: 0; pointer-events: none; }
+  .chip span, .seg span { display: inline-block; padding: 9px 14px; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1.5px var(--line); font-size: 14px; font-weight: 500; cursor: pointer; user-select: none; transition: background .15s ease, color .15s ease, box-shadow .15s ease; }
+  .chip input:checked + span, .seg input:checked + span { background: var(--ink); color: #fff; box-shadow: none; }
+  select { width: 100%; font: inherit; font-size: 15px; padding: 12px 14px; border-radius: 14px; border: 1.5px solid var(--line); background: #fff; color: var(--ink); }
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .dlg .btn { width: 100%; margin-top: 4px; }
+  .small { font-size: 13px; color: var(--soft); text-align: center; margin: 12px 0 0; }
+  .done { display: none; text-align: center; padding: 18px 0 6px; }
+  .done .big { width: 64px; height: 64px; border-radius: 50%; background: var(--green); margin: 0 auto 20px; display: grid; place-items: center; color: #fff; font-size: 30px; font-weight: 800; }
+  .done p { color: var(--muted); margin: 10px auto 20px; max-width: 34ch; }
+  .share { display: flex; gap: 8px; }
+  .share input { flex: 1; min-width: 0; font: inherit; font-size: 14px; padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--line); background: #fff; color: var(--muted); }
+  .share .btn { width: auto; padding: 12px 18px; margin: 0; font-size: 14px; }
+  .done .btn-ghost { margin-top: 10px; }
+  form.sent { display: none; }
+  form.sent + .done { display: block; }
+
+  /* Reveal */
+  .rv { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); }
+  .rv.in { opacity: 1; transform: none; }
+
+  @keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(117,162,76,.55); } 80%, 100% { box-shadow: 0 0 0 10px rgba(117,162,76,0); } }
+  @keyframes breathe { 0%, 100% { opacity: .55; box-shadow: 0 0 8px 2px rgba(117,162,76,.5); } 50% { opacity: 1; box-shadow: 0 0 16px 5px rgba(117,162,76,.8); } }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .bubble, .rv { opacity: 1; transform: none; }
+    html { scroll-behavior: auto; }
+  }
+
+  @media (max-width: 980px) {
+    .rules { grid-template-columns: repeat(2, 1fr); }
+    .rule { min-height: 0; }
+    .rule h3 { margin-top: 18px; }
+  }
+  @media (max-width: 820px) {
+    .hero .wrap { grid-template-columns: 1fr; gap: 10px; }
+    .device { height: 420px; }
+    .compare, .steps, .tiers { grid-template-columns: 1fr; }
+    .fact { flex-direction: column; gap: 6px; }
+    section.block { padding-top: 84px; }
+  }
+  @media (max-width: 560px) {
+    .wrap { padding: 0 16px; }
+    .nav .btn { display: none; }
+    .rules { grid-template-columns: 1fr; }
+    .speaker { width: 200px; height: 270px; }
+    .bubble { max-width: 210px; font-size: 14px; }
+    .dlg { padding: 24px 18px 22px; }
+    .ctas .btn { flex: 1 1 100%; }
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="mark" href="#top" aria-label="pleeply">pleeply<i></i></a>
+    <div class="nav-right">
+      <div class="lang" role="group" aria-label="Language">
+        <button type="button" data-lang="en" aria-pressed="true">EN</button>
+        <button type="button" data-lang="ru" aria-pressed="false">RU</button>
+      </div>
+      <button class="btn btn-dark" type="button" data-open="nav" data-i="nav.cta">Join waitlist</button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <div class="kicker"><span class="dot"></span><span data-i="hero.kicker">In development · Waitlist open</span></div>
+        <h1 id="headline">Your own AI.<br>It lives at home.</h1>
+        <p class="sub" data-i="hero.sub">pleeply is a speaker with a computer inside. It runs open AI models right on the device, keeps a private memory of you, and doesn't need the cloud.</p>
+        <div class="ctas">
+          <a class="btn btn-dark" href="#reserve" data-i="hero.cta1"><span class="dot"></span>Reserve yours — free</a>
+          <a class="btn btn-ghost" href="#how" data-i="hero.cta2">How it works</a>
+        </div>
+        <p class="note" data-i="hero.note">No payment today. We'll email you when reservations open.</p>
+      </div>
+      <div class="device" aria-hidden="true">
+        <div class="speaker"><span class="led"></span><span class="speaker-label" data-i="device.label">on-device</span></div>
+        <div class="bubble q" data-i="bubble.q">What did I say about Mom's birthday?</div>
+        <div class="bubble a" data-i="bubble.a">Tulips, on the 12th. <b>That memory never left this room.</b></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="strip">
+    <div class="wrap">
+      <span data-i="strip.1">Works offline</span>
+      <span data-i="strip.2">Open models</span>
+      <span data-i="strip.3">Memory stays at home</span>
+      <span data-i="strip.4">Yours, not a platform's</span>
+    </div>
+  </div>
+
+  <section class="block" id="rules">
+    <div class="wrap">
+      <p class="eyebrow rv" data-i="rules.eyebrow">Principles</p>
+      <h2 class="rv" data-i="rules.h">Built on five rules.</h2>
+      <div class="rules">
+        <article class="rule rv"><span class="n">01</span><h3 data-i="r1.t">Private by design</h3><p data-i="r1.d">Privacy is in the architecture, not in a settings menu. Your voice is processed by the chip inside the speaker.</p></article>
+        <article class="rule rv"><span class="n">02</span><h3 data-i="r2.t">Your own AI</h3><p data-i="r2.d">Your device, your data, your rules. No big-tech account required.</p></article>
+        <article class="rule rv"><span class="n">03</span><h3 data-i="r3.t">Local intelligence</h3><p data-i="r3.d">Models run in your home, so answers don't wait on a server on another continent.</p></article>
+        <article class="rule rv"><span class="n">04</span><h3 data-i="r4.t">No cloud required</h3><p data-i="r4.d">Core features work without internet. Connect online services only if you choose to.</p></article>
+        <article class="rule rv"><span class="n">05</span><h3 data-i="r5.t">Open models</h3><p data-i="r5.d">Run compatible open models — Llama, Qwen, Mistral, Gemma — and swap them as they get better.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="compare">
+    <div class="wrap">
+      <p class="eyebrow rv" data-i="cmp.eyebrow">The difference</p>
+      <h2 class="rv" data-i="cmp.h">Where does your voice go?</h2>
+      <div class="compare">
+        <div class="lane them rv">
+          <h3 data-i="cmp.them">A typical smart speaker</h3>
+          <ol class="flow">
+            <li><span class="i">1</span><span data-i="cmp.t1">You speak</span></li>
+            <li class="cloud"><span class="i">2</span><span data-i="cmp.t2">Audio is sent to company servers</span></li>
+            <li class="cloud"><span class="i">3</span><span data-i="cmp.t3">Processed in their cloud</span></li>
+            <li><span class="i">4</span><span data-i="cmp.t4">The answer comes back</span></li>
+          </ol>
+          <p class="end" data-i="cmp.tend">No internet, no assistant.</p>
+        </div>
+        <div class="lane us rv">
+          <h3 data-i="cmp.us">pleeply</h3>
+          <ol class="flow">
+            <li><span class="i">1</span><span data-i="cmp.u1">You speak</span></li>
+            <li><span class="i">2</span><span data-i="cmp.u2">The computer inside the speaker thinks</span></li>
+            <li><span class="i">3</span><span data-i="cmp.u3">You get the answer</span></li>
+          </ol>
+          <p class="end" data-i="cmp.uend">Nothing leaves the room unless you allow it.</p>
+        </div>
+      </div>
+      <div class="fact rv">
+        <b data-i="fact.date">March 28, 2025</b>
+        <p data-i="fact.text">Amazon removed the Echo setting that kept voice requests from being sent to its cloud — to make room for Alexa+.</p>
+        <a href="https://techcrunch.com/2025/03/15/amazons-echo-will-send-all-voice-recordings-to-the-cloud-starting-march-28" target="_blank" rel="noopener" data-i="fact.src">TechCrunch ↗</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="how">
+    <div class="wrap">
+      <p class="eyebrow rv" data-i="how.eyebrow">How it works</p>
+      <h2 class="rv" data-i="how.h">Talk. It thinks. It remembers.</h2>
+      <div class="steps">
+        <div class="step rv"><h3 data-i="how1.t">You talk</h3><p data-i="how1.d">Ask anything, set timers, control your home, think out loud.</p></div>
+        <div class="step rv"><h3 data-i="how2.t">It thinks on the device</h3><p data-i="how2.d">An open language model runs on the computer inside. No round trip to the cloud.</p></div>
+        <div class="step rv"><h3 data-i="how3.t">It remembers — privately</h3><p data-i="how3.d">Your personal memory lives on the device. See it, edit it, delete it anytime.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="reserve">
+    <div class="wrap">
+      <p class="eyebrow rv" data-i="price.eyebrow">Reserve</p>
+      <h2 class="rv" data-i="price.h">Pick the one you'd actually buy.</h2>
+      <div class="tiers" id="tiers">
+        <article class="tier rv">
+          <span class="tag" data-i="os.tag">Software</span>
+          <h3>pleeply OS</h3>
+          <div class="price">$99 <small data-i="once">one-time</small></div>
+          <p data-i="os.d">Turn your own Mac mini or PC into a private home AI.</p>
+          <ul><li data-i="os.f1">Runs on hardware you already own</li><li data-i="os.f2">Same private memory and models</li><li data-i="os.f3">Bring your own speaker and mic</li></ul>
+          <button class="btn btn-ghost" type="button" data-tier="os" data-i="reserve">Reserve — free</button>
+        </article>
+        <article class="tier rv">
+          <span class="tag" data-i="one.tag">Speaker</span>
+          <h3>pleeply One</h3>
+          <div class="price">$299</div>
+          <p data-i="one.d">The speaker. Fast with compact open models for everyday help, home control and memory.</p>
+          <ul><li data-i="one.f1">Built-in computer and mic array</li><li data-i="one.f2">Compact models, up to ~8B</li><li data-i="one.f3">Works fully offline</li></ul>
+          <button class="btn btn-dark" type="button" data-tier="one" data-i="reserve">Reserve — free</button>
+        </article>
+        <article class="tier rv">
+          <span class="tag" data-i="pro.tag">Speaker+</span>
+          <h3>pleeply Pro</h3>
+          <div class="price">$549</div>
+          <p data-i="pro.d">More memory and compute for larger, smarter models.</p>
+          <ul><li data-i="pro.f1">Everything in One</li><li data-i="pro.f2">Larger models, up to ~32B</li><li data-i="pro.f3">Faster answers, longer memory</li></ul>
+          <button class="btn btn-dark" type="button" data-tier="pro" data-i="reserve">Reserve — free</button>
+        </article>
+      </div>
+      <p class="fine rv" data-i="price.fine">Expected prices. Specs are planned and may change during development. Reserving is free and doesn't commit you to anything.</p>
+    </div>
+  </section>
+
+
+  <section class="final">
+    <div class="wrap">
+      <h2 class="rv" data-i="final.h">Your AI should live with you.</h2>
+      <button class="btn btn-dark rv" type="button" data-open="final" data-i="final.cta"><span class="dot"></span>Join the waitlist</button>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span class="mark">pleeply<i></i></span>
+    <span data-i="footer">© 2026 pleeply. In development.</span>
+    <nav class="foot-links" aria-label="More"><a href="/info/">Docs</a><a href="/community">Community</a><a href="/info/pleeply/">FAQ</a></nav>
+  </div>
+</footer>
+
+<dialog id="dlg" aria-labelledby="dlg-title">
+  <div class="dlg">
+    <div class="dlg-head">
+      <div>
+        <h3 id="dlg-title" data-i="f.h">Join the waitlist</h3>
+        <p class="lead" data-i="f.lead">Takes 20 seconds. No payment.</p>
+      </div>
+      <button class="x" type="button" data-close aria-label="Close">×</button>
+    </div>
+
+    <form id="form" novalidate>
+      <div class="field">
+        <label for="email" data-i="f.email">Email</label>
+        <input id="email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required>
+        <div class="err" id="email-err" data-i="f.err">Check your email address.</div>
+      </div>
+
+      <div class="field">
+        <span class="lbl" data-i="f.tier">Which one would you buy?</span>
+        <div class="seg">
+          <label><input type="radio" name="tier" value="os"><span>OS · $99</span></label>
+          <label><input type="radio" name="tier" value="one" checked><span>One · $299</span></label>
+          <label><input type="radio" name="tier" value="pro"><span>Pro · $549</span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="lbl" data-i="f.uses">What would you use it for?</span>
+        <div class="chips">
+          <label class="chip"><input type="checkbox" name="uses" value="assistant"><span data-i="u.assistant">Private assistant</span></label>
+          <label class="chip"><input type="checkbox" name="uses" value="memory"><span data-i="u.memory">Notes & memory</span></label>
+          <label class="chip"><input type="checkbox" name="uses" value="home"><span data-i="u.home">Smart home</span></label>
+          <label class="chip"><input type="checkbox" name="uses" value="family"><span data-i="u.family">Kids & family</span></label>
+          <label class="chip"><input type="checkbox" name="uses" value="work"><span data-i="u.work">Work & documents</span></label>
+          <label class="chip"><input type="checkbox" name="uses" value="models"><span data-i="u.models">Running my own models</span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="current" data-i="f.current">What do you use now?</label>
+        <select id="current" name="current">
+          <option value="" data-i="c.pick">Choose one</option>
+          <option value="alexa">Alexa / Echo</option>
+          <option value="google">Google / Nest</option>
+          <option value="apple">Siri / HomePod</option>
+          <option value="ai_app" data-i="c.ai">ChatGPT or another AI app</option>
+          <option value="local" data-i="c.local">My own local setup</option>
+          <option value="none" data-i="c.none">Nothing yet</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <span class="lbl" data-i="f.deposit">Would you put down a fully refundable $49 deposit to get one of the first units?</span>
+        <div class="seg">
+          <label><input type="radio" name="deposit" value="yes"><span data-i="d.yes">Yes</span></label>
+          <label><input type="radio" name="deposit" value="maybe"><span data-i="d.maybe">Maybe</span></label>
+          <label><input type="radio" name="deposit" value="no"><span data-i="d.no">No</span></label>
+        </div>
+      </div>
+
+      <div class="hp" aria-hidden="true"><label>Company <input type="text" name="company" tabindex="-1" autocomplete="off"></label></div>
+
+      <button class="btn btn-dark" type="submit" data-i="f.submit">Join the waitlist</button>
+      <p class="small" data-i="f.small">We'll only email you about pleeply.</p>
+    </form>
+
+    <div class="done" role="status">
+      <div class="big">✓</div>
+      <h3 data-i="s.h">You're on the list.</h3>
+      <p data-i="s.p">Know someone who'd want one? Share your link.</p>
+      <div class="share">
+        <input id="share-url" type="text" readonly aria-label="Share link">
+        <button class="btn btn-dark" type="button" id="copy" data-i="s.copy">Copy</button>
+      </div>
+      <a class="btn btn-ghost" id="share-x" target="_blank" rel="noopener" data-i="s.x">Share on X</a>
+      <a class="btn btn-dark" href="/community/signup?next=%2Fcommunity" data-i="s.community" style="margin-top:10px"><span class="dot"></span>Join the community</a>
+    </div>
+  </div>
+</dialog>
+
+<script src="app.js"></script>
+<!-- Vercel Web Analytics: запасной счётчик визитов, если таблица не ответит. -->
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

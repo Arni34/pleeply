@@ -1,0 +1,15 @@
+{
+  "name": "pleeply",
+  "version": "1.0.0",
+  "description": "pleeply site: static pages + forum functions",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@neondatabase/serverless": "^1.2.0",
+    "@vercel/functions": "1.6.0"
+  },
+  "private": true
+}

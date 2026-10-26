@@ -1,0 +1,21 @@
+# Внутренние файлы — не публикуем на сайте
+VALIDATION.md
+POSTS.md
+sheets-webhook.gs
+LAUNCH_PLAN.md
+outreach/
+SHEETS_SETUP.md
+hardware/
+info-src/
+COMMUNITY_SETUP.md
+PROMO.md
+# Ключи базы и прочие секреты — никогда на сайт
+.env
+.env.*
+.agents/
+.claude/
+node_modules/
+forum/
+launch/
+archive/
+README.md

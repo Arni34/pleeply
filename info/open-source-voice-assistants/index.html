@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Open-source voice assistants compared · pleeply docs</title>
+<meta name="description" content="Home Assistant Assist, OpenVoiceOS, Neon AI, Rhasspy and Mycroft — what each one is, whether it runs offline, and which projects are still active.">
+<link rel="canonical" href="https://pleeply.vercel.app/info/open-source-voice-assistants/">
+<link rel="alternate" type="text/markdown" href="/info/open-source-voice-assistants.md" title="Open-source voice assistants compared (Markdown)">
+<meta property="article:modified_time" content="2026-10-24">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Open-source voice assistants compared · pleeply docs">
+<meta property="og:description" content="Home Assistant Assist, OpenVoiceOS, Neon AI, Rhasspy and Mycroft — what each one is, whether it runs offline, and which projects are still active.">
+<meta property="og:url" content="https://pleeply.vercel.app/info/open-source-voice-assistants/">
+<meta property="og:image" content="https://pleeply.vercel.app/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#111111">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/info/docs.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://pleeply.vercel.app/#org","name":"pleeply","url":"https://pleeply.vercel.app/","logo":"https://pleeply.vercel.app/icon-512.png"},{"@type":"TechArticle","@id":"https://pleeply.vercel.app/info/open-source-voice-assistants/#article","headline":"Open-source voice assistants compared","description":"Home Assistant Assist, OpenVoiceOS, Neon AI, Rhasspy and Mycroft — what each one is, whether it runs offline, and which projects are still active.","datePublished":"2026-10-24","dateModified":"2026-10-24","inLanguage":"en","mainEntityOfPage":"https://pleeply.vercel.app/info/open-source-voice-assistants/","author":{"@id":"https://pleeply.vercel.app/#org"},"publisher":{"@id":"https://pleeply.vercel.app/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"pleeply","item":"https://pleeply.vercel.app/"},{"@type":"ListItem","position":2,"name":"Docs","item":"https://pleeply.vercel.app/info/"},{"@type":"ListItem","position":3,"name":"Open-source voice assistants","item":"https://pleeply.vercel.app/info/open-source-voice-assistants/"}]},{"@type":"FAQPage","@id":"https://pleeply.vercel.app/info/open-source-voice-assistants/#faq","mainEntity":[{"@type":"Question","name":"Is Mycroft still alive?","acceptedAnswer":{"@type":"Answer","text":"Mycroft AI, the company, stopped development in early 2023. Sources disagree on the cause — funding problems and a patent dispute are both cited. Its software continues in community projects: OpenVoiceOS leads development and Neon AI supports the Mark II."}},{"@type":"Question","name":"What's the difference between OpenVoiceOS and Mycroft?","acceptedAnswer":{"@type":"Answer","text":"OpenVoiceOS is a community fork of Mycroft started in November 2021. It describes itself as a full voice operating system, is maintained by a nonprofit foundation, and kept going after Mycroft AI stopped."}},{"@type":"Question","name":"Is Rhasspy still maintained?","acceptedAnswer":{"@type":"Answer","text":"Rhasspy's creator, Mike Hansen, joined Nabu Casa in late 2022 to lead Home Assistant's voice work, and many of Rhasspy's ideas now live in Home Assistant's voice stack and the Wyoming protocol. Check Rhasspy's repository for current releases."}},{"@type":"Question","name":"Which open-source voice assistant works offline?","acceptedAnswer":{"@type":"Answer","text":"Home Assistant Assist with local Whisper, Piper and Ollama; Rhasspy; and OpenVoiceOS can all run fully offline."}}]}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="/info/" aria-label="pleeply docs"><span class="mark">pleeply<i></i></span><span class="docs">docs</span></a>
+    <nav class="top-links" aria-label="Site">
+      <a href="/info/" aria-current="page">Docs</a>
+      <a href="/community">Community</a>
+      <a href="/">Product</a>
+      <a class="btn" href="/#reserve"><span class="dot"></span>Join waitlist</a>
+    </nav>
+  </div>
+</header>
+<div class="shell">
+  <aside class="side">
+    <details class="navbox" open>
+      <summary>Menu</summary>
+      <input class="filter" type="search" placeholder="Filter pages" aria-label="Filter pages">
+      <nav aria-label="Docs"><div class="nav-group"><p class="nav-title">Start here</p><ul><li><a href="/info/">Overview</a></li></ul></div><div class="nav-group"><p class="nav-title">Learn</p><ul><li><a href="/info/local-ai-assistant/">What is a local AI assistant?</a></li><li><a href="/info/how-local-voice-assistants-work/">How local voice assistants work</a></li><li><a href="/info/smart-speaker-privacy/">Smart speaker privacy</a></li></ul></div><div class="nav-group"><p class="nav-title">Run it yourself</p><ul><li><a href="/info/run-ai-at-home/">Choose your hardware</a></li><li><a href="/info/raspberry-pi-5-llm/">LLM on a Raspberry Pi 5</a></li><li><a href="/info/home-assistant-local-llm/">Home Assistant + local LLM</a></li><li><a href="/info/local-llm-memory/">How much RAM you need</a></li></ul></div><div class="nav-group"><p class="nav-title">Compare</p><ul><li><a href="/info/alexa-alternatives/">Private Alexa alternatives</a></li><li><a href="/info/open-source-voice-assistants/" aria-current="page">Open-source voice assistants</a></li></ul></div><div class="nav-group"><p class="nav-title">pleeply</p><ul><li><a href="/info/pleeply/">What is pleeply?</a></li></ul></div></nav>
+    </details>
+  </aside>
+  <main id="main" class="doc">
+    <article>
+      <p class="crumb">Compare</p>
+      <h1>Open-source voice assistants compared</h1>
+      <div class="meta">
+        <span>Updated <time datetime="2026-10-24">Oct 24, 2026</time></span><span>2 min read</span>
+        <span class="meta-actions"><button class="copy-md" type="button" data-md="/info/open-source-voice-assistants.md">Copy as Markdown</button><a href="/info/open-source-voice-assistants.md">View .md</a></span>
+      </div>
+      <div class="prose">
+<p>The most active open-source voice assistant today is Home Assistant's Assist, which can run speech and language models locally and powers the Voice Preview Edition. OpenVoiceOS and Neon AI carry on the Mycroft codebase, Rhasspy is a fully offline toolkit, and Mycroft AI itself stopped development in early 2023.</p>
+<h2 id="comparison">Comparison<a class="anchor" href="#comparison" aria-label="Link to this section">#</a></h2>
+<div class="table"><table><thead><tr><th>Project</th><th>What it is</th><th>Offline</th><th>Status</th></tr></thead><tbody><tr><td>Home Assistant Assist</td><td>The voice assistant built into Home Assistant; plugs in voice services such as Whisper and Piper over the Wyoming protocol</td><td>Yes, with local speech and an Ollama model</td><td>Active; Voice Preview Edition hardware since December 2024</td></tr><tr><td>OpenVoiceOS (OVOS)</td><td>Community fork of Mycroft from November 2021, now run by a nonprofit foundation</td><td>Can be configured fully offline</td><td>Active</td></tr><tr><td>Neon AI</td><td>Conversational AI platform built on Mycroft and OVOS code; took over Mark II software support</td><td>Partly</td><td>Active</td></tr><tr><td>Rhasspy</td><td>Toolkit of offline voice services for home automation</td><td>Yes</td><td>Its creator, Mike Hansen, has led Home Assistant's voice work since late 2022</td></tr><tr><td>Mycroft</td><td>The original open-source assistant and Mark II speaker</td><td>Mostly cloud, with user control</td><td>Development stopped in early 2023; code lives on in OVOS and Neon</td></tr></tbody></table></div>
+<h2 id="which-one-to-choose">Which one to choose<a class="anchor" href="#which-one-to-choose" aria-label="Link to this section">#</a></h2>
+<ul><li><strong>You run Home Assistant:</strong> use Assist. It has the most momentum, local speech and an Ollama integration.</li><li><strong>You want a standalone assistant rather than a smart-home hub:</strong> try OpenVoiceOS.</li><li><strong>You're building a custom offline voice interface:</strong> combine Wyoming services — openWakeWord, Whisper and Piper — the way Rhasspy pioneered.</li></ul>
+<h2 id="what-is-the-wyoming-protocol">What is the Wyoming protocol?<a class="anchor" href="#what-is-the-wyoming-protocol" aria-label="Link to this section">#</a></h2>
+<p>Wyoming is a simple protocol for connecting voice services — wake word, speech-to-text, text-to-speech — over the network. Nabu Casa created it for Home Assistant, so you can run Whisper or Piper on another machine and plug them into Assist. Rhasspy 3 uses it too.</p>
+<h2 id="faq">FAQ<a class="anchor" href="#faq" aria-label="Link to this section">#</a></h2>
+<h3 id="is-mycroft-still-alive">Is Mycroft still alive?<a class="anchor" href="#is-mycroft-still-alive" aria-label="Link to this section">#</a></h3>
+<p>Mycroft AI, the company, stopped development in early 2023. Sources disagree on the cause — funding problems and a patent dispute are both cited. Its software continues in community projects: OpenVoiceOS leads development and Neon AI supports the Mark II.</p>
+<h3 id="what-s-the-difference-between-openvoiceos-and-mycroft">What's the difference between OpenVoiceOS and Mycroft?<a class="anchor" href="#what-s-the-difference-between-openvoiceos-and-mycroft" aria-label="Link to this section">#</a></h3>
+<p>OpenVoiceOS is a community fork of Mycroft started in November 2021. It describes itself as a full voice operating system, is maintained by a nonprofit foundation, and kept going after Mycroft AI stopped.</p>
+<h3 id="is-rhasspy-still-maintained">Is Rhasspy still maintained?<a class="anchor" href="#is-rhasspy-still-maintained" aria-label="Link to this section">#</a></h3>
+<p>Rhasspy's creator, Mike Hansen, joined Nabu Casa in late 2022 to lead Home Assistant's voice work, and many of Rhasspy's ideas now live in Home Assistant's voice stack and the Wyoming protocol. Check Rhasspy's repository for current releases.</p>
+<h3 id="which-open-source-voice-assistant-works-offline">Which open-source voice assistant works offline?<a class="anchor" href="#which-open-source-voice-assistant-works-offline" aria-label="Link to this section">#</a></h3>
+<p>Home Assistant Assist with local Whisper, Piper and Ollama; Rhasspy; and OpenVoiceOS can all run fully offline.</p>
+<h2 id="sources">Sources<a class="anchor" href="#sources" aria-label="Link to this section">#</a></h2>
+<ul><li><a href="https://www.home-assistant.io/blog/2022/12/20/year-of-voice/" rel="noopener" target="_blank">Home Assistant — 2023: Home Assistant's year of Voice</a></li><li><a href="https://www.home-assistant.io/blog/2023/04/27/year-of-the-voice-chapter-2/" rel="noopener" target="_blank">Home Assistant — Year of the Voice, Chapter 2 (Wyoming)</a></li><li><a href="https://www.home-assistant.io/blog/2024/12/19/voice-preview-edition-the-era-of-open-voice/" rel="noopener" target="_blank">Home Assistant — Voice Preview Edition announcement</a></li><li><a href="https://blog.openvoiceos.org/posts/2023-02-15-a-brief-history-of-open-voice-os" rel="noopener" target="_blank">Open Voice OS — A brief history of Open Voice OS</a></li><li><a href="https://community.mycroft.ai/t/faq-ovos-neon-and-the-future-of-the-mycroft-voice-assistant" rel="noopener" target="_blank">Mycroft Community — FAQ: OVOS, Neon and the future of the Mycroft voice assistant</a></li><li><a href="https://en.wikipedia.org/wiki/Mycroft_(software" rel="noopener" target="_blank">Wikipedia — Mycroft (software)</a>)</li></ul>
+      </div>
+      <section class="join" aria-labelledby="join-title">
+        <p class="join-kicker">pleeply Community</p>
+        <h2 id="join-title">Keep going with the community</h2>
+        <p>Running AI at home is easier with people who've already done it. On the pleeply forum you can:</p>
+        <ul>
+          <li>ask about local models, hardware and Home Assistant, and get answers from people running them;</li>
+          <li>vote on what pleeply should do first;</li>
+          <li>show your own local-AI setup and get feedback;</li>
+          <li>hear first about test builds and reservations.</li>
+        </ul>
+        <div class="join-actions"><a class="btn btn-lg" href="/community/signup?next=%2Fcommunity">Join the community →</a><a class="join-more" href="/community">See top topics</a></div>
+        <p class="join-micro">Free · no email needed</p>
+      </section>
+      <p class="ai-note">This page is also available as <a href="/info/open-source-voice-assistants.md">Markdown</a>. For the full docs index, see <a href="/llms.txt">llms.txt</a>.</p>
+      <nav class="pager" aria-label="Previous and next">
+        <a class="prev" href="/info/alexa-alternatives/"><span>Previous</span>Private Alexa alternatives</a>
+        <a class="next" href="/info/pleeply/"><span>Next</span>What is pleeply?</a>
+      </nav>
+    </article>
+  </main>
+  <aside class="toc" aria-label="On this page"><p>On this page</p><ul><li><a href="#comparison">Comparison</a></li><li><a href="#which-one-to-choose">Which one to choose</a></li><li><a href="#what-is-the-wyoming-protocol">What is the Wyoming protocol?</a></li><li><a href="#faq">FAQ</a></li><li><a href="#sources">Sources</a></li></ul></aside>
+</div>
+<footer class="foot">
+  <div class="foot-in"><span class="mark">pleeply<i></i></span><span>© 2026 pleeply. In development.</span><span class="foot-links"><a href="/community">Community</a><a href="/llms.txt">llms.txt</a></span></div>
+</footer>
+<script defer src="/_vercel/insights/script.js"></script>
+<script>
+(function () {
+  var box = document.querySelector('.navbox');
+  if (box && window.matchMedia('(max-width: 899px)').matches) box.removeAttribute('open');
+  var f = document.querySelector('.filter');
+  if (f) f.addEventListener('input', function () {
+    var q = f.value.trim().toLowerCase();
+    document.querySelectorAll('.nav-group').forEach(function (g) {
+      var any = false;
+      g.querySelectorAll('li').forEach(function (li) {
+        var hit = !q || li.textContent.toLowerCase().indexOf(q) !== -1;
+        li.hidden = !hit; if (hit) any = true;
+      });
+      g.hidden = !any;
+    });
+  });
+  var b = document.querySelector('.copy-md');
+  if (b) b.addEventListener('click', function () {
+    fetch(b.dataset.md).then(function (r) { return r.text(); })
+      .then(function (t) { return navigator.clipboard.writeText(t); })
+      .then(function () { b.textContent = 'Copied'; }, function () { location.href = b.dataset.md; })
+      .then(function () { setTimeout(function () { b.textContent = 'Copy as Markdown'; }, 1600); });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://pleeply.vercel.app/sitemap.xml
+Sitemap: https://pleeply.vercel.app/community/sitemap.xml

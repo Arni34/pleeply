@@ -1,0 +1,41 @@
+# pleeply
+
+> pleeply is a home speaker with a computer inside. It runs open-weight AI models on the device, keeps a private memory of you at home, and works without the cloud.
+
+Status: in development, not for sale yet. Prices on the site are expected prices for planned products; specs may change. Waitlist: https://pleeply.vercel.app/
+
+## Start here
+
+- [Your own AI at home](https://pleeply.vercel.app/info/index.md): Guides to running a private AI assistant at home — how local voice assistants work, what hardware you need, how smart speakers handle your voice, and where pleeply fits in.
+
+## Learn
+
+- [What is a local AI assistant?](https://pleeply.vercel.app/info/local-ai-assistant.md): A local AI assistant runs speech recognition, an open-weight language model and speech synthesis on hardware in your home, so your voice and memory stay on the device. How it compares with cloud assistants.
+- [How a local voice assistant works](https://pleeply.vercel.app/info/how-local-voice-assistants-work.md): The four stages of an offline voice assistant — wake word, speech-to-text, language model, text-to-speech — which open-source software does each, and how long each step takes on small hardware.
+- [Do smart speakers send your voice to the cloud?](https://pleeply.vercel.app/info/smart-speaker-privacy.md): Mainstream smart speakers send your requests to company servers. What changed for Amazon Echo on March 28, 2025, what Alexa+ means for privacy, and how a local assistant differs.
+
+## Run it yourself
+
+- [Run AI at home: choose your hardware](https://pleeply.vercel.app/info/run-ai-at-home.md): Compare the ways to run a private AI assistant at home — Raspberry Pi 5, Jetson Orin Nano Super, Mac mini, a PC with a GPU, Home Assistant Voice, or a ready-made device — by model size, speed and effort.
+- [Run an LLM on a Raspberry Pi 5](https://pleeply.vercel.app/info/raspberry-pi-5-llm.md): What a Raspberry Pi 5 can run — measured tokens per second for 1–3B models, which models to pick for a voice assistant, why cooling matters, and how to install Ollama.
+- [Use a local LLM with Home Assistant](https://pleeply.vercel.app/info/home-assistant-local-llm.md): How to connect Home Assistant's Assist to a local language model with Ollama, what the Voice Preview Edition does, which settings matter, and how to keep commands fast.
+- [How much RAM do you need to run a local LLM?](https://pleeply.vercel.app/info/local-llm-memory.md): Memory sets the largest model you can run at home. Rules of thumb for 8, 16, 24 and 48 GB, what 4-bit quantization does, and how the context window adds to it.
+
+## Compare
+
+- [Private alternatives to Alexa](https://pleeply.vercel.app/info/alexa-alternatives.md): Voice assistants that don't send your voice to Amazon — Home Assistant Assist with local AI, open-source assistants, DIY Raspberry Pi builds and local AI devices — compared on privacy, cost and effort.
+- [Open-source voice assistants compared](https://pleeply.vercel.app/info/open-source-voice-assistants.md): Home Assistant Assist, OpenVoiceOS, Neon AI, Rhasspy and Mycroft — what each one is, whether it runs offline, and which projects are still active.
+
+## pleeply
+
+- [What is pleeply?](https://pleeply.vercel.app/info/pleeply.md): pleeply is a home speaker with a computer inside that runs open AI models on the device, keeps a private memory and works without the cloud. It's in development — here is what's planned.
+
+## Community
+
+- [pleeply Community](https://pleeply.vercel.app/community): forum about running AI at home and ideas for pleeply; top topics, categories and discussions
+- [Latest topics](https://pleeply.vercel.app/community/latest)
+
+## Product
+
+- [pleeply home page](https://pleeply.vercel.app/): what pleeply is, planned lineup and the waitlist
+- [Full docs in one file](https://pleeply.vercel.app/llms-full.txt)

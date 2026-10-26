@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your own AI at home · pleeply docs</title>
+<meta name="description" content="Guides to running a private AI assistant at home — how local voice assistants work, what hardware you need, how smart speakers handle your voice, and where pleeply fits in.">
+<link rel="canonical" href="https://pleeply.vercel.app/info/">
+<link rel="alternate" type="text/markdown" href="/info/index.md" title="Your own AI at home (Markdown)">
+<meta property="article:modified_time" content="2026-10-24">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Your own AI at home · pleeply docs">
+<meta property="og:description" content="Guides to running a private AI assistant at home — how local voice assistants work, what hardware you need, how smart speakers handle your voice, and where pleeply fits in.">
+<meta property="og:url" content="https://pleeply.vercel.app/info/">
+<meta property="og:image" content="https://pleeply.vercel.app/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#111111">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/info/docs.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://pleeply.vercel.app/#org","name":"pleeply","url":"https://pleeply.vercel.app/","logo":"https://pleeply.vercel.app/icon-512.png"},{"@type":"TechArticle","@id":"https://pleeply.vercel.app/info/#article","headline":"Your own AI at home","description":"Guides to running a private AI assistant at home — how local voice assistants work, what hardware you need, how smart speakers handle your voice, and where pleeply fits in.","datePublished":"2026-10-24","dateModified":"2026-10-24","inLanguage":"en","mainEntityOfPage":"https://pleeply.vercel.app/info/","author":{"@id":"https://pleeply.vercel.app/#org"},"publisher":{"@id":"https://pleeply.vercel.app/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"pleeply","item":"https://pleeply.vercel.app/"},{"@type":"ListItem","position":2,"name":"Docs","item":"https://pleeply.vercel.app/info/"}]}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="/info/" aria-label="pleeply docs"><span class="mark">pleeply<i></i></span><span class="docs">docs</span></a>
+    <nav class="top-links" aria-label="Site">
+      <a href="/info/" aria-current="page">Docs</a>
+      <a href="/community">Community</a>
+      <a href="/">Product</a>
+      <a class="btn" href="/#reserve"><span class="dot"></span>Join waitlist</a>
+    </nav>
+  </div>
+</header>
+<div class="shell">
+  <aside class="side">
+    <details class="navbox" open>
+      <summary>Menu</summary>
+      <input class="filter" type="search" placeholder="Filter pages" aria-label="Filter pages">
+      <nav aria-label="Docs"><div class="nav-group"><p class="nav-title">Start here</p><ul><li><a href="/info/" aria-current="page">Overview</a></li></ul></div><div class="nav-group"><p class="nav-title">Learn</p><ul><li><a href="/info/local-ai-assistant/">What is a local AI assistant?</a></li><li><a href="/info/how-local-voice-assistants-work/">How local voice assistants work</a></li><li><a href="/info/smart-speaker-privacy/">Smart speaker privacy</a></li></ul></div><div class="nav-group"><p class="nav-title">Run it yourself</p><ul><li><a href="/info/run-ai-at-home/">Choose your hardware</a></li><li><a href="/info/raspberry-pi-5-llm/">LLM on a Raspberry Pi 5</a></li><li><a href="/info/home-assistant-local-llm/">Home Assistant + local LLM</a></li><li><a href="/info/local-llm-memory/">How much RAM you need</a></li></ul></div><div class="nav-group"><p class="nav-title">Compare</p><ul><li><a href="/info/alexa-alternatives/">Private Alexa alternatives</a></li><li><a href="/info/open-source-voice-assistants/">Open-source voice assistants</a></li></ul></div><div class="nav-group"><p class="nav-title">pleeply</p><ul><li><a href="/info/pleeply/">What is pleeply?</a></li></ul></div></nav>
+    </details>
+  </aside>
+  <main id="main" class="doc">
+    <article>
+      <p class="crumb">Start here</p>
+      <h1>Your own AI at home</h1>
+      <div class="meta">
+        <span>Updated <time datetime="2026-10-24">Oct 24, 2026</time></span><span>2 min read</span>
+        <span class="meta-actions"><button class="copy-md" type="button" data-md="/info/index.md">Copy as Markdown</button><a href="/info/index.md">View .md</a></span>
+      </div>
+      <div class="prose">
+<p>You can run an AI assistant at home that listens, answers and remembers without sending your voice to a company's servers. These docs explain how that works, what it takes to build one yourself, and how it compares with cloud speakers like Alexa.</p>
+<aside class="callout tip"><p class="callout-title">Short answer</p><p>A local AI assistant runs four things on a computer in your home: a wake word detector, speech-to-text (for example Whisper), an open-weight language model (for example Llama, Qwen or Gemma) and text-to-speech (for example Piper). A Raspberry Pi 5 handles small 1–3B models; conversation-quality 7–8B models need about 16 GB of memory. See <a href="/info/run-ai-at-home/">Choose your hardware</a>.</p></aside>
+<h2 id="in-this-section">In this section<a class="anchor" href="#in-this-section" aria-label="Link to this section">#</a></h2>
+<ul><li><a href="/info/local-ai-assistant/">What is a local AI assistant?</a> — how on-device AI differs from cloud assistants, and what you give up.</li><li><a href="/info/how-local-voice-assistants-work/">How a local voice assistant works</a> — the pipeline from wake word to spoken answer, and where the delay comes from.</li><li><a href="/info/smart-speaker-privacy/">Do smart speakers send your voice to the cloud?</a> — what changed for Amazon Echo in March 2025.</li><li><a href="/info/run-ai-at-home/">Choose your hardware</a> — from a Raspberry Pi to a PC with a graphics card.</li><li><a href="/info/raspberry-pi-5-llm/">Run an LLM on a Raspberry Pi 5</a> — measured speeds and which models to pick.</li><li><a href="/info/home-assistant-local-llm/">Use a local LLM with Home Assistant</a> — Assist, Ollama and the Voice Preview Edition.</li><li><a href="/info/local-llm-memory/">How much RAM a local LLM needs</a> — rules of thumb for 8, 16, 24 and 48 GB.</li><li><a href="/info/alexa-alternatives/">Private alternatives to Alexa</a> — compared on privacy, cost and effort.</li><li><a href="/info/open-source-voice-assistants/">Open-source voice assistants compared</a> — Assist, OpenVoiceOS, Neon, Rhasspy, Mycroft.</li><li><a href="/info/pleeply/">What is pleeply?</a> — the speaker we're building, and its status.</li></ul>
+<h2 id="choose-your-path">Choose your path<a class="anchor" href="#choose-your-path" aria-label="Link to this section">#</a></h2>
+<div class="cards"><div class="card has-link"><h3><a class="card-link" href="/info/local-ai-assistant/">Understand it first</a></h3><p><strong>Best for:</strong> deciding whether local AI is worth it.</p>
+<p>What runs where, how good small models are, and what stays private.</p></div><div class="card has-link"><h3><a class="card-link" href="/info/run-ai-at-home/">Build it yourself</a></h3><p><strong>Best for:</strong> tinkerers with a Raspberry Pi, a Mac mini or a spare PC.</p>
+<p><strong>Requirements:</strong> 8 GB of memory for small models, 16 GB or more for 7–8B models.</p></div><div class="card has-link"><h3><a class="card-link" href="/info/home-assistant-local-llm/">Use Home Assistant</a></h3><p><strong>Best for:</strong> controlling a smart home by voice.</p>
+<p><strong>Requirements:</strong> a Home Assistant server and an Ollama server on your network.</p></div><div class="card has-link"><h3><a class="card-link" href="/info/pleeply/">Get a ready-made device</a></h3><p><strong>Best for:</strong> private AI without assembling it yourself.</p>
+<p>pleeply is in development. The waitlist is open.</p></div></div>
+<h2 id="how-these-pages-are-written">How these pages are written<a class="anchor" href="#how-these-pages-are-written" aria-label="Link to this section">#</a></h2>
+<p>Every number and date links to its source at the bottom of the page. Speeds on small hardware vary a lot with the model, the quantization and the runtime, so treat them as ranges, not promises. Each page shows when it was last checked.</p>
+      </div>
+      <section class="join" aria-labelledby="join-title">
+        <p class="join-kicker">pleeply Community</p>
+        <h2 id="join-title">Keep going with the community</h2>
+        <p>Running AI at home is easier with people who've already done it. On the pleeply forum you can:</p>
+        <ul>
+          <li>ask about local models, hardware and Home Assistant, and get answers from people running them;</li>
+          <li>vote on what pleeply should do first;</li>
+          <li>show your own local-AI setup and get feedback;</li>
+          <li>hear first about test builds and reservations.</li>
+        </ul>
+        <div class="join-actions"><a class="btn btn-lg" href="/community/signup?next=%2Fcommunity">Join the community →</a><a class="join-more" href="/community">See top topics</a></div>
+        <p class="join-micro">Free · no email needed</p>
+      </section>
+      <p class="ai-note">This page is also available as <a href="/info/index.md">Markdown</a>. For the full docs index, see <a href="/llms.txt">llms.txt</a>.</p>
+      <nav class="pager" aria-label="Previous and next">
+        <span></span>
+        <a class="next" href="/info/local-ai-assistant/"><span>Next</span>What is a local AI assistant?</a>
+      </nav>
+    </article>
+  </main>
+  <aside class="toc" aria-label="On this page"><p>On this page</p><ul><li><a href="#in-this-section">In this section</a></li><li><a href="#choose-your-path">Choose your path</a></li><li><a href="#how-these-pages-are-written">How these pages are written</a></li></ul></aside>
+</div>
+<footer class="foot">
+  <div class="foot-in"><span class="mark">pleeply<i></i></span><span>© 2026 pleeply. In development.</span><span class="foot-links"><a href="/community">Community</a><a href="/llms.txt">llms.txt</a></span></div>
+</footer>
+<script defer src="/_vercel/insights/script.js"></script>
+<script>
+(function () {
+  var box = document.querySelector('.navbox');
+  if (box && window.matchMedia('(max-width: 899px)').matches) box.removeAttribute('open');
+  var f = document.querySelector('.filter');
+  if (f) f.addEventListener('input', function () {
+    var q = f.value.trim().toLowerCase();
+    document.querySelectorAll('.nav-group').forEach(function (g) {
+      var any = false;
+      g.querySelectorAll('li').forEach(function (li) {
+        var hit = !q || li.textContent.toLowerCase().indexOf(q) !== -1;
+        li.hidden = !hit; if (hit) any = true;
+      });
+      g.hidden = !any;
+    });
+  });
+  var b = document.querySelector('.copy-md');
+  if (b) b.addEventListener('click', function () {
+    fetch(b.dataset.md).then(function (r) { return r.text(); })
+      .then(function (t) { return navigator.clipboard.writeText(t); })
+      .then(function () { b.textContent = 'Copied'; }, function () { location.href = b.dataset.md; })
+      .then(function () { setTimeout(function () { b.textContent = 'Copy as Markdown'; }, 1600); });
+  });
+})();
+</script>
+</body>
+</html>

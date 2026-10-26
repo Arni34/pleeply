@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What is a local AI assistant? · pleeply docs</title>
+<meta name="description" content="A local AI assistant runs speech recognition, an open-weight language model and speech synthesis on hardware in your home, so your voice and memory stay on the device. How it compares with cloud assistants.">
+<link rel="canonical" href="https://pleeply.vercel.app/info/local-ai-assistant/">
+<link rel="alternate" type="text/markdown" href="/info/local-ai-assistant.md" title="What is a local AI assistant? (Markdown)">
+<meta property="article:modified_time" content="2026-10-24">
+<meta property="og:type" content="article">
+<meta property="og:title" content="What is a local AI assistant? · pleeply docs">
+<meta property="og:description" content="A local AI assistant runs speech recognition, an open-weight language model and speech synthesis on hardware in your home, so your voice and memory stay on the device. How it compares with cloud assistants.">
+<meta property="og:url" content="https://pleeply.vercel.app/info/local-ai-assistant/">
+<meta property="og:image" content="https://pleeply.vercel.app/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#111111">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/info/docs.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://pleeply.vercel.app/#org","name":"pleeply","url":"https://pleeply.vercel.app/","logo":"https://pleeply.vercel.app/icon-512.png"},{"@type":"TechArticle","@id":"https://pleeply.vercel.app/info/local-ai-assistant/#article","headline":"What is a local AI assistant?","description":"A local AI assistant runs speech recognition, an open-weight language model and speech synthesis on hardware in your home, so your voice and memory stay on the device. How it compares with cloud assistants.","datePublished":"2026-10-24","dateModified":"2026-10-24","inLanguage":"en","mainEntityOfPage":"https://pleeply.vercel.app/info/local-ai-assistant/","author":{"@id":"https://pleeply.vercel.app/#org"},"publisher":{"@id":"https://pleeply.vercel.app/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"pleeply","item":"https://pleeply.vercel.app/"},{"@type":"ListItem","position":2,"name":"Docs","item":"https://pleeply.vercel.app/info/"},{"@type":"ListItem","position":3,"name":"What is a local AI assistant?","item":"https://pleeply.vercel.app/info/local-ai-assistant/"}]},{"@type":"FAQPage","@id":"https://pleeply.vercel.app/info/local-ai-assistant/#faq","mainEntity":[{"@type":"Question","name":"Does a local AI assistant need internet?","acceptedAnswer":{"@type":"Answer","text":"Not for its core loop. The wake word, speech recognition, the language model and speech output all run on the device. You need internet to download models and updates, and for online services you choose to connect, such as weather or music."}},{"@type":"Question","name":"What is the difference between on-device AI and cloud AI?","acceptedAnswer":{"@type":"Answer","text":"On-device AI runs the model on hardware you own, so data stays local and it works offline, but the model's size is limited by your hardware. Cloud AI runs large models in a provider's data center, which is more capable but means sending your data there."}},{"@type":"Question","name":"Which models can a local assistant run?","acceptedAnswer":{"@type":"Answer","text":"Open-weight models such as Llama, Qwen, Gemma and Mistral, in sizes that fit the device's memory. Small boards run 1–3B models; 16 GB of memory fits 7–8B models at 4-bit quantization."}},{"@type":"Question","name":"Can a local assistant remember things about me?","acceptedAnswer":{"@type":"Answer","text":"Yes. Memory is data stored on the device — notes, preferences, past conversations — that the assistant looks up when it answers. Because it lives locally, you can see, edit or delete it."}}]}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="/info/" aria-label="pleeply docs"><span class="mark">pleeply<i></i></span><span class="docs">docs</span></a>
+    <nav class="top-links" aria-label="Site">
+      <a href="/info/" aria-current="page">Docs</a>
+      <a href="/community">Community</a>
+      <a href="/">Product</a>
+      <a class="btn" href="/#reserve"><span class="dot"></span>Join waitlist</a>
+    </nav>
+  </div>
+</header>
+<div class="shell">
+  <aside class="side">
+    <details class="navbox" open>
+      <summary>Menu</summary>
+      <input class="filter" type="search" placeholder="Filter pages" aria-label="Filter pages">
+      <nav aria-label="Docs"><div class="nav-group"><p class="nav-title">Start here</p><ul><li><a href="/info/">Overview</a></li></ul></div><div class="nav-group"><p class="nav-title">Learn</p><ul><li><a href="/info/local-ai-assistant/" aria-current="page">What is a local AI assistant?</a></li><li><a href="/info/how-local-voice-assistants-work/">How local voice assistants work</a></li><li><a href="/info/smart-speaker-privacy/">Smart speaker privacy</a></li></ul></div><div class="nav-group"><p class="nav-title">Run it yourself</p><ul><li><a href="/info/run-ai-at-home/">Choose your hardware</a></li><li><a href="/info/raspberry-pi-5-llm/">LLM on a Raspberry Pi 5</a></li><li><a href="/info/home-assistant-local-llm/">Home Assistant + local LLM</a></li><li><a href="/info/local-llm-memory/">How much RAM you need</a></li></ul></div><div class="nav-group"><p class="nav-title">Compare</p><ul><li><a href="/info/alexa-alternatives/">Private Alexa alternatives</a></li><li><a href="/info/open-source-voice-assistants/">Open-source voice assistants</a></li></ul></div><div class="nav-group"><p class="nav-title">pleeply</p><ul><li><a href="/info/pleeply/">What is pleeply?</a></li></ul></div></nav>
+    </details>
+  </aside>
+  <main id="main" class="doc">
+    <article>
+      <p class="crumb">Learn</p>
+      <h1>What is a local AI assistant?</h1>
+      <div class="meta">
+        <span>Updated <time datetime="2026-10-24">Oct 24, 2026</time></span><span>3 min read</span>
+        <span class="meta-actions"><button class="copy-md" type="button" data-md="/info/local-ai-assistant.md">Copy as Markdown</button><a href="/info/local-ai-assistant.md">View .md</a></span>
+      </div>
+      <div class="prose">
+<p>A local AI assistant is a voice or chat assistant whose AI runs on a computer in your home instead of on a company's servers. It hears you, works out an answer with an open-weight language model and replies — all on the device — so your voice, your questions and its memory of you stay on hardware you own.</p>
+<h2 id="local-vs-cloud">Local vs cloud<a class="anchor" href="#local-vs-cloud" aria-label="Link to this section">#</a></h2>
+<div class="table"><table><thead><tr><th></th><th>Local AI assistant</th><th>Cloud assistant (for example Alexa+)</th></tr></thead><tbody><tr><td>Where your voice is processed</td><td>On a device in your home</td><td>On the company's servers</td></tr><tr><td>Without internet</td><td>Core features keep working</td><td>Stops working</td></tr><tr><td>Model size</td><td>Limited by your hardware: about 1–3B parameters on a Raspberry Pi 5, 7–8B with 16 GB of memory</td><td>Very large models in data centers</td></tr><tr><td>Answer quality</td><td>Good for everyday questions, timers, notes and home control; weaker on complex reasoning</td><td>Strongest on hard questions</td></tr><tr><td>Speed</td><td>Depends on hardware — several seconds on small boards</td><td>Usually quick, depends on your connection</td></tr><tr><td>Memory of you</td><td>Stored on the device, where you can inspect and delete it</td><td>Stored in the provider's account</td></tr><tr><td>Cost</td><td>Hardware up front, no per-request fees</td><td>Often a subscription — Alexa+ is $19.99 a month without Prime</td></tr></tbody></table></div>
+<h2 id="what-runs-on-the-device">What runs on the device<a class="anchor" href="#what-runs-on-the-device" aria-label="Link to this section">#</a></h2>
+<p>A local assistant chains four components:</p>
+<ol><li><strong>Wake word</strong> — a tiny model listens for a trigger phrase, for example openWakeWord.</li><li><strong>Speech-to-text</strong> — turns your sentence into text, for example Whisper.</li><li><strong>Language model</strong> — an open-weight model such as Llama, Qwen, Gemma or Mistral writes the answer, usually through a runtime like Ollama or llama.cpp.</li><li><strong>Text-to-speech</strong> — speaks the answer, for example Piper.</li></ol>
+<p>Timings and tuning are in <a href="/info/how-local-voice-assistants-work/">How a local voice assistant works</a>.</p>
+<h2 id="what-open-weight-model-means">What &quot;open-weight model&quot; means<a class="anchor" href="#what-open-weight-model-means" aria-label="Link to this section">#</a></h2>
+<p>An open-weight model is a language model whose trained weights are published, so anyone can download it and run it on their own hardware. Meta's Llama, Alibaba's Qwen, Google's Gemma and Mistral's models are common examples. Because the weights sit on your disk, the model works without contacting its publisher, and you can swap it for a better one when it comes out. Licenses differ, so check each model's terms before using it in a product.</p>
+<h2 id="is-it-as-smart-as-chatgpt">Is it as smart as ChatGPT?<a class="anchor" href="#is-it-as-smart-as-chatgpt" aria-label="Link to this section">#</a></h2>
+<p>Not for every task. Small models that fit on home hardware handle everyday requests well — reminders, short answers, summaries of your notes, controlling devices — but they make more mistakes than frontier cloud models on multi-step reasoning and niche facts. The gap narrows as memory grows: 16 GB runs 7–8B models, and 24 GB or more opens 14–32B models. See <a href="/info/local-llm-memory/">How much RAM a local LLM needs</a>.</p>
+<h2 id="what-stays-at-home">What stays at home<a class="anchor" href="#what-stays-at-home" aria-label="Link to this section">#</a></h2>
+<p>With a local assistant the audio, the transcript, the answer and the long-term memory can all stay on the device. That is a property of the design rather than a setting: data that is never sent can't be stored somewhere else. A local assistant can still go online for things that need fresh data — weather, news, music services — but only for those requests, and only if you connect them.</p>
+<h2 id="faq">FAQ<a class="anchor" href="#faq" aria-label="Link to this section">#</a></h2>
+<h3 id="does-a-local-ai-assistant-need-internet">Does a local AI assistant need internet?<a class="anchor" href="#does-a-local-ai-assistant-need-internet" aria-label="Link to this section">#</a></h3>
+<p>Not for its core loop. The wake word, speech recognition, the language model and speech output all run on the device. You need internet to download models and updates, and for online services you choose to connect, such as weather or music.</p>
+<h3 id="what-is-the-difference-between-on-device-ai-and-cloud-ai">What is the difference between on-device AI and cloud AI?<a class="anchor" href="#what-is-the-difference-between-on-device-ai-and-cloud-ai" aria-label="Link to this section">#</a></h3>
+<p>On-device AI runs the model on hardware you own, so data stays local and it works offline, but the model's size is limited by your hardware. Cloud AI runs large models in a provider's data center, which is more capable but means sending your data there.</p>
+<h3 id="which-models-can-a-local-assistant-run">Which models can a local assistant run?<a class="anchor" href="#which-models-can-a-local-assistant-run" aria-label="Link to this section">#</a></h3>
+<p>Open-weight models such as Llama, Qwen, Gemma and Mistral, in sizes that fit the device's memory. Small boards run 1–3B models; 16 GB of memory fits 7–8B models at 4-bit quantization.</p>
+<h3 id="can-a-local-assistant-remember-things-about-me">Can a local assistant remember things about me?<a class="anchor" href="#can-a-local-assistant-remember-things-about-me" aria-label="Link to this section">#</a></h3>
+<p>Yes. Memory is data stored on the device — notes, preferences, past conversations — that the assistant looks up when it answers. Because it lives locally, you can see, edit or delete it.</p>
+<h2 id="sources">Sources<a class="anchor" href="#sources" aria-label="Link to this section">#</a></h2>
+<ul><li>Alexa+ pricing: <a href="https://androidauthority.com/alexa-plus-pricing-3530655" rel="noopener" target="_blank">Android Authority — Alexa+ pricing</a></li><li>Memory needed for 7–8B models: <a href="https://blog.starmorph.com/blog/best-mac-mini-for-local-llms" rel="noopener" target="_blank">Starmorph — Best Mac mini for local LLMs</a></li><li>Local voice components: <a href="https://www.home-assistant.io/blog/2024/12/19/voice-preview-edition-the-era-of-open-voice/" rel="noopener" target="_blank">Home Assistant — The era of open voice assistants has arrived</a></li></ul>
+      </div>
+      <section class="join" aria-labelledby="join-title">
+        <p class="join-kicker">pleeply Community</p>
+        <h2 id="join-title">Keep going with the community</h2>
+        <p>Running AI at home is easier with people who've already done it. On the pleeply forum you can:</p>
+        <ul>
+          <li>ask about local models, hardware and Home Assistant, and get answers from people running them;</li>
+          <li>vote on what pleeply should do first;</li>
+          <li>show your own local-AI setup and get feedback;</li>
+          <li>hear first about test builds and reservations.</li>
+        </ul>
+        <div class="join-actions"><a class="btn btn-lg" href="/community/signup?next=%2Fcommunity">Join the community →</a><a class="join-more" href="/community">See top topics</a></div>
+        <p class="join-micro">Free · no email needed</p>
+      </section>
+      <p class="ai-note">This page is also available as <a href="/info/local-ai-assistant.md">Markdown</a>. For the full docs index, see <a href="/llms.txt">llms.txt</a>.</p>
+      <nav class="pager" aria-label="Previous and next">
+        <a class="prev" href="/info/"><span>Previous</span>Overview</a>
+        <a class="next" href="/info/how-local-voice-assistants-work/"><span>Next</span>How local voice assistants work</a>
+      </nav>
+    </article>
+  </main>
+  <aside class="toc" aria-label="On this page"><p>On this page</p><ul><li><a href="#local-vs-cloud">Local vs cloud</a></li><li><a href="#what-runs-on-the-device">What runs on the device</a></li><li><a href="#what-open-weight-model-means">What &quot;open-weight model&quot; means</a></li><li><a href="#is-it-as-smart-as-chatgpt">Is it as smart as ChatGPT?</a></li><li><a href="#what-stays-at-home">What stays at home</a></li><li><a href="#faq">FAQ</a></li><li><a href="#sources">Sources</a></li></ul></aside>
+</div>
+<footer class="foot">
+  <div class="foot-in"><span class="mark">pleeply<i></i></span><span>© 2026 pleeply. In development.</span><span class="foot-links"><a href="/community">Community</a><a href="/llms.txt">llms.txt</a></span></div>
+</footer>
+<script defer src="/_vercel/insights/script.js"></script>
+<script>
+(function () {
+  var box = document.querySelector('.navbox');
+  if (box && window.matchMedia('(max-width: 899px)').matches) box.removeAttribute('open');
+  var f = document.querySelector('.filter');
+  if (f) f.addEventListener('input', function () {
+    var q = f.value.trim().toLowerCase();
+    document.querySelectorAll('.nav-group').forEach(function (g) {
+      var any = false;
+      g.querySelectorAll('li').forEach(function (li) {
+        var hit = !q || li.textContent.toLowerCase().indexOf(q) !== -1;
+        li.hidden = !hit; if (hit) any = true;
+      });
+      g.hidden = !any;
+    });
+  });
+  var b = document.querySelector('.copy-md');
+  if (b) b.addEventListener('click', function () {
+    fetch(b.dataset.md).then(function (r) { return r.text(); })
+      .then(function (t) { return navigator.clipboard.writeText(t); })
+      .then(function () { b.textContent = 'Copied'; }, function () { location.href = b.dataset.md; })
+      .then(function () { setTimeout(function () { b.textContent = 'Copy as Markdown'; }, 1600); });
+  });
+})();
+</script>
+</body>
+</html>

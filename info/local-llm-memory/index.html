@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How much RAM do you need to run a local LLM? · pleeply docs</title>
+<meta name="description" content="Memory sets the largest model you can run at home. Rules of thumb for 8, 16, 24 and 48 GB, what 4-bit quantization does, and how the context window adds to it.">
+<link rel="canonical" href="https://pleeply.vercel.app/info/local-llm-memory/">
+<link rel="alternate" type="text/markdown" href="/info/local-llm-memory.md" title="How much RAM do you need to run a local LLM? (Markdown)">
+<meta property="article:modified_time" content="2026-10-24">
+<meta property="og:type" content="article">
+<meta property="og:title" content="How much RAM do you need to run a local LLM? · pleeply docs">
+<meta property="og:description" content="Memory sets the largest model you can run at home. Rules of thumb for 8, 16, 24 and 48 GB, what 4-bit quantization does, and how the context window adds to it.">
+<meta property="og:url" content="https://pleeply.vercel.app/info/local-llm-memory/">
+<meta property="og:image" content="https://pleeply.vercel.app/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#111111">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/info/docs.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://pleeply.vercel.app/#org","name":"pleeply","url":"https://pleeply.vercel.app/","logo":"https://pleeply.vercel.app/icon-512.png"},{"@type":"TechArticle","@id":"https://pleeply.vercel.app/info/local-llm-memory/#article","headline":"How much RAM do you need to run a local LLM?","description":"Memory sets the largest model you can run at home. Rules of thumb for 8, 16, 24 and 48 GB, what 4-bit quantization does, and how the context window adds to it.","datePublished":"2026-10-24","dateModified":"2026-10-24","inLanguage":"en","mainEntityOfPage":"https://pleeply.vercel.app/info/local-llm-memory/","author":{"@id":"https://pleeply.vercel.app/#org"},"publisher":{"@id":"https://pleeply.vercel.app/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"pleeply","item":"https://pleeply.vercel.app/"},{"@type":"ListItem","position":2,"name":"Docs","item":"https://pleeply.vercel.app/info/"},{"@type":"ListItem","position":3,"name":"How much RAM you need","item":"https://pleeply.vercel.app/info/local-llm-memory/"}]},{"@type":"FAQPage","@id":"https://pleeply.vercel.app/info/local-llm-memory/#faq","mainEntity":[{"@type":"Question","name":"Can 8 GB of RAM run Llama?","acceptedAnswer":{"@type":"Answer","text":"Yes, the small versions. Llama 3.2 1B and 3B run on 8 GB. An 8B model at 4-bit technically fits, but leaves only about 3 GB for everything else and tends to swap."}},{"@type":"Question","name":"How much RAM does a 7B model need?","acceptedAnswer":{"@type":"Answer","text":"About 4–5 GB for the weights at 4-bit quantization, so a machine with 16 GB runs it comfortably."}},{"@type":"Question","name":"How much memory does a 70B model need?","acceptedAnswer":{"@type":"Answer","text":"Roughly 35–40 GB at 4-bit for the weights alone, so plan for 48 GB or more."}},{"@type":"Question","name":"Does a longer context window use more RAM?","acceptedAnswer":{"@type":"Answer","text":"Yes. Context memory grows with its length, so a 32k context needs noticeably more than the default 2k–8k."}}]}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="/info/" aria-label="pleeply docs"><span class="mark">pleeply<i></i></span><span class="docs">docs</span></a>
+    <nav class="top-links" aria-label="Site">
+      <a href="/info/" aria-current="page">Docs</a>
+      <a href="/community">Community</a>
+      <a href="/">Product</a>
+      <a class="btn" href="/#reserve"><span class="dot"></span>Join waitlist</a>
+    </nav>
+  </div>
+</header>
+<div class="shell">
+  <aside class="side">
+    <details class="navbox" open>
+      <summary>Menu</summary>
+      <input class="filter" type="search" placeholder="Filter pages" aria-label="Filter pages">
+      <nav aria-label="Docs"><div class="nav-group"><p class="nav-title">Start here</p><ul><li><a href="/info/">Overview</a></li></ul></div><div class="nav-group"><p class="nav-title">Learn</p><ul><li><a href="/info/local-ai-assistant/">What is a local AI assistant?</a></li><li><a href="/info/how-local-voice-assistants-work/">How local voice assistants work</a></li><li><a href="/info/smart-speaker-privacy/">Smart speaker privacy</a></li></ul></div><div class="nav-group"><p class="nav-title">Run it yourself</p><ul><li><a href="/info/run-ai-at-home/">Choose your hardware</a></li><li><a href="/info/raspberry-pi-5-llm/">LLM on a Raspberry Pi 5</a></li><li><a href="/info/home-assistant-local-llm/">Home Assistant + local LLM</a></li><li><a href="/info/local-llm-memory/" aria-current="page">How much RAM you need</a></li></ul></div><div class="nav-group"><p class="nav-title">Compare</p><ul><li><a href="/info/alexa-alternatives/">Private Alexa alternatives</a></li><li><a href="/info/open-source-voice-assistants/">Open-source voice assistants</a></li></ul></div><div class="nav-group"><p class="nav-title">pleeply</p><ul><li><a href="/info/pleeply/">What is pleeply?</a></li></ul></div></nav>
+    </details>
+  </aside>
+  <main id="main" class="doc">
+    <article>
+      <p class="crumb">Run it yourself</p>
+      <h1>How much RAM do you need to run a local LLM?</h1>
+      <div class="meta">
+        <span>Updated <time datetime="2026-10-24">Oct 24, 2026</time></span><span>2 min read</span>
+        <span class="meta-actions"><button class="copy-md" type="button" data-md="/info/local-llm-memory.md">Copy as Markdown</button><a href="/info/local-llm-memory.md">View .md</a></span>
+      </div>
+      <div class="prose">
+<p>Memory decides which language models you can run locally. As a rule of thumb, 8 GB runs small 1–3B models, 16 GB runs 7–8B models at 4-bit quantization, 24 GB or more opens 14–32B models, and the largest open models need 48 GB or more.</p>
+<h2 id="rules-of-thumb">Rules of thumb<a class="anchor" href="#rules-of-thumb" aria-label="Link to this section">#</a></h2>
+<div class="table"><table><thead><tr><th>Memory</th><th>What fits comfortably</th><th>Good for</th></tr></thead><tbody><tr><td>8 GB</td><td>1–3B models, up to about 3.8B</td><td>Commands, timers, short answers</td></tr><tr><td>16 GB</td><td>7–8B at 4-bit</td><td>Everyday conversation and summaries</td></tr><tr><td>24–32 GB</td><td>14–32B at 4-bit</td><td>Better reasoning and writing</td></tr><tr><td>48 GB or more</td><td>Larger models</td><td>Closest to cloud quality</td></tr></tbody></table></div>
+<h2 id="how-to-estimate">How to estimate<a class="anchor" href="#how-to-estimate" aria-label="Link to this section">#</a></h2>
+<p>A model's weights take roughly parameters × bits per weight ÷ 8 bytes.</p>
+<ul><li>An 8B model at 4 bits: 8 billion × 4 ÷ 8 ≈ 4 GB. Llama 3.1 8B at Q4 is about 4.9 GB on disk.</li><li>Keep the model to about 60–70% of total memory, leaving room for the operating system, the context and other apps.</li><li>On a Mac, leave 4–8 GB for macOS and your apps.</li></ul>
+<h2 id="what-quantization-means">What quantization means<a class="anchor" href="#what-quantization-means" aria-label="Link to this section">#</a></h2>
+<p>Quantization stores each weight with fewer bits — for example 4 instead of 16 — so the model needs about a quarter of the memory. Q4_K_M is a common 4-bit format in llama.cpp and Ollama that keeps quality close to the original for most everyday tasks. Lower-bit formats save more memory and lose more quality.</p>
+<h2 id="the-context-window-uses-memory-too">The context window uses memory too<a class="anchor" href="#the-context-window-uses-memory-too" aria-label="Link to this section">#</a></h2>
+<p>The context window is how much text the model considers at once. Its memory grows with its length, so long conversations and large smart homes cost RAM. Home Assistant, for example, sets an 8k-token context for Ollama by default, up from Ollama's own 2k.</p>
+<h2 id="apple-silicon-vs-a-pc">Apple Silicon vs a PC<a class="anchor" href="#apple-silicon-vs-a-pc" aria-label="Link to this section">#</a></h2>
+<p>Apple Silicon Macs use unified memory shared by the CPU and GPU, so most of the RAM is available to the model. On a PC with a graphics card, the model should fit in the card's own memory (VRAM) to run fast; a 12 GB card runs 7–8B models well.</p>
+<h2 id="faq">FAQ<a class="anchor" href="#faq" aria-label="Link to this section">#</a></h2>
+<h3 id="can-8-gb-of-ram-run-llama">Can 8 GB of RAM run Llama?<a class="anchor" href="#can-8-gb-of-ram-run-llama" aria-label="Link to this section">#</a></h3>
+<p>Yes, the small versions. Llama 3.2 1B and 3B run on 8 GB. An 8B model at 4-bit technically fits, but leaves only about 3 GB for everything else and tends to swap.</p>
+<h3 id="how-much-ram-does-a-7b-model-need">How much RAM does a 7B model need?<a class="anchor" href="#how-much-ram-does-a-7b-model-need" aria-label="Link to this section">#</a></h3>
+<p>About 4–5 GB for the weights at 4-bit quantization, so a machine with 16 GB runs it comfortably.</p>
+<h3 id="how-much-memory-does-a-70b-model-need">How much memory does a 70B model need?<a class="anchor" href="#how-much-memory-does-a-70b-model-need" aria-label="Link to this section">#</a></h3>
+<p>Roughly 35–40 GB at 4-bit for the weights alone, so plan for 48 GB or more.</p>
+<h3 id="does-a-longer-context-window-use-more-ram">Does a longer context window use more RAM?<a class="anchor" href="#does-a-longer-context-window-use-more-ram" aria-label="Link to this section">#</a></h3>
+<p>Yes. Context memory grows with its length, so a 32k context needs noticeably more than the default 2k–8k.</p>
+<h2 id="sources">Sources<a class="anchor" href="#sources" aria-label="Link to this section">#</a></h2>
+<ul><li><a href="https://www.refurb.me/blog/run-local-ai-on-mac" rel="noopener" target="_blank">Refurb.me — Run local AI on a Mac</a></li><li><a href="https://blog.starmorph.com/blog/best-mac-mini-for-local-llms" rel="noopener" target="_blank">Starmorph — Best Mac mini for local LLMs</a></li><li><a href="https://localclaw.io/guides/best-local-llms-for-mac-mini-m4" rel="noopener" target="_blank">LocalClaw — Best local LLMs for Mac mini M4</a></li><li><a href="https://www.home-assistant.io/integrations/ollama/" rel="noopener" target="_blank">Home Assistant — Ollama integration (context window defaults)</a></li></ul>
+      </div>
+      <section class="join" aria-labelledby="join-title">
+        <p class="join-kicker">pleeply Community</p>
+        <h2 id="join-title">Keep going with the community</h2>
+        <p>Running AI at home is easier with people who've already done it. On the pleeply forum you can:</p>
+        <ul>
+          <li>ask about local models, hardware and Home Assistant, and get answers from people running them;</li>
+          <li>vote on what pleeply should do first;</li>
+          <li>show your own local-AI setup and get feedback;</li>
+          <li>hear first about test builds and reservations.</li>
+        </ul>
+        <div class="join-actions"><a class="btn btn-lg" href="/community/signup?next=%2Fcommunity">Join the community →</a><a class="join-more" href="/community">See top topics</a></div>
+        <p class="join-micro">Free · no email needed</p>
+      </section>
+      <p class="ai-note">This page is also available as <a href="/info/local-llm-memory.md">Markdown</a>. For the full docs index, see <a href="/llms.txt">llms.txt</a>.</p>
+      <nav class="pager" aria-label="Previous and next">
+        <a class="prev" href="/info/home-assistant-local-llm/"><span>Previous</span>Home Assistant + local LLM</a>
+        <a class="next" href="/info/alexa-alternatives/"><span>Next</span>Private Alexa alternatives</a>
+      </nav>
+    </article>
+  </main>
+  <aside class="toc" aria-label="On this page"><p>On this page</p><ul><li><a href="#rules-of-thumb">Rules of thumb</a></li><li><a href="#how-to-estimate">How to estimate</a></li><li><a href="#what-quantization-means">What quantization means</a></li><li><a href="#the-context-window-uses-memory-too">The context window uses memory too</a></li><li><a href="#apple-silicon-vs-a-pc">Apple Silicon vs a PC</a></li><li><a href="#faq">FAQ</a></li><li><a href="#sources">Sources</a></li></ul></aside>
+</div>
+<footer class="foot">
+  <div class="foot-in"><span class="mark">pleeply<i></i></span><span>© 2026 pleeply. In development.</span><span class="foot-links"><a href="/community">Community</a><a href="/llms.txt">llms.txt</a></span></div>
+</footer>
+<script defer src="/_vercel/insights/script.js"></script>
+<script>
+(function () {
+  var box = document.querySelector('.navbox');
+  if (box && window.matchMedia('(max-width: 899px)').matches) box.removeAttribute('open');
+  var f = document.querySelector('.filter');
+  if (f) f.addEventListener('input', function () {
+    var q = f.value.trim().toLowerCase();
+    document.querySelectorAll('.nav-group').forEach(function (g) {
+      var any = false;
+      g.querySelectorAll('li').forEach(function (li) {
+        var hit = !q || li.textContent.toLowerCase().indexOf(q) !== -1;
+        li.hidden = !hit; if (hit) any = true;
+      });
+      g.hidden = !any;
+    });
+  });
+  var b = document.querySelector('.copy-md');
+  if (b) b.addEventListener('click', function () {
+    fetch(b.dataset.md).then(function (r) { return r.text(); })
+      .then(function (t) { return navigator.clipboard.writeText(t); })
+      .then(function () { b.textContent = 'Copied'; }, function () { location.href = b.dataset.md; })
+      .then(function () { setTimeout(function () { b.textContent = 'Copy as Markdown'; }, 1600); });
+  });
+})();
+</script>
+</body>
+</html>

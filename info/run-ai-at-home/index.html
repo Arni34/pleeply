@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Run AI at home: choose your hardware · pleeply docs</title>
+<meta name="description" content="Compare the ways to run a private AI assistant at home — Raspberry Pi 5, Jetson Orin Nano Super, Mac mini, a PC with a GPU, Home Assistant Voice, or a ready-made device — by model size, speed and effort.">
+<link rel="canonical" href="https://pleeply.vercel.app/info/run-ai-at-home/">
+<link rel="alternate" type="text/markdown" href="/info/run-ai-at-home.md" title="Run AI at home: choose your hardware (Markdown)">
+<meta property="article:modified_time" content="2026-10-24">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Run AI at home: choose your hardware · pleeply docs">
+<meta property="og:description" content="Compare the ways to run a private AI assistant at home — Raspberry Pi 5, Jetson Orin Nano Super, Mac mini, a PC with a GPU, Home Assistant Voice, or a ready-made device — by model size, speed and effort.">
+<meta property="og:url" content="https://pleeply.vercel.app/info/run-ai-at-home/">
+<meta property="og:image" content="https://pleeply.vercel.app/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#111111">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/info/docs.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://pleeply.vercel.app/#org","name":"pleeply","url":"https://pleeply.vercel.app/","logo":"https://pleeply.vercel.app/icon-512.png"},{"@type":"TechArticle","@id":"https://pleeply.vercel.app/info/run-ai-at-home/#article","headline":"Run AI at home: choose your hardware","description":"Compare the ways to run a private AI assistant at home — Raspberry Pi 5, Jetson Orin Nano Super, Mac mini, a PC with a GPU, Home Assistant Voice, or a ready-made device — by model size, speed and effort.","datePublished":"2026-10-24","dateModified":"2026-10-24","inLanguage":"en","mainEntityOfPage":"https://pleeply.vercel.app/info/run-ai-at-home/","author":{"@id":"https://pleeply.vercel.app/#org"},"publisher":{"@id":"https://pleeply.vercel.app/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"pleeply","item":"https://pleeply.vercel.app/"},{"@type":"ListItem","position":2,"name":"Docs","item":"https://pleeply.vercel.app/info/"},{"@type":"ListItem","position":3,"name":"Choose your hardware","item":"https://pleeply.vercel.app/info/run-ai-at-home/"}]},{"@type":"FAQPage","@id":"https://pleeply.vercel.app/info/run-ai-at-home/#faq","mainEntity":[{"@type":"Question","name":"What is the cheapest way to run a local LLM at home?","acceptedAnswer":{"@type":"Answer","text":"A Raspberry Pi 5 with 8 GB is the cheapest common option. It runs 1–3B models at roughly 5–11 tokens per second — fine for commands and short answers, slow for conversation."}},{"@type":"Question","name":"Is a Raspberry Pi 5 or a Jetson Orin Nano better for local AI?","acceptedAnswer":{"@type":"Answer","text":"For language models, the Jetson Orin Nano Super is several times faster on small models because it has a CUDA GPU: published 3B results are roughly 22–43 tokens per second against about 5 on a Pi 5. The Pi 5 is cheaper, simpler and has more community guides."}},{"@type":"Question","name":"Can a Mac mini run a local LLM?","acceptedAnswer":{"@type":"Answer","text":"Yes. Apple Silicon Macs share memory between the CPU and GPU, so a 16 GB Mac mini runs 7–8B models at 4-bit quantization, and 24 GB or more fits 14–32B models."}},{"@type":"Question","name":"Do I need a GPU to run AI at home?","acceptedAnswer":{"@type":"Answer","text":"No. Small models run on CPUs, including the Raspberry Pi 5's. A GPU or Apple Silicon makes larger models fast enough for conversation."}}]}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="/info/" aria-label="pleeply docs"><span class="mark">pleeply<i></i></span><span class="docs">docs</span></a>
+    <nav class="top-links" aria-label="Site">
+      <a href="/info/" aria-current="page">Docs</a>
+      <a href="/community">Community</a>
+      <a href="/">Product</a>
+      <a class="btn" href="/#reserve"><span class="dot"></span>Join waitlist</a>
+    </nav>
+  </div>
+</header>
+<div class="shell">
+  <aside class="side">
+    <details class="navbox" open>
+      <summary>Menu</summary>
+      <input class="filter" type="search" placeholder="Filter pages" aria-label="Filter pages">
+      <nav aria-label="Docs"><div class="nav-group"><p class="nav-title">Start here</p><ul><li><a href="/info/">Overview</a></li></ul></div><div class="nav-group"><p class="nav-title">Learn</p><ul><li><a href="/info/local-ai-assistant/">What is a local AI assistant?</a></li><li><a href="/info/how-local-voice-assistants-work/">How local voice assistants work</a></li><li><a href="/info/smart-speaker-privacy/">Smart speaker privacy</a></li></ul></div><div class="nav-group"><p class="nav-title">Run it yourself</p><ul><li><a href="/info/run-ai-at-home/" aria-current="page">Choose your hardware</a></li><li><a href="/info/raspberry-pi-5-llm/">LLM on a Raspberry Pi 5</a></li><li><a href="/info/home-assistant-local-llm/">Home Assistant + local LLM</a></li><li><a href="/info/local-llm-memory/">How much RAM you need</a></li></ul></div><div class="nav-group"><p class="nav-title">Compare</p><ul><li><a href="/info/alexa-alternatives/">Private Alexa alternatives</a></li><li><a href="/info/open-source-voice-assistants/">Open-source voice assistants</a></li></ul></div><div class="nav-group"><p class="nav-title">pleeply</p><ul><li><a href="/info/pleeply/">What is pleeply?</a></li></ul></div></nav>
+    </details>
+  </aside>
+  <main id="main" class="doc">
+    <article>
+      <p class="crumb">Run it yourself</p>
+      <h1>Run AI at home: choose your hardware</h1>
+      <div class="meta">
+        <span>Updated <time datetime="2026-10-24">Oct 24, 2026</time></span><span>4 min read</span>
+        <span class="meta-actions"><button class="copy-md" type="button" data-md="/info/run-ai-at-home.md">Copy as Markdown</button><a href="/info/run-ai-at-home.md">View .md</a></span>
+      </div>
+      <div class="prose">
+<p>You can run a private AI assistant on anything from a single-board computer to a desktop with a graphics card. Memory is what decides: it sets the largest model you can run, and the model's size sets how capable and how fast your assistant is.</p>
+<aside class="callout tip"><p class="callout-title">Short answer</p><p>For a voice assistant with small 1–3B models, a Raspberry Pi 5 with 8 GB works, but answers take several seconds. For conversation-quality 7–8B models, use a machine with about 16 GB of memory, such as an Apple Silicon Mac mini. For the fastest small models on a low-power board, a Jetson Orin Nano Super.</p></aside>
+<h2 id="choose-your-setup">Choose your setup<a class="anchor" href="#choose-your-setup" aria-label="Link to this section">#</a></h2>
+<div class="cards"><div class="card has-link"><h3><a class="card-link" href="/info/raspberry-pi-5-llm/">Raspberry Pi 5</a></h3><p><strong>Best for:</strong> tinkerers and always-on, low-power setups.</p>
+<p><strong>Models:</strong> 1–3B at about 5–11 tokens per second; 7B is very slow (about 1.5–2.5).</p>
+<p><strong>Requirements:</strong> the 8 GB or 16 GB board and an active cooler.</p></div><div class="card"><h3>Jetson Orin Nano Super</h3><p><strong>Best for:</strong> faster small models on a low-power board.</p>
+<p><strong>Models:</strong> 3B-class models at roughly 22–43 tokens per second in published tests.</p>
+<p><strong>Requirements:</strong> 8 GB of shared memory, so small models only. Launched at $249 in December 2024.</p></div><div class="card"><h3>Mac mini with Apple Silicon</h3><p><strong>Best for:</strong> quiet, capable 7–8B models.</p>
+<p><strong>Models:</strong> 16 GB runs 7–8B at 4-bit; 24 GB or more opens 14–32B.</p>
+<p><strong>Requirements:</strong> 16 GB of memory for a useful assistant.</p></div><div class="card"><h3>PC or mini PC with a GPU</h3><p><strong>Best for:</strong> larger models and the fastest answers.</p>
+<p><strong>Models:</strong> set by the card's memory; a 12 GB card such as an RTX 3060 runs 7–8B models.</p>
+<p><strong>Requirements:</strong> more power and noise, so it usually lives away from the speaker.</p></div><div class="card has-link"><h3><a class="card-link" href="/info/home-assistant-local-llm/">Home Assistant Voice + a server</a></h3><p><strong>Best for:</strong> voice control of a smart home.</p>
+<p><strong>Requirements:</strong> the $59 Voice Preview Edition is a satellite — speech and the language model run on your Home Assistant and Ollama servers.</p></div><div class="card has-link"><h3><a class="card-link" href="/info/pleeply/">pleeply (in development)</a></h3><p><strong>Best for:</strong> private AI without assembling it yourself.</p>
+<p><strong>Planned:</strong> a speaker with a built-in computer — One for models up to about 8B, Pro up to about 32B. Expected prices; specs may change.</p></div></div>
+<h2 id="compare-at-a-glance">Compare at a glance<a class="anchor" href="#compare-at-a-glance" aria-label="Link to this section">#</a></h2>
+<div class="table"><table><thead><tr><th>Setup</th><th>Memory</th><th>Practical model size</th><th>Watch out for</th></tr></thead><tbody><tr><td>Raspberry Pi 5</td><td>8 or 16 GB</td><td>1–3B; 7B is slow</td><td>Throttles without active cooling</td></tr><tr><td>Jetson Orin Nano Super</td><td>8 GB shared</td><td>Up to about 3–4B</td><td>Published speeds vary by model and runtime</td></tr><tr><td>Mac mini, 16 GB</td><td>16 GB unified</td><td>7–8B at 4-bit</td><td>Memory can't be upgraded later</td></tr><tr><td>Mac mini, 24 GB or more</td><td>24–64 GB unified</td><td>14–32B at 4-bit</td><td>Cost rises quickly with memory</td></tr><tr><td>PC with a 12 GB GPU</td><td>12 GB of VRAM plus system RAM</td><td>7–8B; more with bigger cards</td><td>Power draw and fan noise</td></tr><tr><td>Home Assistant Voice PE</td><td>Uses your server</td><td>Depends on the server</td><td>Needs a Home Assistant server</td></tr></tbody></table></div>
+<h2 id="what-size-of-model-do-you-need">What size of model do you need?<a class="anchor" href="#what-size-of-model-do-you-need" aria-label="Link to this section">#</a></h2>
+<ul><li><strong>1–3B parameters:</strong> commands, timers, short answers, simple lookups in your notes. Fits 8 GB devices.</li><li><strong>7–8B:</strong> natural conversation, summaries, better at following instructions. Needs about 16 GB.</li><li><strong>14–32B:</strong> noticeably better reasoning and writing. Needs 24–48 GB.</li></ul>
+<p>Details in <a href="/info/local-llm-memory/">How much RAM a local LLM needs</a>.</p>
+<h2 id="faq">FAQ<a class="anchor" href="#faq" aria-label="Link to this section">#</a></h2>
+<h3 id="what-is-the-cheapest-way-to-run-a-local-llm-at-home">What is the cheapest way to run a local LLM at home?<a class="anchor" href="#what-is-the-cheapest-way-to-run-a-local-llm-at-home" aria-label="Link to this section">#</a></h3>
+<p>A Raspberry Pi 5 with 8 GB is the cheapest common option. It runs 1–3B models at roughly 5–11 tokens per second — fine for commands and short answers, slow for conversation.</p>
+<h3 id="is-a-raspberry-pi-5-or-a-jetson-orin-nano-better-for-local-ai">Is a Raspberry Pi 5 or a Jetson Orin Nano better for local AI?<a class="anchor" href="#is-a-raspberry-pi-5-or-a-jetson-orin-nano-better-for-local-ai" aria-label="Link to this section">#</a></h3>
+<p>For language models, the Jetson Orin Nano Super is several times faster on small models because it has a CUDA GPU: published 3B results are roughly 22–43 tokens per second against about 5 on a Pi 5. The Pi 5 is cheaper, simpler and has more community guides.</p>
+<h3 id="can-a-mac-mini-run-a-local-llm">Can a Mac mini run a local LLM?<a class="anchor" href="#can-a-mac-mini-run-a-local-llm" aria-label="Link to this section">#</a></h3>
+<p>Yes. Apple Silicon Macs share memory between the CPU and GPU, so a 16 GB Mac mini runs 7–8B models at 4-bit quantization, and 24 GB or more fits 14–32B models.</p>
+<h3 id="do-i-need-a-gpu-to-run-ai-at-home">Do I need a GPU to run AI at home?<a class="anchor" href="#do-i-need-a-gpu-to-run-ai-at-home" aria-label="Link to this section">#</a></h3>
+<p>No. Small models run on CPUs, including the Raspberry Pi 5's. A GPU or Apple Silicon makes larger models fast enough for conversation.</p>
+<h2 id="sources">Sources<a class="anchor" href="#sources" aria-label="Link to this section">#</a></h2>
+<ul><li>Raspberry Pi 5 speeds: <a href="https://stratospherelinuxips.readthedocs.io/en/develop/immune/research_rpi_llm_performance.html" rel="noopener" target="_blank">Stratosphere Linux IPS — LLM performance on Raspberry Pi 5</a>, <a href="https://bestllmfor.com/best/raspberry-pi-5-llm/" rel="noopener" target="_blank">bestllmfor — Local LLM on Raspberry Pi 5</a></li><li>Jetson Orin Nano Super: <a href="https://computingforgeeks.com/edge-llm-jetson-orin-vs-ai-hat-2-vs-hailo-10h/" rel="noopener" target="_blank">ComputingForGeeks — Edge LLM: Jetson Orin vs AI HAT+ 2 vs Hailo-10H</a>, <a href="https://www.aimadetools.com/blog/how-to-run-llms-on-raspberry-pi-5-2026/" rel="noopener" target="_blank">AI Made Tools — How to run LLMs on Raspberry Pi 5 (2026)</a></li><li>Mac memory guidance: <a href="https://blog.starmorph.com/blog/best-mac-mini-for-local-llms" rel="noopener" target="_blank">Starmorph — Best Mac mini for local LLMs</a></li><li>RTX 3060 build: <a href="https://jpk.io/home-automation/home-assistant-voice-pe-local-llm/" rel="noopener" target="_blank">jpk.io — Fully local voice assistant with Home Assistant Voice PE and Ollama</a></li><li>Voice Preview Edition: <a href="https://www.cnx-software.com/2024/12/20/59-voice-preview-edition-adds-an-offline-smart-speaker-to-your-home-assistant-server/" rel="noopener" target="_blank">CNX Software — $59 Voice Preview Edition</a></li></ul>
+      </div>
+      <section class="join" aria-labelledby="join-title">
+        <p class="join-kicker">pleeply Community</p>
+        <h2 id="join-title">Keep going with the community</h2>
+        <p>Running AI at home is easier with people who've already done it. On the pleeply forum you can:</p>
+        <ul>
+          <li>ask about local models, hardware and Home Assistant, and get answers from people running them;</li>
+          <li>vote on what pleeply should do first;</li>
+          <li>show your own local-AI setup and get feedback;</li>
+          <li>hear first about test builds and reservations.</li>
+        </ul>
+        <div class="join-actions"><a class="btn btn-lg" href="/community/signup?next=%2Fcommunity">Join the community →</a><a class="join-more" href="/community">See top topics</a></div>
+        <p class="join-micro">Free · no email needed</p>
+      </section>
+      <p class="ai-note">This page is also available as <a href="/info/run-ai-at-home.md">Markdown</a>. For the full docs index, see <a href="/llms.txt">llms.txt</a>.</p>
+      <nav class="pager" aria-label="Previous and next">
+        <a class="prev" href="/info/smart-speaker-privacy/"><span>Previous</span>Smart speaker privacy</a>
+        <a class="next" href="/info/raspberry-pi-5-llm/"><span>Next</span>LLM on a Raspberry Pi 5</a>
+      </nav>
+    </article>
+  </main>
+  <aside class="toc" aria-label="On this page"><p>On this page</p><ul><li><a href="#choose-your-setup">Choose your setup</a></li><li><a href="#compare-at-a-glance">Compare at a glance</a></li><li><a href="#what-size-of-model-do-you-need">What size of model do you need?</a></li><li><a href="#faq">FAQ</a></li><li><a href="#sources">Sources</a></li></ul></aside>
+</div>
+<footer class="foot">
+  <div class="foot-in"><span class="mark">pleeply<i></i></span><span>© 2026 pleeply. In development.</span><span class="foot-links"><a href="/community">Community</a><a href="/llms.txt">llms.txt</a></span></div>
+</footer>
+<script defer src="/_vercel/insights/script.js"></script>
+<script>
+(function () {
+  var box = document.querySelector('.navbox');
+  if (box && window.matchMedia('(max-width: 899px)').matches) box.removeAttribute('open');
+  var f = document.querySelector('.filter');
+  if (f) f.addEventListener('input', function () {
+    var q = f.value.trim().toLowerCase();
+    document.querySelectorAll('.nav-group').forEach(function (g) {
+      var any = false;
+      g.querySelectorAll('li').forEach(function (li) {
+        var hit = !q || li.textContent.toLowerCase().indexOf(q) !== -1;
+        li.hidden = !hit; if (hit) any = true;
+      });
+      g.hidden = !any;
+    });
+  });
+  var b = document.querySelector('.copy-md');
+  if (b) b.addEventListener('click', function () {
+    fetch(b.dataset.md).then(function (r) { return r.text(); })
+      .then(function (t) { return navigator.clipboard.writeText(t); })
+      .then(function () { b.textContent = 'Copied'; }, function () { location.href = b.dataset.md; })
+      .then(function () { setTimeout(function () { b.textContent = 'Copy as Markdown'; }, 1600); });
+  });
+})();
+</script>
+</body>
+</html>

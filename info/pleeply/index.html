@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What is pleeply? · pleeply docs</title>
+<meta name="description" content="pleeply is a home speaker with a computer inside that runs open AI models on the device, keeps a private memory and works without the cloud. It's in development — here is what's planned.">
+<link rel="canonical" href="https://pleeply.vercel.app/info/pleeply/">
+<link rel="alternate" type="text/markdown" href="/info/pleeply.md" title="What is pleeply? (Markdown)">
+<meta property="article:modified_time" content="2026-10-25">
+<meta property="og:type" content="article">
+<meta property="og:title" content="What is pleeply? · pleeply docs">
+<meta property="og:description" content="pleeply is a home speaker with a computer inside that runs open AI models on the device, keeps a private memory and works without the cloud. It's in development — here is what's planned.">
+<meta property="og:url" content="https://pleeply.vercel.app/info/pleeply/">
+<meta property="og:image" content="https://pleeply.vercel.app/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#111111">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/info/docs.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://pleeply.vercel.app/#org","name":"pleeply","url":"https://pleeply.vercel.app/","logo":"https://pleeply.vercel.app/icon-512.png"},{"@type":"TechArticle","@id":"https://pleeply.vercel.app/info/pleeply/#article","headline":"What is pleeply?","description":"pleeply is a home speaker with a computer inside that runs open AI models on the device, keeps a private memory and works without the cloud. It's in development — here is what's planned.","datePublished":"2026-10-25","dateModified":"2026-10-25","inLanguage":"en","mainEntityOfPage":"https://pleeply.vercel.app/info/pleeply/","author":{"@id":"https://pleeply.vercel.app/#org"},"publisher":{"@id":"https://pleeply.vercel.app/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"pleeply","item":"https://pleeply.vercel.app/"},{"@type":"ListItem","position":2,"name":"Docs","item":"https://pleeply.vercel.app/info/"},{"@type":"ListItem","position":3,"name":"What is pleeply?","item":"https://pleeply.vercel.app/info/pleeply/"}]},{"@type":"FAQPage","@id":"https://pleeply.vercel.app/info/pleeply/#faq","mainEntity":[{"@type":"Question","name":"Is pleeply available to buy?","acceptedAnswer":{"@type":"Answer","text":"Not yet. pleeply is in development. You can reserve one for free on the waitlist, and we'll email you when reservations open."}},{"@type":"Question","name":"How much will pleeply cost?","acceptedAnswer":{"@type":"Answer","text":"Expected prices are $499 for pleeply Pocket (a hand-assembled, pocket-size device with a Raspberry Pi 5), $299 for the pleeply One speaker and $549 for pleeply Pro. Prices and specs may change during development."}},{"@type":"Question","name":"Does pleeply work offline?","acceptedAnswer":{"@type":"Answer","text":"That's the design goal: core features — talking to it, answers from the on-device model and your memory — work without internet. Online services are optional."}},{"@type":"Question","name":"Which AI models does pleeply run?","acceptedAnswer":{"@type":"Answer","text":"Compatible open-weight models such as Llama, Qwen, Mistral and Gemma. The One is planned for compact models up to about 8B parameters, the Pro for larger models up to about 32B."}},{"@type":"Question","name":"Where is my data stored?","acceptedAnswer":{"@type":"Answer","text":"On the device. Your voice is processed by the computer inside the speaker, and your personal memory lives there too. You can see, edit or delete it anytime."}},{"@type":"Question","name":"How is pleeply different from Alexa?","acceptedAnswer":{"@type":"Answer","text":"Alexa processes requests in Amazon's cloud — since March 28, 2025 there has been no setting to keep them on the device. pleeply runs its model on the speaker and keeps your memory at home."}}]}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="/info/" aria-label="pleeply docs"><span class="mark">pleeply<i></i></span><span class="docs">docs</span></a>
+    <nav class="top-links" aria-label="Site">
+      <a href="/info/" aria-current="page">Docs</a>
+      <a href="/community">Community</a>
+      <a href="/">Product</a>
+      <a class="btn" href="/#reserve"><span class="dot"></span>Join waitlist</a>
+    </nav>
+  </div>
+</header>
+<div class="shell">
+  <aside class="side">
+    <details class="navbox" open>
+      <summary>Menu</summary>
+      <input class="filter" type="search" placeholder="Filter pages" aria-label="Filter pages">
+      <nav aria-label="Docs"><div class="nav-group"><p class="nav-title">Start here</p><ul><li><a href="/info/">Overview</a></li></ul></div><div class="nav-group"><p class="nav-title">Learn</p><ul><li><a href="/info/local-ai-assistant/">What is a local AI assistant?</a></li><li><a href="/info/how-local-voice-assistants-work/">How local voice assistants work</a></li><li><a href="/info/smart-speaker-privacy/">Smart speaker privacy</a></li></ul></div><div class="nav-group"><p class="nav-title">Run it yourself</p><ul><li><a href="/info/run-ai-at-home/">Choose your hardware</a></li><li><a href="/info/raspberry-pi-5-llm/">LLM on a Raspberry Pi 5</a></li><li><a href="/info/home-assistant-local-llm/">Home Assistant + local LLM</a></li><li><a href="/info/local-llm-memory/">How much RAM you need</a></li></ul></div><div class="nav-group"><p class="nav-title">Compare</p><ul><li><a href="/info/alexa-alternatives/">Private Alexa alternatives</a></li><li><a href="/info/open-source-voice-assistants/">Open-source voice assistants</a></li></ul></div><div class="nav-group"><p class="nav-title">pleeply</p><ul><li><a href="/info/pleeply/" aria-current="page">What is pleeply?</a></li></ul></div></nav>
+    </details>
+  </aside>
+  <main id="main" class="doc">
+    <article>
+      <p class="crumb">pleeply</p>
+      <h1>What is pleeply?</h1>
+      <div class="meta">
+        <span>Updated <time datetime="2026-10-25">Oct 25, 2026</time></span><span>3 min read</span>
+        <span class="meta-actions"><button class="copy-md" type="button" data-md="/info/pleeply.md">Copy as Markdown</button><a href="/info/pleeply.md">View .md</a></span>
+      </div>
+      <div class="prose">
+<p>pleeply is a speaker with a computer inside. It runs open-weight AI models on the device, keeps a private memory of you at home and works without the cloud. pleeply is in development and not for sale yet; the waitlist is open at <a href="https://pleeply.vercel.app/" rel="noopener" target="_blank">pleeply.vercel.app</a>.</p>
+<aside class="callout warning"><p class="callout-title">Status: in development</p><p>Prices below are expected prices and specs are planned — both may change during development. Reserving is free and doesn't commit you to anything.</p></aside>
+<h2 id="how-it-works">How it works<a class="anchor" href="#how-it-works" aria-label="Link to this section">#</a></h2>
+<ol><li><strong>You talk.</strong> Ask anything, set timers, control your home, think out loud.</li><li><strong>It thinks on the device.</strong> An open language model runs on the computer inside the speaker — no round trip to a cloud server.</li><li><strong>It remembers, privately.</strong> Your personal memory lives on the device. See it, edit it, delete it anytime.</li></ol>
+<h2 id="planned-lineup">Planned lineup<a class="anchor" href="#planned-lineup" aria-label="Link to this section">#</a></h2>
+<div class="table"><table><thead><tr><th></th><th>pleeply Pocket</th><th>pleeply One</th><th>pleeply Pro</th></tr></thead><tbody><tr><td>What it is</td><td>A pocket-size device with a Raspberry Pi 5, a battery and a push-to-talk button</td><td>A speaker with a built-in computer and microphone array</td><td>A speaker with more memory and compute</td></tr><tr><td>Models</td><td>Compact open models, 1–3B</td><td>Compact open models, up to about 8B</td><td>Larger models, up to about 32B</td></tr><tr><td>Hardware</td><td>Built in, with a 3000 mAh battery charged over USB-C</td><td>Built in</td><td>Built in</td></tr><tr><td>Expected price</td><td>$499</td><td>$299</td><td>$549</td></tr></tbody></table></div>
+<h2 id="principles">Principles<a class="anchor" href="#principles" aria-label="Link to this section">#</a></h2>
+<ul><li><strong>Private by design.</strong> Your voice is processed by the chip inside the speaker.</li><li><strong>Your own AI.</strong> Your device, your data, your rules — no big-tech account required.</li><li><strong>Local intelligence.</strong> Models run in your home, so answers don't wait on a server on another continent.</li><li><strong>No cloud required.</strong> Core features work without internet; connect online services only if you choose to.</li><li><strong>Open models.</strong> Run compatible open models — Llama, Qwen, Mistral, Gemma — and swap them as they get better.</li></ul>
+<h2 id="pleeply-vs-a-typical-smart-speaker">pleeply vs a typical smart speaker<a class="anchor" href="#pleeply-vs-a-typical-smart-speaker" aria-label="Link to this section">#</a></h2>
+<div class="table"><table><thead><tr><th></th><th>Typical cloud smart speaker</th><th>pleeply</th></tr></thead><tbody><tr><td>Where your voice goes</td><td>To company servers</td><td>Stays on the device</td></tr><tr><td>Without internet</td><td>Stops working</td><td>Core features keep working</td></tr><tr><td>Memory of you</td><td>In the provider's account</td><td>On the device, where you can edit it</td></tr><tr><td>Models</td><td>The provider's own</td><td>Open models you can swap</td></tr></tbody></table></div>
+<h2 id="faq">FAQ<a class="anchor" href="#faq" aria-label="Link to this section">#</a></h2>
+<h3 id="is-pleeply-available-to-buy">Is pleeply available to buy?<a class="anchor" href="#is-pleeply-available-to-buy" aria-label="Link to this section">#</a></h3>
+<p>Not yet. pleeply is in development. You can reserve one for free on the waitlist, and we'll email you when reservations open.</p>
+<h3 id="how-much-will-pleeply-cost">How much will pleeply cost?<a class="anchor" href="#how-much-will-pleeply-cost" aria-label="Link to this section">#</a></h3>
+<p>Expected prices are $499 for pleeply Pocket (a hand-assembled, pocket-size device with a Raspberry Pi 5), $299 for the pleeply One speaker and $549 for pleeply Pro. Prices and specs may change during development.</p>
+<h3 id="does-pleeply-work-offline">Does pleeply work offline?<a class="anchor" href="#does-pleeply-work-offline" aria-label="Link to this section">#</a></h3>
+<p>That's the design goal: core features — talking to it, answers from the on-device model and your memory — work without internet. Online services are optional.</p>
+<h3 id="which-ai-models-does-pleeply-run">Which AI models does pleeply run?<a class="anchor" href="#which-ai-models-does-pleeply-run" aria-label="Link to this section">#</a></h3>
+<p>Compatible open-weight models such as Llama, Qwen, Mistral and Gemma. The One is planned for compact models up to about 8B parameters, the Pro for larger models up to about 32B.</p>
+<h3 id="where-is-my-data-stored">Where is my data stored?<a class="anchor" href="#where-is-my-data-stored" aria-label="Link to this section">#</a></h3>
+<p>On the device. Your voice is processed by the computer inside the speaker, and your personal memory lives there too. You can see, edit or delete it anytime.</p>
+<h3 id="how-is-pleeply-different-from-alexa">How is pleeply different from Alexa?<a class="anchor" href="#how-is-pleeply-different-from-alexa" aria-label="Link to this section">#</a></h3>
+<p>Alexa processes requests in Amazon's cloud — since March 28, 2025 there has been no setting to keep them on the device. pleeply runs its model on the speaker and keeps your memory at home.</p>
+<h2 id="sources">Sources<a class="anchor" href="#sources" aria-label="Link to this section">#</a></h2>
+<ul><li><a href="https://pleeply.vercel.app/" rel="noopener" target="_blank">pleeply — home page and waitlist</a></li><li><a href="https://techcrunch.com/2025/03/15/amazons-echo-will-send-all-voice-recordings-to-the-cloud-starting-march-28" rel="noopener" target="_blank">TechCrunch — Amazon's Echo will send all voice recordings to the cloud, starting March 28</a></li></ul>
+      </div>
+      <section class="join" aria-labelledby="join-title">
+        <p class="join-kicker">pleeply Community</p>
+        <h2 id="join-title">Keep going with the community</h2>
+        <p>Running AI at home is easier with people who've already done it. On the pleeply forum you can:</p>
+        <ul>
+          <li>ask about local models, hardware and Home Assistant, and get answers from people running them;</li>
+          <li>vote on what pleeply should do first;</li>
+          <li>show your own local-AI setup and get feedback;</li>
+          <li>hear first about test builds and reservations.</li>
+        </ul>
+        <div class="join-actions"><a class="btn btn-lg" href="/community/signup?next=%2Fcommunity">Join the community →</a><a class="join-more" href="/community">See top topics</a></div>
+        <p class="join-micro">Free · no email needed</p>
+      </section>
+      <p class="ai-note">This page is also available as <a href="/info/pleeply.md">Markdown</a>. For the full docs index, see <a href="/llms.txt">llms.txt</a>.</p>
+      <nav class="pager" aria-label="Previous and next">
+        <a class="prev" href="/info/open-source-voice-assistants/"><span>Previous</span>Open-source voice assistants</a>
+        <span></span>
+      </nav>
+    </article>
+  </main>
+  <aside class="toc" aria-label="On this page"><p>On this page</p><ul><li><a href="#how-it-works">How it works</a></li><li><a href="#planned-lineup">Planned lineup</a></li><li><a href="#principles">Principles</a></li><li><a href="#pleeply-vs-a-typical-smart-speaker">pleeply vs a typical smart speaker</a></li><li><a href="#faq">FAQ</a></li><li><a href="#sources">Sources</a></li></ul></aside>
+</div>
+<footer class="foot">
+  <div class="foot-in"><span class="mark">pleeply<i></i></span><span>© 2026 pleeply. In development.</span><span class="foot-links"><a href="/community">Community</a><a href="/llms.txt">llms.txt</a></span></div>
+</footer>
+<script defer src="/_vercel/insights/script.js"></script>
+<script>
+(function () {
+  var box = document.querySelector('.navbox');
+  if (box && window.matchMedia('(max-width: 899px)').matches) box.removeAttribute('open');
+  var f = document.querySelector('.filter');
+  if (f) f.addEventListener('input', function () {
+    var q = f.value.trim().toLowerCase();
+    document.querySelectorAll('.nav-group').forEach(function (g) {
+      var any = false;
+      g.querySelectorAll('li').forEach(function (li) {
+        var hit = !q || li.textContent.toLowerCase().indexOf(q) !== -1;
+        li.hidden = !hit; if (hit) any = true;
+      });
+      g.hidden = !any;
+    });
+  });
+  var b = document.querySelector('.copy-md');
+  if (b) b.addEventListener('click', function () {
+    fetch(b.dataset.md).then(function (r) { return r.text(); })
+      .then(function (t) { return navigator.clipboard.writeText(t); })
+      .then(function () { b.textContent = 'Copied'; }, function () { location.href = b.dataset.md; })
+      .then(function () { setTimeout(function () { b.textContent = 'Copy as Markdown'; }, 1600); });
+  });
+})();
+</script>
+</body>
+</html>

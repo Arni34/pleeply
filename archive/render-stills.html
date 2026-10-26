@@ -1,0 +1,88 @@
+<!doctype html>
+<!-- Снимки Pocket для сайта из той же 3D-модели. Не публикуется (archive/ в .vercelignore).
+     Снять кадр: Chrome --headless=new --screenshot=out.png --window-size=1200,900 --force-device-scale-factor=2
+     --default-background-color=00000000 --virtual-time-budget=15000 "http://localhost:4194/archive/render-stills.html?view=hero" -->
+<html>
+<head>
+<meta charset="utf-8">
+<title>render</title>
+<style>html, body { margin: 0; background: transparent; overflow: hidden; } canvas { display: block; width: 100vw; height: 100vh; }</style>
+<script type="importmap">{"imports":{"three":"/assets/vendor/three/three.module.min.js","three/addons/":"/assets/vendor/three/addons/"}}</script>
+</head>
+<body>
+<canvas></canvas>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { toCreasedNormals } from 'three/addons/utils/BufferGeometryUtils.js';
+import { PARTS, material } from '/assets/pocket3d.js';
+
+// Позы — те же, что в сцене на главной: закрытый, раскрытый, дном вверх, сбоку
+const VIEWS = {
+  hero: { rot: [0.62, -0.5, 0], open: 0, dist: 3.4 },
+  side: { rot: [0.18, 0.62, 0], open: 0, dist: 3.4 },
+  explode: { rot: [0.42, -0.25, 0], open: 1, dist: 4.4 },
+  bottom: { rot: [0.37, -0.35, Math.PI], open: 0, dist: 3.4 },
+};
+const q = new URLSearchParams(location.search);
+const view = VIEWS[q.get('view')] || VIEWS.hero;
+
+const canvas = document.querySelector('canvas');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(window.devicePixelRatio || 1);
+renderer.setSize(innerWidth, innerHeight, false);
+renderer.setClearColor(0x000000, 0);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+const scene = new THREE.Scene();
+scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
+const key = new THREE.DirectionalLight(0xffffff, 2.2);
+key.position.set(3, 4, 5);
+const rim = new THREE.DirectionalLight(0xe9ece6, 1.1);
+rim.position.set(-4, 1.5, -3);
+scene.add(key, rim, new THREE.HemisphereLight(0xffffff, 0x1a1c18, 0.35));
+
+const camera = new THREE.PerspectiveCamera(30, innerWidth / innerHeight, 0.1, 100);
+camera.position.set(0, 0.28, view.dist * Math.max(1, 1.05 / camera.aspect));
+camera.lookAt(0, 0, 0);
+
+const pocket = new THREE.Group();
+const model = new THREE.Group();
+model.rotation.x = -Math.PI / 2;
+model.scale.setScalar(0.01);
+pocket.add(model);
+pocket.rotation.set(...view.rot);
+scene.add(pocket);
+
+new GLTFLoader().load('/assets/pocket.glb', (gltf) => {
+  const meshes = {};
+  gltf.scene.traverse((o) => { if (o.isMesh) meshes[o.name] = o; });
+  const box = new THREE.Box3();
+  for (const name of ['front', 'back']) {
+    meshes[name].geometry.computeBoundingBox();
+    box.union(meshes[name].geometry.boundingBox);
+  }
+  const center = box.getCenter(new THREE.Vector3());
+  for (const [name, spec] of Object.entries(PARTS)) {
+    if (!meshes[name]) continue;
+    const mesh = new THREE.Mesh(toCreasedNormals(meshes[name].geometry, THREE.MathUtils.degToRad(35)), material(spec));
+    mesh.position.copy(center).negate().addScaledVector(new THREE.Vector3(...spec.explode), view.open);
+    model.add(mesh);
+  }
+  renderer.render(scene, camera);
+  // Рамка объекта по непрозрачным пикселям — для обрезки (Chrome --dump-dom покажет её в <title>)
+  const gl = renderer.getContext(), w = gl.drawingBufferWidth, h = gl.drawingBufferHeight;
+  const px = new Uint8Array(w * h * 4);
+  gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, px);
+  let x0 = w, y0 = h, x1 = -1, y1 = -1;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    if (px[(y * w + x) * 4 + 3] > 8) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  }
+  document.title = `bbox ${x0} ${h - 1 - y1} ${x1 - x0 + 1} ${y1 - y0 + 1}`;
+});
+</script>
+</body>
+</html>
