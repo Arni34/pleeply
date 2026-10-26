@@ -124,20 +124,25 @@ export function shortDate(value) {
 // Сначала экранируем всё, потом разрешаем только **жирный**, *курсив*, `код`, ```блоки```, ссылки, списки и цитаты.
 const link = (href, text) => `<a href="${href}" rel="nofollow ugc noopener" target="_blank">${text}</a>`;
 
+// Код и ссылки сразу уходят в заглушки \0N\0 и возвращаются только в самом конце:
+// следующие регулярки не должны проходить по уже собранному HTML (иначе URL внутри href
+// превращается во вложенный <a> и рвёт атрибут — так получался XSS).
 function inline(escaped) {
-  const codes = [];
-  let s = escaped.replace(/`([^`\n]+)`/g, (_, c) => `\u0000${codes.push(c) - 1}\u0000`);
-  s = s.replace(/\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)/g, (_, text, href) => link(href, text));
-  s = s.replace(/(^|[^"=>\w])(https?:\/\/[^\s<]*[^\s<.,:;!?)\]'])/g, (_, pre, href) => pre + link(href, href));
+  const held = [];
+  const hold = (html) => `\u0000${held.push(html) - 1}\u0000`;
+  const unhold = (s) => s.replace(/\u0000(\d+)\u0000/g, (_, i) => held[i]);
+  let s = escaped.replace(/`([^`\n]+)`/g, (_, c) => hold(`<code>${c}</code>`));
+  s = s.replace(/\[([^\]\n]+)\]\((https?:\/\/[^\s)\u0000]+)\)/g, (_, text, href) => hold(link(href, unhold(text))));
+  s = s.replace(/(^|[^\w])(https?:\/\/[^\s<\u0000]*[^\s<\u0000.,:;!?)\]'])/g, (_, pre, href) => pre + hold(link(href, href)));
   s = s.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
   s = s.replace(/(^|[^*\w])\*([^*\s][^*\n]*?)\*(?![*\w])/g, '$1<em>$2</em>');
-  return s.replace(/\u0000(\d+)\u0000/g, (_, i) => `<code>${codes[i]}</code>`);
+  return unhold(s);
 }
 
 const BLOCK_START = /^(```|>|[-*]\s|\d+\.\s)/;
 
 export function renderPost(src, depth = 0) {
-  const lines = String(src).replace(/\r/g, '').split('\n');
+  const lines = String(src).replace(/[\r\u0000]/g, '').split('\n'); // \0 занят под заглушки в inline()
   const out = [];
   let i = 0;
   while (i < lines.length) {

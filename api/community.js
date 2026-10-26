@@ -1,6 +1,7 @@
 // Страницы форума pleeply в духе community.n8n.io. Рендер на сервере — темы видят поисковики и ИИ.
 // Адреса (см. vercel.json): /community, /community/latest, /community/categories, /community/c/<slug>,
 // /community/t/<id>/<slug>, /community/new, /community/login, /community/signup, /community/sitemap.xml
+import { createHash } from 'node:crypto';
 import { sql, esc, getUser, avatar, shortDate, renderPost, plainText, safeNext, SITE } from './_lib/forum.js';
 
 const DESCRIPTION = 'The pleeply forum: questions about running AI at home — local models, voice assistants, private smart homes — and ideas for what pleeply should do first.';
@@ -131,6 +132,13 @@ const CLIENT = `(function () {
     }
   });
 })();`;
+
+// CSP — вторая линия защиты от XSS в постах: исполняются только свои файлы и один встроенный
+// скрипт CLIENT (по хешу), а атрибуты вроде onmouseover браузер не запустит.
+const CSP = [
+  `script-src 'self' 'sha256-${createHash('sha256').update(CLIENT).digest('base64')}'`,
+  "object-src 'none'", "base-uri 'self'", "frame-ancestors 'self'",
+].join('; ');
 
 // ---------- куски ----------
 const tabs = (active) => `<nav class="cm-tabs" aria-label="Forum views">
@@ -426,6 +434,7 @@ const VIEWS = {
 };
 
 export default async function handler(req, res) {
+  res.setHeader('Content-Security-Policy', CSP);
   try {
     const user = await getUser(req);
     const view = VIEWS[String(req.query.view || 'top')] || notFound;
