@@ -72,7 +72,6 @@ ${body}
   <div class="foot-in"><span class="mark">pleeply<i></i></span><span>© 2026 pleeply. In development.</span><span class="foot-links"><a href="/info/">Docs</a><a href="/#reserve">Join waitlist</a></span></div>
 </footer>
 <script>${CLIENT}</script>
-<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>`;
 }
