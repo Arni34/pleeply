@@ -142,26 +142,26 @@ const RU = {
   footer: '© 2026 pleeply. В разработке.',
   'foot.top': 'Наверх ↑',
   'f.h': 'Лист ожидания',
-  'f.lead': '20 секунд. Без оплаты.',
+  'f.lead': 'Пять коротких вопросов, 30 секунд. Без оплаты.',
   'f.email': 'Почта',
   'f.err': 'Проверь адрес почты.',
   'f.tier': 'Что бы ты купил?',
-  'f.uses': 'Для чего он тебе?',
-  'u.assistant': 'Личный ассистент',
-  'u.memory': 'Заметки и память',
-  'u.home': 'Умный дом',
-  'u.family': 'Дети и семья',
-  'u.work': 'Работа и документы',
-  'u.models': 'Свои модели',
-  'f.current': 'Чем пользуешься сейчас?',
-  'c.pick': 'Выбери',
-  'c.ai': 'ChatGPT или другое ИИ-приложение',
-  'c.local': 'Своя локальная сборка',
-  'c.none': 'Пока ничем',
+  'f.local': 'На чём сейчас запускаешь локальный ИИ?',
+  'l.own': 'Свой сервер / видеокарта',
+  'l.cloud': 'Только облачный ИИ (ChatGPT и т. п.)',
+  'l.none': 'Пока ни на чём',
+  'f.budget': 'Сколько заплатил бы за такое устройство?',
+  'b.pick': 'Выбери вилку',
+  'b.lt300': 'До $300',
+  'b.700p': '$700 и больше',
+  'b.unsure': 'Пока не знаю',
   'f.deposit': 'Внёс бы возвратный депозит $49, чтобы получить одно из первых устройств?',
   'd.yes': 'Да',
-  'd.maybe': 'Возможно',
+  'd.maybe': 'Зависит',
   'd.no': 'Нет',
+  'f.call': 'Готов на 15-минутное интервью с основателем? Напишем на почту, чтобы выбрать время.',
+  'call.yes': 'Да, давай',
+  'call.no': 'Не сейчас',
   'f.submit': 'Встать в лист',
   'f.small': 'Пишем только про pleeply.',
   's.h': 'Ты в списке.',
@@ -215,6 +215,12 @@ const RU = {
   // ---- отправка в таблицу
   function send(payload) {
     const data = { ts: new Date().toISOString(), session, lang, variant, referrer, ...attr, ...payload };
+    // События воронки — в Neon через assets/track.js (/api/track → site_events). Сама анкета идёт в saveLead.
+    // 'view' там уже посчитан как pageview; у заявки в события уходит только выбранная модель, без почты.
+    if (window.plTrack) {
+      if (payload.type === 'signup') window.plTrack('signup', payload.tier);
+      else if (payload.event !== 'view') window.plTrack(payload.event, payload.detail);
+    }
     if (!CONFIG.endpoint) {
       const box = readJSON('pl_outbox', []);
       box.push(data);
@@ -235,15 +241,18 @@ const RU = {
 
   // ---- письмо о заявке
   const TIERS = { pocket: 'Pocket · $499', one: 'One · $299', pro: 'Pro · $549' };
+  const LOCAL_AI = { ollama: 'Ollama', lmstudio: 'LM Studio', own_hw: 'своё железо', cloud: 'только облако', none: 'ничего' };
+  const BUDGET = { lt300: 'до $300', '300_499': '$300–499', '500_699': '$500–699', '700p': '$700+', unsure: 'не знает' };
   function notify(s) {
     const source = [attr.utm_source, attr.utm_medium, attr.utm_campaign].filter(Boolean).join(' / ');
-    const subject = `pleeply: заявка — ${TIERS[s.tier] || s.tier}`;
+    const subject = `pleeply: заявка — ${TIERS[s.tier] || s.tier}${s.call === 'yes' ? ' · готов на звонок' : ''}`;
     const fields = {
       email: s.email,
       'Вариант': TIERS[s.tier] || s.tier,
+      'Локальный ИИ сейчас': s.local_ai.map((v) => LOCAL_AI[v] || v).join(', ') || '—',
+      'Бюджет': BUDGET[s.budget] || '—',
       'Депозит $49': s.deposit || '—',
-      'Для чего': s.uses.join(', ') || '—',
-      'Сейчас пользуется': s.current || '—',
+      'Интервью 15 мин': s.call === 'yes' ? 'да' : s.call === 'no' ? 'нет' : '—',
       'Источник': source || referrer || 'прямой заход',
       'Заголовок': variant,
       'Язык': lang,
@@ -265,6 +274,27 @@ const RU = {
         _subject: subject, _template: 'table', _captcha: 'false', ...fields,
       });
     }
+  }
+
+  // ---- анкета в базу (Neon, таблица waitlist_leads через /api/waitlist).
+  // Письмо Web3Forms остаётся запасным каналом, если база не ответит.
+  // Внешний referrer первой страницы визита (его хранит assets/track.js), иначе referrer текущей страницы.
+  function firstReferrer() {
+    try { const r = sessionStorage.getItem('pl_first_ref'); if (r !== null) return r; } catch { /* приватный режим */ }
+    return referrer;
+  }
+  function saveLead(s) {
+    fetch('/api/waitlist', {
+      method: 'POST',
+      keepalive: true,
+      headers: { 'Content-Type': 'application/json', 'X-Pleeply': '1' },
+      body: JSON.stringify({
+        email: s.email, tier: s.tier, local_ai: s.local_ai, budget: s.budget, deposit: s.deposit, call: s.call,
+        lang, variant, session, referrer: firstReferrer(), my_ref: myRef, ref: attr.ref || '',
+        utm_source: attr.utm_source || '', utm_medium: attr.utm_medium || '', utm_campaign: attr.utm_campaign || '',
+      }),
+    }).then((r) => { if (!r.ok) track('lead_save_failed', String(r.status)); })
+      .catch(() => track('lead_save_failed', 'network'));
   }
 
   // ---- язык
@@ -354,18 +384,29 @@ const RU = {
         type: 'signup',
         email,
         tier: form.tier.value,
-        uses: [...form.querySelectorAll('[name=uses]:checked')].map((i) => i.value),
-        current: form.current.value,
+        local_ai: [...form.querySelectorAll('[name=local_ai]:checked')].map((i) => i.value),
+        budget: form.budget.value,
         deposit: form.deposit.value || '',
+        call: form.call.value || '',
         my_ref: myRef,
       };
       send(signup);
+      saveLead(signup);
       notify(signup);
       store.set('pl_joined', '1');
     }
     form.classList.add('sent');
     updateShare();
   });
+
+  // «Пока ни на чём» и «только облако» не сочетаются с остальными вариантами.
+  const EXCLUSIVE = ['none', 'cloud'];
+  form.querySelectorAll('[name=local_ai]').forEach((box) => box.addEventListener('change', () => {
+    if (!box.checked) return;
+    form.querySelectorAll('[name=local_ai]').forEach((other) => {
+      if (other !== box && (EXCLUSIVE.includes(box.value) || EXCLUSIVE.includes(other.value))) other.checked = false;
+    });
+  }));
 
   copyBtn.addEventListener('click', async () => {
     try { await navigator.clipboard.writeText(shareInput.value); } catch { shareInput.select(); document.execCommand('copy'); }

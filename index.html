@@ -374,36 +374,36 @@
   <section class="sec wrap" id="reserve">
     <div class="sec-head rv"><h2 data-i="price.h">Pick the one you'd actually buy.</h2></div>
     <div id="tiers">
-      <article class="prod-hero rv">
+      <article class="prod-hero rv" data-model="pocket">
         <span class="tag" data-i="pocket.tag">Prototype</span>
         <h3>pleeply Pocket</h3>
         <p data-i="pocket.d">A pocket-size AI with a battery and a push-to-talk button. The first units are assembled by hand.</p>
         <p class="price-line"><b>$499</b> <span data-i="pocket.spec">Raspberry Pi 5 · compact models, 1–3B · 3000 mAh battery</span></p>
         <div class="ctas">
           <button class="btn btn-dark" type="button" data-tier="pocket" data-i="reserve">Reserve for free</button>
-          <a class="btn btn-line" href="#inside" data-i="pocket.more">See it in 3D</a>
+          <a class="btn btn-line" href="#inside" data-i="pocket.more" data-model-open="pocket:3d">See it in 3D</a>
         </div>
         <img src="/assets/stills/pocket-hero.webp" alt="pleeply Pocket, closed" width="1400" height="1050" loading="lazy">
       </article>
       <div class="prod-row">
-        <article class="prod rv">
+        <article class="prod rv" data-model="one">
           <span class="tag" data-i="one.tag">Speaker</span>
           <h3>pleeply One</h3>
           <p data-i="one.d">The speaker. Fast with compact open models for everyday help, home control and memory.</p>
           <p class="price-line"><b>$299</b> <span data-i="one.spec">Built-in computer and mic array · models up to ~8B · works offline</span></p>
           <div class="ctas">
             <button class="btn btn-dark" type="button" data-tier="one" data-i="reserve">Reserve for free</button>
-            <a class="btn btn-line" href="/info/pleeply/" data-i="more">Learn more</a>
+            <a class="btn btn-line" href="/info/pleeply/" data-i="more" data-model-open="one:more">Learn more</a>
           </div>
         </article>
-        <article class="prod rv">
+        <article class="prod rv" data-model="pro">
           <span class="tag" data-i="pro.tag">Speaker+</span>
           <h3>pleeply Pro</h3>
           <p data-i="pro.d">More memory and compute for larger, smarter models.</p>
           <p class="price-line"><b>$549</b> <span data-i="pro.spec">Everything in One · models up to ~32B · longer memory</span></p>
           <div class="ctas">
             <button class="btn btn-dark" type="button" data-tier="pro" data-i="reserve">Reserve for free</button>
-            <a class="btn btn-line" href="/info/pleeply/" data-i="more">Learn more</a>
+            <a class="btn btn-line" href="/info/pleeply/" data-i="more" data-model-open="pro:more">Learn more</a>
           </div>
         </article>
       </div>
@@ -609,7 +609,7 @@
     <div class="dlg-head">
       <div>
         <h3 id="dlg-title" data-i="f.h">Join the waitlist</h3>
-        <p class="lead" data-i="f.lead">Takes 20 seconds. No payment.</p>
+        <p class="lead" data-i="f.lead">Five quick questions, 30 seconds. No payment.</p>
       </div>
       <button class="x" type="button" data-close aria-label="Close">×</button>
     </div>
@@ -625,33 +625,31 @@
         <span class="lbl" data-i="f.tier">Which one would you buy?</span>
         <div class="seg">
           <label><input type="radio" name="tier" value="pocket"><span>Pocket · $499</span></label>
-          <label><input type="radio" name="tier" value="one" checked><span>One · $299</span></label>
+          <label><input type="radio" name="tier" value="one"><span>One · $299</span></label>
           <label><input type="radio" name="tier" value="pro"><span>Pro · $549</span></label>
         </div>
       </div>
 
       <div class="field">
-        <span class="lbl" data-i="f.uses">What would you use it for?</span>
+        <span class="lbl" data-i="f.local">What do you run local AI on today?</span>
         <div class="chips">
-          <label class="chip"><input type="checkbox" name="uses" value="assistant"><span data-i="u.assistant">Private assistant</span></label>
-          <label class="chip"><input type="checkbox" name="uses" value="memory"><span data-i="u.memory">Notes & memory</span></label>
-          <label class="chip"><input type="checkbox" name="uses" value="home"><span data-i="u.home">Smart home</span></label>
-          <label class="chip"><input type="checkbox" name="uses" value="family"><span data-i="u.family">Kids & family</span></label>
-          <label class="chip"><input type="checkbox" name="uses" value="work"><span data-i="u.work">Work & documents</span></label>
-          <label class="chip"><input type="checkbox" name="uses" value="models"><span data-i="u.models">Running my own models</span></label>
+          <label class="chip"><input type="checkbox" name="local_ai" value="ollama"><span>Ollama</span></label>
+          <label class="chip"><input type="checkbox" name="local_ai" value="lmstudio"><span>LM Studio</span></label>
+          <label class="chip"><input type="checkbox" name="local_ai" value="own_hw"><span data-i="l.own">My own server / GPU</span></label>
+          <label class="chip"><input type="checkbox" name="local_ai" value="cloud"><span data-i="l.cloud">Only cloud AI (ChatGPT etc.)</span></label>
+          <label class="chip"><input type="checkbox" name="local_ai" value="none"><span data-i="l.none">Nothing yet</span></label>
         </div>
       </div>
 
       <div class="field">
-        <label for="current" data-i="f.current">What do you use now?</label>
-        <select id="current" name="current">
-          <option value="" data-i="c.pick">Choose one</option>
-          <option value="alexa">Alexa / Echo</option>
-          <option value="google">Google / Nest</option>
-          <option value="apple">Siri / HomePod</option>
-          <option value="ai_app" data-i="c.ai">ChatGPT or another AI app</option>
-          <option value="local" data-i="c.local">My own local setup</option>
-          <option value="none" data-i="c.none">Nothing yet</option>
+        <label for="budget" data-i="f.budget">How much would you pay for a device like this?</label>
+        <select id="budget" name="budget">
+          <option value="" data-i="b.pick">Choose a range</option>
+          <option value="lt300" data-i="b.lt300">Under $300</option>
+          <option value="300_499">$300–499</option>
+          <option value="500_699">$500–699</option>
+          <option value="700p" data-i="b.700p">$700 or more</option>
+          <option value="unsure" data-i="b.unsure">Not sure yet</option>
         </select>
       </div>
 
@@ -659,8 +657,16 @@
         <span class="lbl" data-i="f.deposit">Would you put down a fully refundable $49 deposit to get one of the first units?</span>
         <div class="seg">
           <label><input type="radio" name="deposit" value="yes"><span data-i="d.yes">Yes</span></label>
-          <label><input type="radio" name="deposit" value="maybe"><span data-i="d.maybe">Maybe</span></label>
+          <label><input type="radio" name="deposit" value="maybe"><span data-i="d.maybe">Depends</span></label>
           <label><input type="radio" name="deposit" value="no"><span data-i="d.no">No</span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="lbl" data-i="f.call">Up for a 15-minute interview with the founder? We'll email you to pick a time.</span>
+        <div class="seg">
+          <label><input type="radio" name="call" value="yes"><span data-i="call.yes">Yes, happy to</span></label>
+          <label><input type="radio" name="call" value="no"><span data-i="call.no">Not now</span></label>
         </div>
       </div>
 
@@ -688,6 +694,9 @@
 { "imports": { "three": "/assets/vendor/three/three.module.min.js", "three/addons/": "/assets/vendor/three/addons/" } }
 </script>
 <script type="module" src="/assets/pocket3d.js"></script>
+<!-- Своя аналитика без cookie: визиты, источники, гайды, модели → /api/track → Neon (site_events).
+     Стоит до app.js, чтобы form_open по ссылке /#join не терялся. -->
+<script src="/assets/track.js"></script>
 <script src="app.js"></script>
 <!-- Vercel Web Analytics: запасной счётчик визитов, если таблица не ответит. -->
 <script defer src="/_vercel/insights/script.js"></script>
