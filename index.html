@@ -145,6 +145,7 @@
   .quote { text-align: center; max-width: 1040px; margin: 0 auto; }
   .quote blockquote { margin: 0; font-size: clamp(30px, 3.4vw, 48px); line-height: 1.15; letter-spacing: -0.01em; color: var(--ink); font-weight: 500; }
   .quote p { max-width: 58ch; margin: 24px auto 28px; color: var(--muted); }
+  .quote p a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
 
   /* «Встроено, а не прикручено»: карточки с маленькими интерфейсами */
   .feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px 20px; }
@@ -414,8 +415,8 @@
   <!-- Факт с источником -->
   <section class="sec wrap">
     <figure class="quote rv">
-      <blockquote data-i="proof.q">On March 28, 2025, Amazon removed the Echo setting that kept <em>voice requests off its cloud</em>.</blockquote>
-      <p data-i="proof.p">TechCrunch, March 15, 2025. pleeply is built the other way around: the model runs on the device, in your home.</p>
+      <blockquote data-i="proof.q">On March 28, 2025, Amazon switched off “Do Not Send Voice Recordings” on the Echo Dot (4th gen), Echo Show 10 and Echo Show 15. <em>Privacy that ships as a setting can be removed by an update.</em></blockquote>
+      <p data-i="proof.p">The option existed only on those three models, in the US, in English, and Amazon says fewer than 0.03% of customers used it. Its reason: generative AI features that need its cloud. Sources: <a href="https://techcrunch.com/2025/03/15/amazons-echo-will-send-all-voice-recordings-to-the-cloud-starting-march-28" target="_blank" rel="noopener">TechCrunch</a>, <a href="https://www.theregister.com/2025/03/17/amazon_kills_on_device_alexa/" target="_blank" rel="noopener">The Register</a>, <a href="https://ny1.com/nyc/all-boroughs/ap-top-news/2025/03/19/amazon-ends-little-used-privacy-feature-that-let-echo-users-opt-out-of-sending-recordings-to-company" target="_blank" rel="noopener">AP</a>. pleeply is built the other way around: the model runs on the device, in your home.</p>
       <a class="btn btn-main" href="https://techcrunch.com/2025/03/15/amazons-echo-will-send-all-voice-recordings-to-the-cloud-starting-march-28" target="_blank" rel="noopener" data-i="proof.link">Read the story</a>
     </figure>
   </section>

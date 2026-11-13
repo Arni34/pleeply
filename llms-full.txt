@@ -8,7 +8,7 @@ Status: in development, not for sale yet. Prices on the site are expected prices
 
 > Guides to running a private AI assistant at home — how local voice assistants work, what hardware you need, how smart speakers handle your voice, and where pleeply fits in.
 
-Source: https://pleeply.vercel.app/info/ · Updated 2026-10-24
+Source: https://pleeply.vercel.app/info/ · Updated 2026-11-14
 
 You can run an AI assistant at home that listens, answers and remembers without sending your voice to a company's servers. These docs explain how that works, what it takes to build one yourself, and how it compares with cloud speakers like Alexa.
 
@@ -19,9 +19,9 @@ You can run an AI assistant at home that listens, answers and remembers without 
 
 - [What is a local AI assistant?](https://pleeply.vercel.app/info/local-ai-assistant/) — how on-device AI differs from cloud assistants, and what you give up.
 - [How a local voice assistant works](https://pleeply.vercel.app/info/how-local-voice-assistants-work/) — the pipeline from wake word to spoken answer, and where the delay comes from.
-- [Do smart speakers send your voice to the cloud?](https://pleeply.vercel.app/info/smart-speaker-privacy/) — what changed for Amazon Echo in March 2025.
+- [Do smart speakers send your voice to the cloud?](https://pleeply.vercel.app/info/smart-speaker-privacy/) — what Amazon switched off on three Echo models in March 2025.
 - [Choose your hardware](https://pleeply.vercel.app/info/run-ai-at-home/) — from a Raspberry Pi to a PC with a graphics card.
-- [Run an LLM on a Raspberry Pi 5](https://pleeply.vercel.app/info/raspberry-pi-5-llm/) — measured speeds and which models to pick.
+- [Run an LLM on a Raspberry Pi 5](https://pleeply.vercel.app/info/raspberry-pi-5-llm/) — third-party speed tests and which models to pick.
 - [Use a local LLM with Home Assistant](https://pleeply.vercel.app/info/home-assistant-local-llm/) — Assist, Ollama and the Voice Preview Edition.
 - [How much RAM a local LLM needs](https://pleeply.vercel.app/info/local-llm-memory/) — rules of thumb for 8, 16, 24 and 48 GB.
 - [Private alternatives to Alexa](https://pleeply.vercel.app/info/alexa-alternatives/) — compared on privacy, cost and effort.
@@ -53,7 +53,7 @@ pleeply is in development. The waitlist is open.
 
 ## How these pages are written
 
-Every number and date links to its source at the bottom of the page. Speeds on small hardware vary a lot with the model, the quantization and the runtime, so treat them as ranges, not promises. Each page shows when it was last checked.
+Every number and date links to its source at the bottom of the page. We haven't benchmarked anything ourselves yet — there is no pleeply prototype — so every speed figure in these docs comes from third-party tests. Speeds on small hardware vary a lot with the model, the quantization and the runtime, so treat them as ranges, not promises. Each page shows when it was last checked.
 
 ---
 
@@ -130,7 +130,7 @@ Yes. Memory is data stored on the device — notes, preferences, past conversati
 
 > The four stages of an offline voice assistant — wake word, speech-to-text, language model, text-to-speech — which open-source software does each, and how long each step takes on small hardware.
 
-Source: https://pleeply.vercel.app/info/how-local-voice-assistants-work/ · Updated 2026-10-24
+Source: https://pleeply.vercel.app/info/how-local-voice-assistants-work/ · Updated 2026-11-14
 
 An offline voice assistant turns your speech into a spoken answer in four stages that all run on one machine: a wake word detector, speech-to-text, a language model and text-to-speech. On a Raspberry Pi 5 the whole loop takes several seconds, and most of that time is the language model writing its answer.
 
@@ -145,9 +145,12 @@ An offline voice assistant turns your speech into a spoken answer in four stages
 
 In front of all four sits the audio hardware: a microphone array with echo cancellation and noise suppression, so the assistant can hear you over its own speaker and the room. Home Assistant's Voice Preview Edition, for example, uses an XMOS XU316 chip for this.
 
+> **Whose numbers these are**
+> We haven't measured any of this ourselves — there is no pleeply prototype yet. Every speed figure on this page comes from third-party tests and guides listed under Sources. Your results will vary with model, quantization, prompt length and cooling.
+
 ## Where the time goes
 
-Reported timings on a Raspberry Pi 5:
+Timings reported by third-party tests and guides on a Raspberry Pi 5 (not measured by pleeply):
 
 - **Speech-to-text:** Whisper "small" in int8 takes about 2–4 seconds, depending on sentence length.
 - **Language model:** with 4-bit models in Ollama, a 1B model generates about 11 tokens per second and a 3B model about 4.7. A one-sentence answer of about 25 tokens therefore takes roughly 2–5 seconds, plus the time to read the prompt.
@@ -171,7 +174,7 @@ Timers and alarms, conversions, questions the model can answer from what it lear
 
 ### Can Whisper run on a Raspberry Pi?
 
-Yes. Small Whisper models run on a Raspberry Pi 5: the "small" model in int8 takes about 2–4 seconds per sentence. Larger models such as "medium" use too much of the Pi's memory to be practical.
+Yes. Small Whisper models run on a Raspberry Pi 5: guides report the "small" model in int8 takes about 2–4 seconds per sentence. Larger models such as "medium" use too much of the Pi's memory to be practical.
 
 ### What is the best offline text-to-speech?
 
@@ -179,7 +182,7 @@ Piper is the most widely used offline text-to-speech for home assistants. It run
 
 ### Why are local voice assistants slower than Alexa?
 
-Because the language model runs on small hardware in your home instead of on data-center GPUs. On a Raspberry Pi 5 a request takes about 5–8 seconds end to end; a board with a GPU or an Apple Silicon Mac generates short answers several times faster.
+Because the language model runs on small hardware in your home instead of on data-center GPUs. Published guides report about 5–8 seconds per request end to end on a Raspberry Pi 5; a board with a GPU or an Apple Silicon Mac generates short answers several times faster.
 
 ### Does the wake word detector record everything?
 
@@ -199,17 +202,19 @@ In a typical design, no. The wake word model checks a short rolling audio buffer
 
 # Do smart speakers send your voice to the cloud?
 
-> Mainstream smart speakers send your requests to company servers. What changed for Amazon Echo on March 28, 2025, what Alexa+ means for privacy, and how a local assistant differs.
+> Mainstream smart speakers send your requests to company servers. What Amazon switched off on three Echo models on March 28, 2025, what Alexa+ means for privacy, and how a local assistant differs.
 
-Source: https://pleeply.vercel.app/info/smart-speaker-privacy/ · Updated 2026-10-24
+Source: https://pleeply.vercel.app/info/smart-speaker-privacy/ · Updated 2026-11-14
 
-Yes. Mainstream smart speakers send what you say after the wake word to the company's servers to be processed. Amazon switched off the last Echo setting that kept requests on the device on March 28, 2025, so every Alexa request now goes to Amazon's cloud. A local assistant processes your voice on the device instead.
+Yes. Mainstream smart speakers send what you say after the wake word to the company's servers to be processed. On March 28, 2025 Amazon switched off "Do Not Send Voice Recordings" — an option that existed on three Echo models in the US — so voice recordings from those devices now go to Amazon's cloud too. A local assistant processes your voice on the device instead.
 
 ## What changed for Alexa in 2025
 
-- A few Echo models — the Echo Dot (4th generation), Echo Show 10 and Echo Show 15 — had a "Do Not Send Voice Recordings" option that processed requests on the device.
-- Amazon ended support for that option on March 28, 2025. In its email to customers it said it was expanding Alexa with generative AI features that rely on cloud processing, and had "decided to no longer support this feature".
-- You can still tell Alexa not to save recordings, but requests are processed in Amazon's cloud either way.
+- Three Echo models — the Echo Dot (4th generation), Echo Show 10 and Echo Show 15 — had a "Do Not Send Voice Recordings" option. It recognized speech on the device and sent Amazon a text transcript of the request instead of the audio.
+- According to AP, the option was available only to US customers with the device set to English, and Amazon said fewer than 0.03% of customers used it. Other Echo devices never had it.
+- Amazon ended support for it on March 28, 2025. In its email to customers it said it was expanding Alexa with generative AI features that rely on cloud processing, and had "decided to no longer support this feature".
+- Customers who didn't act were switched to "Don't save recordings": audio goes to Amazon's cloud and is deleted after processing.
+- The point isn't the size of the change. Privacy that a company grants as a setting, it can also remove with an update.
 
 ## Alexa+ runs in the cloud
 
@@ -230,17 +235,17 @@ These reduce what is stored. They don't change where requests are processed.
 | Does audio leave the house? | Yes, after the wake word | No |
 | Who handles the transcript? | The provider's servers | Only the device in your home |
 | Works when the internet is down? | No | Yes, for core features |
-| Can processing move to the cloud later? | Yes — Echo's local option was removed in 2025 | Only if the device's software changes; open-source software lets you check |
+| Can processing move to the cloud later? | Yes — Amazon removed the on-device option from three Echo models in 2025 | Only if the device's software changes; open-source software lets you check |
 
 ## FAQ
 
 ### Does Alexa record everything I say?
 
-No. An Echo listens on the device for the wake word and sends audio to Amazon only after it hears it. Since March 28, 2025 every request is processed in Amazon's cloud; you can choose not to save recordings, but the audio still goes to Amazon.
+No. An Echo listens on the device for the wake word and sends audio to Amazon only after it hears it. Since March 28, 2025 that audio is processed in Amazon's cloud on every Echo; you can choose not to save recordings, but the audio still goes to Amazon.
 
 ### Can I stop Alexa from sending recordings to Amazon?
 
-No. The only option that kept requests on the device was removed on March 28, 2025. You can choose not to save recordings, delete your voice history or mute the microphones, but requests are still processed in Amazon's cloud.
+Not anymore. The only option — "Do Not Send Voice Recordings" on the Echo Dot (4th generation), Echo Show 10 and Echo Show 15 in the US — was removed on March 28, 2025, and even it sent a text transcript of each request to Amazon. You can choose not to save recordings, delete your voice history or mute the microphones, but requests are still processed in Amazon's cloud.
 
 ### Is there a smart speaker that doesn't send audio to the cloud?
 
@@ -252,7 +257,9 @@ Alexa+ processes your requests on Amazon's servers, under Amazon's privacy polic
 
 ## Sources
 
-- [TechCrunch — Amazon's Echo will send all voice recordings to the cloud, starting March 28](https://techcrunch.com/2025/03/15/amazons-echo-will-send-all-voice-recordings-to-the-cloud-starting-march-28)
+- [TechCrunch — Amazon's Echo will send all voice recordings to the cloud, starting March 28](https://techcrunch.com/2025/03/15/amazons-echo-will-send-all-voice-recordings-to-the-cloud-starting-march-28) (March 15, 2025)
+- [The Register — report on Amazon's email ending on-device Alexa processing](https://www.theregister.com/2025/03/17/amazon_kills_on_device_alexa/) (March 17, 2025; quotes Amazon's email)
+- [AP via NY1 — Amazon ends little-used privacy feature that let Echo users opt out of sending recordings](https://ny1.com/nyc/all-boroughs/ap-top-news/2025/03/19/amazon-ends-little-used-privacy-feature-that-let-echo-users-opt-out-of-sending-recordings-to-company) (March 19, 2025; models, US-only, under 0.03%)
 - [AlternativeTo — Amazon Echo removes the "Do Not Send Voice Recordings" option](https://alternativeto.net/news/2025/3/amazon-echo-to-remove-do-not-send-voice-recordings-to-the-cloud-option-weakening-privacy)
 - [Android Authority — Alexa+ pricing](https://androidauthority.com/alexa-plus-pricing-3530655)
 - [Home Assistant — Voice Preview Edition announcement](https://www.home-assistant.io/blog/2024/12/19/voice-preview-edition-the-era-of-open-voice/)
@@ -263,12 +270,15 @@ Alexa+ processes your requests on Amazon's servers, under Amazon's privacy polic
 
 > Compare the ways to run a private AI assistant at home — Raspberry Pi 5, Jetson Orin Nano Super, Mac mini, a PC with a GPU, Home Assistant Voice, or a ready-made device — by model size, speed and effort.
 
-Source: https://pleeply.vercel.app/info/run-ai-at-home/ · Updated 2026-10-24
+Source: https://pleeply.vercel.app/info/run-ai-at-home/ · Updated 2026-11-14
 
 You can run a private AI assistant on anything from a single-board computer to a desktop with a graphics card. Memory is what decides: it sets the largest model you can run, and the model's size sets how capable and how fast your assistant is.
 
 > **Short answer**
 > For a voice assistant with small 1–3B models, a Raspberry Pi 5 with 8 GB works, but answers take several seconds. For conversation-quality 7–8B models, use a machine with about 16 GB of memory, such as an Apple Silicon Mac mini. For the fastest small models on a low-power board, a Jetson Orin Nano Super.
+
+> **Whose numbers these are**
+> We haven't measured any of this ourselves — there is no pleeply prototype yet. Every speed figure on this page comes from third-party tests and guides listed under Sources. Your results will vary with model, quantization, prompt length and cooling.
 
 ## Choose your setup
 
@@ -276,7 +286,7 @@ You can run a private AI assistant on anything from a single-board computer to a
 ### [Raspberry Pi 5](https://pleeply.vercel.app/info/raspberry-pi-5-llm/)
 **Best for:** tinkerers and always-on, low-power setups.
 
-**Models:** 1–3B at about 5–11 tokens per second; 7B is very slow (about 1.5–2.5).
+**Models:** 1–3B at about 5–11 tokens per second in third-party tests; 7B is very slow (about 1.5–2.5).
 
 **Requirements:** the 8 GB or 16 GB board and an active cooler.
 
@@ -334,11 +344,11 @@ Details in [How much RAM a local LLM needs](https://pleeply.vercel.app/info/loca
 
 ### What is the cheapest way to run a local LLM at home?
 
-A Raspberry Pi 5 with 8 GB is the cheapest common option. It runs 1–3B models at roughly 5–11 tokens per second — fine for commands and short answers, slow for conversation.
+A Raspberry Pi 5 with 8 GB is the cheapest common option. Third-party tests show it running 1–3B models at roughly 5–11 tokens per second — fine for commands and short answers, slow for conversation.
 
 ### Is a Raspberry Pi 5 or a Jetson Orin Nano better for local AI?
 
-For language models, the Jetson Orin Nano Super is several times faster on small models because it has a CUDA GPU: published 3B results are roughly 22–43 tokens per second against about 5 on a Pi 5. The Pi 5 is cheaper, simpler and has more community guides.
+For language models, the Jetson Orin Nano Super is several times faster on small models because it has a CUDA GPU: published third-party 3B results are roughly 22–43 tokens per second against about 5 on a Pi 5. The Pi 5 is cheaper, simpler and has more community guides.
 
 ### Can a Mac mini run a local LLM?
 
@@ -360,13 +370,16 @@ No. Small models run on CPUs, including the Raspberry Pi 5's. A GPU or Apple Sil
 
 # Run an LLM on a Raspberry Pi 5
 
-> What a Raspberry Pi 5 can run — measured tokens per second for 1–3B models, which models to pick for a voice assistant, why cooling matters, and how to install Ollama.
+> What a Raspberry Pi 5 can run — third-party tokens-per-second results for 1–3B models, which models to pick for a voice assistant, why cooling matters, and how to install Ollama.
 
-Source: https://pleeply.vercel.app/info/raspberry-pi-5-llm/ · Updated 2026-10-24
+Source: https://pleeply.vercel.app/info/raspberry-pi-5-llm/ · Updated 2026-11-14
 
-A Raspberry Pi 5 can run small language models locally. In Ollama tests with 4-bit models it generates about 11 tokens per second with 1B models and about 5 with 3B models — enough for short voice answers, too slow for long conversation. Use the 8 GB or 16 GB board and an active cooler.
+A Raspberry Pi 5 can run small language models locally. In published third-party Ollama tests with 4-bit models it generates about 11 tokens per second with 1B models and about 5 with 3B models — enough for short voice answers, too slow for long conversation. Use the 8 GB or 16 GB board and an active cooler.
 
-## Measured speeds
+> **Whose numbers these are**
+> We haven't measured any of this ourselves — there is no pleeply prototype yet. Every speed figure on this page comes from third-party tests and guides listed under Sources. Your results will vary with model, quantization, prompt length and cooling.
+
+## Published speeds (third-party tests)
 
 | Model | Quantization | Tokens per second |
 |---|---|---|
@@ -378,7 +391,7 @@ A Raspberry Pi 5 can run small language models locally. In Ollama tests with 4-b
 | Qwen 2.5 3B | Q4_K_M | 5.2 |
 | Llama 3.2 3B | Q4_K_M | 4.7 |
 
-Measured with Ollama on a Raspberry Pi 5 by the Stratosphere Linux IPS project. Larger models are much slower: about 1.5–2.5 tokens per second for 7B models on the 16 GB board.
+Measured with Ollama on a Raspberry Pi 5 by the Stratosphere Linux IPS project, not by pleeply. Larger models are much slower: bestllmfor reports about 1.5–2.5 tokens per second for 7B models on the 16 GB board.
 
 ## Which model to pick
 
@@ -420,15 +433,15 @@ For commands and short answers, yes: guides report about 5–8 seconds per reque
 
 ### Can a Raspberry Pi 5 run Llama?
 
-Yes. Llama 3.2 1B runs at about 11 tokens per second and Llama 3.2 3B at about 4.7 tokens per second with 4-bit quantization in Ollama.
+Yes. In third-party Ollama tests (Stratosphere Linux IPS), Llama 3.2 1B ran at about 11 tokens per second and Llama 3.2 3B at about 4.7 with 4-bit quantization.
 
 ### What is the best LLM for a Raspberry Pi 5?
 
-For speed, Gemma 3 1B or Llama 3.2 1B at about 11 tokens per second. For better answers at a usable speed, Qwen 2.5 3B or Llama 3.2 3B at about 5 tokens per second.
+For speed, Gemma 3 1B or Llama 3.2 1B — about 11 tokens per second in third-party tests. For better answers at a usable speed, Qwen 2.5 3B or Llama 3.2 3B — about 5 tokens per second in the same tests.
 
 ### Can a Raspberry Pi 5 run a 7B model?
 
-On the 16 GB board, yes, but slowly — about 1.5–2.5 tokens per second.
+On the 16 GB board, yes, but slowly — about 1.5–2.5 tokens per second, according to third-party reports.
 
 ### Does the Raspberry Pi AI HAT speed up LLMs?
 
@@ -583,7 +596,7 @@ Yes. Context memory grows with its length, so a 32k context needs noticeably mor
 
 > Voice assistants that don't send your voice to Amazon — Home Assistant Assist with local AI, open-source assistants, DIY Raspberry Pi builds and local AI devices — compared on privacy, cost and effort.
 
-Source: https://pleeply.vercel.app/info/alexa-alternatives/ · Updated 2026-10-24
+Source: https://pleeply.vercel.app/info/alexa-alternatives/ · Updated 2026-11-14
 
 If you want a voice assistant that doesn't send your voice to Amazon, the main options are Home Assistant's Assist with local speech and an Ollama model, an open-source assistant such as OpenVoiceOS, a DIY Raspberry Pi build, or a device that runs its AI on board. Each trades some convenience for privacy.
 
@@ -635,6 +648,8 @@ You can use an Echo as a front end for Home Assistant, but your voice requests a
 - [The Next Web — Google's first speaker in six years is really a $10-a-month Gemini subscription](https://thenextweb.com/news/google-home-speaker-gemini-99-subscription)
 - [Home Assistant — Voice Preview Edition announcement](https://www.home-assistant.io/blog/2024/12/19/voice-preview-edition-the-era-of-open-voice/)
 - [TechCrunch — Amazon's Echo will send all voice recordings to the cloud, starting March 28](https://techcrunch.com/2025/03/15/amazons-echo-will-send-all-voice-recordings-to-the-cloud-starting-march-28)
+- [The Register — report on Amazon's email ending on-device Alexa processing](https://www.theregister.com/2025/03/17/amazon_kills_on_device_alexa/)
+- [AP via NY1 — Amazon ends little-used privacy feature that let Echo users opt out of sending recordings](https://ny1.com/nyc/all-boroughs/ap-top-news/2025/03/19/amazon-ends-little-used-privacy-feature-that-let-echo-users-opt-out-of-sending-recordings-to-company)
 - [Open Voice OS — About](https://www.openvoiceos.org/about)
 
 ---
@@ -700,7 +715,7 @@ Home Assistant Assist with local Whisper, Piper and Ollama; Rhasspy; and OpenVoi
 
 > pleeply is a home speaker with a computer inside that runs open AI models on the device, keeps a private memory and works without the cloud. It's in development — here is what's planned.
 
-Source: https://pleeply.vercel.app/info/pleeply/ · Updated 2026-10-25
+Source: https://pleeply.vercel.app/info/pleeply/ · Updated 2026-11-14
 
 pleeply is a speaker with a computer inside. It runs open-weight AI models on the device, keeps a private memory of you at home and works without the cloud. pleeply is in development and not for sale yet; the waitlist is open at [pleeply.vercel.app](https://pleeply.vercel.app/).
 
@@ -763,9 +778,11 @@ On the device. Your voice is processed by the computer inside the speaker, and y
 
 ### How is pleeply different from Alexa?
 
-Alexa processes requests in Amazon's cloud — since March 28, 2025 there has been no setting to keep them on the device. pleeply runs its model on the speaker and keeps your memory at home.
+Alexa processes requests in Amazon's cloud. The one exception — a "Do Not Send Voice Recordings" option on three Echo models in the US — was switched off on March 28, 2025. pleeply runs its model on the speaker and keeps your memory at home.
 
 ## Sources
 
 - [pleeply — home page and waitlist](https://pleeply.vercel.app/)
 - [TechCrunch — Amazon's Echo will send all voice recordings to the cloud, starting March 28](https://techcrunch.com/2025/03/15/amazons-echo-will-send-all-voice-recordings-to-the-cloud-starting-march-28)
+- [The Register — report on Amazon's email ending on-device Alexa processing](https://www.theregister.com/2025/03/17/amazon_kills_on_device_alexa/)
+- [AP via NY1 — Amazon ends little-used privacy feature that let Echo users opt out of sending recordings](https://ny1.com/nyc/all-boroughs/ap-top-news/2025/03/19/amazon-ends-little-used-privacy-feature-that-let-echo-users-opt-out-of-sending-recordings-to-company)

@@ -12,12 +12,12 @@ Status: in development, not for sale yet. Prices on the site are expected prices
 
 - [What is a local AI assistant?](https://pleeply.vercel.app/info/local-ai-assistant.md): A local AI assistant runs speech recognition, an open-weight language model and speech synthesis on hardware in your home, so your voice and memory stay on the device. How it compares with cloud assistants.
 - [How a local voice assistant works](https://pleeply.vercel.app/info/how-local-voice-assistants-work.md): The four stages of an offline voice assistant — wake word, speech-to-text, language model, text-to-speech — which open-source software does each, and how long each step takes on small hardware.
-- [Do smart speakers send your voice to the cloud?](https://pleeply.vercel.app/info/smart-speaker-privacy.md): Mainstream smart speakers send your requests to company servers. What changed for Amazon Echo on March 28, 2025, what Alexa+ means for privacy, and how a local assistant differs.
+- [Do smart speakers send your voice to the cloud?](https://pleeply.vercel.app/info/smart-speaker-privacy.md): Mainstream smart speakers send your requests to company servers. What Amazon switched off on three Echo models on March 28, 2025, what Alexa+ means for privacy, and how a local assistant differs.
 
 ## Run it yourself
 
 - [Run AI at home: choose your hardware](https://pleeply.vercel.app/info/run-ai-at-home.md): Compare the ways to run a private AI assistant at home — Raspberry Pi 5, Jetson Orin Nano Super, Mac mini, a PC with a GPU, Home Assistant Voice, or a ready-made device — by model size, speed and effort.
-- [Run an LLM on a Raspberry Pi 5](https://pleeply.vercel.app/info/raspberry-pi-5-llm.md): What a Raspberry Pi 5 can run — measured tokens per second for 1–3B models, which models to pick for a voice assistant, why cooling matters, and how to install Ollama.
+- [Run an LLM on a Raspberry Pi 5](https://pleeply.vercel.app/info/raspberry-pi-5-llm.md): What a Raspberry Pi 5 can run — third-party tokens-per-second results for 1–3B models, which models to pick for a voice assistant, why cooling matters, and how to install Ollama.
 - [Use a local LLM with Home Assistant](https://pleeply.vercel.app/info/home-assistant-local-llm.md): How to connect Home Assistant's Assist to a local language model with Ollama, what the Voice Preview Edition does, which settings matter, and how to keep commands fast.
 - [How much RAM do you need to run a local LLM?](https://pleeply.vercel.app/info/local-llm-memory.md): Memory sets the largest model you can run at home. Rules of thumb for 8, 16, 24 and 48 GB, what 4-bit quantization does, and how the context window adds to it.
 

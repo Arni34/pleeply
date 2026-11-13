@@ -4,7 +4,7 @@ nav: How local voice assistants work
 description: The four stages of an offline voice assistant — wake word, speech-to-text, language model, text-to-speech — which open-source software does each, and how long each step takes on small hardware.
 section: learn
 order: 2
-updated: 2026-10-24
+updated: 2026-11-14
 ---
 
 An offline voice assistant turns your speech into a spoken answer in four stages that all run on one machine: a wake word detector, speech-to-text, a language model and text-to-speech. On a Raspberry Pi 5 the whole loop takes several seconds, and most of that time is the language model writing its answer.
@@ -20,9 +20,12 @@ An offline voice assistant turns your speech into a spoken answer in four stages
 
 In front of all four sits the audio hardware: a microphone array with echo cancellation and noise suppression, so the assistant can hear you over its own speaker and the room. Home Assistant's Voice Preview Edition, for example, uses an XMOS XU316 chip for this.
 
+> [!NOTE] Whose numbers these are
+> We haven't measured any of this ourselves — there is no pleeply prototype yet. Every speed figure on this page comes from third-party tests and guides listed under Sources. Your results will vary with model, quantization, prompt length and cooling.
+
 ## Where the time goes
 
-Reported timings on a Raspberry Pi 5:
+Timings reported by third-party tests and guides on a Raspberry Pi 5 (not measured by pleeply):
 
 - **Speech-to-text:** Whisper "small" in int8 takes about 2–4 seconds, depending on sentence length.
 - **Language model:** with 4-bit models in Ollama, a 1B model generates about 11 tokens per second and a 3B model about 4.7. A one-sentence answer of about 25 tokens therefore takes roughly 2–5 seconds, plus the time to read the prompt.
@@ -46,7 +49,7 @@ Timers and alarms, conversions, questions the model can answer from what it lear
 
 ### Can Whisper run on a Raspberry Pi?
 
-Yes. Small Whisper models run on a Raspberry Pi 5: the "small" model in int8 takes about 2–4 seconds per sentence. Larger models such as "medium" use too much of the Pi's memory to be practical.
+Yes. Small Whisper models run on a Raspberry Pi 5: guides report the "small" model in int8 takes about 2–4 seconds per sentence. Larger models such as "medium" use too much of the Pi's memory to be practical.
 
 ### What is the best offline text-to-speech?
 
@@ -54,7 +57,7 @@ Piper is the most widely used offline text-to-speech for home assistants. It run
 
 ### Why are local voice assistants slower than Alexa?
 
-Because the language model runs on small hardware in your home instead of on data-center GPUs. On a Raspberry Pi 5 a request takes about 5–8 seconds end to end; a board with a GPU or an Apple Silicon Mac generates short answers several times faster.
+Because the language model runs on small hardware in your home instead of on data-center GPUs. Published guides report about 5–8 seconds per request end to end on a Raspberry Pi 5; a board with a GPU or an Apple Silicon Mac generates short answers several times faster.
 
 ### Does the wake word detector record everything?
 

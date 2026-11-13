@@ -4,7 +4,7 @@ nav: What is pleeply?
 description: pleeply is a home speaker with a computer inside that runs open AI models on the device, keeps a private memory and works without the cloud. It's in development — here is what's planned.
 section: pleeply
 order: 1
-updated: 2026-10-25
+updated: 2026-11-14
 ---
 
 pleeply is a speaker with a computer inside. It runs open-weight AI models on the device, keeps a private memory of you at home and works without the cloud. pleeply is in development and not for sale yet; the waitlist is open at [pleeply.vercel.app](https://pleeply.vercel.app/).
@@ -68,9 +68,11 @@ On the device. Your voice is processed by the computer inside the speaker, and y
 
 ### How is pleeply different from Alexa?
 
-Alexa processes requests in Amazon's cloud — since March 28, 2025 there has been no setting to keep them on the device. pleeply runs its model on the speaker and keeps your memory at home.
+Alexa processes requests in Amazon's cloud. The one exception — a "Do Not Send Voice Recordings" option on three Echo models in the US — was switched off on March 28, 2025. pleeply runs its model on the speaker and keeps your memory at home.
 
 ## Sources
 
 - [pleeply — home page and waitlist](https://pleeply.vercel.app/)
 - [TechCrunch — Amazon's Echo will send all voice recordings to the cloud, starting March 28](https://techcrunch.com/2025/03/15/amazons-echo-will-send-all-voice-recordings-to-the-cloud-starting-march-28)
+- [The Register — report on Amazon's email ending on-device Alexa processing](https://www.theregister.com/2025/03/17/amazon_kills_on_device_alexa/)
+- [AP via NY1 — Amazon ends little-used privacy feature that let Echo users opt out of sending recordings](https://ny1.com/nyc/all-boroughs/ap-top-news/2025/03/19/amazon-ends-little-used-privacy-feature-that-let-echo-users-opt-out-of-sending-recordings-to-company)

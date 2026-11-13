@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Run an LLM on a Raspberry Pi 5 · pleeply docs</title>
-<meta name="description" content="What a Raspberry Pi 5 can run — measured tokens per second for 1–3B models, which models to pick for a voice assistant, why cooling matters, and how to install Ollama.">
+<meta name="description" content="What a Raspberry Pi 5 can run — third-party tokens-per-second results for 1–3B models, which models to pick for a voice assistant, why cooling matters, and how to install Ollama.">
 <link rel="canonical" href="https://pleeply.vercel.app/info/raspberry-pi-5-llm/">
 <link rel="alternate" type="text/markdown" href="/info/raspberry-pi-5-llm.md" title="Run an LLM on a Raspberry Pi 5 (Markdown)">
-<meta property="article:modified_time" content="2026-10-24">
+<meta property="article:modified_time" content="2026-11-14">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Run an LLM on a Raspberry Pi 5 · pleeply docs">
-<meta property="og:description" content="What a Raspberry Pi 5 can run — measured tokens per second for 1–3B models, which models to pick for a voice assistant, why cooling matters, and how to install Ollama.">
+<meta property="og:description" content="What a Raspberry Pi 5 can run — third-party tokens-per-second results for 1–3B models, which models to pick for a voice assistant, why cooling matters, and how to install Ollama.">
 <meta property="og:url" content="https://pleeply.vercel.app/info/raspberry-pi-5-llm/">
 <meta property="og:image" content="https://pleeply.vercel.app/og.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -22,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/info/docs.css">
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://pleeply.vercel.app/#org","name":"pleeply","url":"https://pleeply.vercel.app/","logo":"https://pleeply.vercel.app/icon-512.png"},{"@type":"TechArticle","@id":"https://pleeply.vercel.app/info/raspberry-pi-5-llm/#article","headline":"Run an LLM on a Raspberry Pi 5","description":"What a Raspberry Pi 5 can run — measured tokens per second for 1–3B models, which models to pick for a voice assistant, why cooling matters, and how to install Ollama.","datePublished":"2026-10-24","dateModified":"2026-10-24","inLanguage":"en","mainEntityOfPage":"https://pleeply.vercel.app/info/raspberry-pi-5-llm/","author":{"@id":"https://pleeply.vercel.app/#org"},"publisher":{"@id":"https://pleeply.vercel.app/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"pleeply","item":"https://pleeply.vercel.app/"},{"@type":"ListItem","position":2,"name":"Docs","item":"https://pleeply.vercel.app/info/"},{"@type":"ListItem","position":3,"name":"LLM on a Raspberry Pi 5","item":"https://pleeply.vercel.app/info/raspberry-pi-5-llm/"}]},{"@type":"FAQPage","@id":"https://pleeply.vercel.app/info/raspberry-pi-5-llm/#faq","mainEntity":[{"@type":"Question","name":"Can a Raspberry Pi 5 run Llama?","acceptedAnswer":{"@type":"Answer","text":"Yes. Llama 3.2 1B runs at about 11 tokens per second and Llama 3.2 3B at about 4.7 tokens per second with 4-bit quantization in Ollama."}},{"@type":"Question","name":"What is the best LLM for a Raspberry Pi 5?","acceptedAnswer":{"@type":"Answer","text":"For speed, Gemma 3 1B or Llama 3.2 1B at about 11 tokens per second. For better answers at a usable speed, Qwen 2.5 3B or Llama 3.2 3B at about 5 tokens per second."}},{"@type":"Question","name":"Can a Raspberry Pi 5 run a 7B model?","acceptedAnswer":{"@type":"Answer","text":"On the 16 GB board, yes, but slowly — about 1.5–2.5 tokens per second."}},{"@type":"Question","name":"Does the Raspberry Pi AI HAT speed up LLMs?","acceptedAnswer":{"@type":"Answer","text":"Independent tests found it doesn't speed up token generation for language models. It helps with vision and some speech workloads."}}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://pleeply.vercel.app/#org","name":"pleeply","url":"https://pleeply.vercel.app/","logo":"https://pleeply.vercel.app/icon-512.png"},{"@type":"TechArticle","@id":"https://pleeply.vercel.app/info/raspberry-pi-5-llm/#article","headline":"Run an LLM on a Raspberry Pi 5","description":"What a Raspberry Pi 5 can run — third-party tokens-per-second results for 1–3B models, which models to pick for a voice assistant, why cooling matters, and how to install Ollama.","datePublished":"2026-11-14","dateModified":"2026-11-14","inLanguage":"en","mainEntityOfPage":"https://pleeply.vercel.app/info/raspberry-pi-5-llm/","author":{"@id":"https://pleeply.vercel.app/#org"},"publisher":{"@id":"https://pleeply.vercel.app/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"pleeply","item":"https://pleeply.vercel.app/"},{"@type":"ListItem","position":2,"name":"Docs","item":"https://pleeply.vercel.app/info/"},{"@type":"ListItem","position":3,"name":"LLM on a Raspberry Pi 5","item":"https://pleeply.vercel.app/info/raspberry-pi-5-llm/"}]},{"@type":"FAQPage","@id":"https://pleeply.vercel.app/info/raspberry-pi-5-llm/#faq","mainEntity":[{"@type":"Question","name":"Can a Raspberry Pi 5 run Llama?","acceptedAnswer":{"@type":"Answer","text":"Yes. In third-party Ollama tests (Stratosphere Linux IPS), Llama 3.2 1B ran at about 11 tokens per second and Llama 3.2 3B at about 4.7 with 4-bit quantization."}},{"@type":"Question","name":"What is the best LLM for a Raspberry Pi 5?","acceptedAnswer":{"@type":"Answer","text":"For speed, Gemma 3 1B or Llama 3.2 1B — about 11 tokens per second in third-party tests. For better answers at a usable speed, Qwen 2.5 3B or Llama 3.2 3B — about 5 tokens per second in the same tests."}},{"@type":"Question","name":"Can a Raspberry Pi 5 run a 7B model?","acceptedAnswer":{"@type":"Answer","text":"On the 16 GB board, yes, but slowly — about 1.5–2.5 tokens per second, according to third-party reports."}},{"@type":"Question","name":"Does the Raspberry Pi AI HAT speed up LLMs?","acceptedAnswer":{"@type":"Answer","text":"Independent tests found it doesn't speed up token generation for language models. It helps with vision and some speech workloads."}}]}]}</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -50,14 +50,15 @@
       <p class="crumb">Run it yourself</p>
       <h1>Run an LLM on a Raspberry Pi 5</h1>
       <div class="meta">
-        <span>Updated <time datetime="2026-10-24">Oct 24, 2026</time></span><span>3 min read</span>
+        <span>Updated <time datetime="2026-11-14">Nov 14, 2026</time></span><span>3 min read</span>
         <span class="meta-actions"><button class="copy-md" type="button" data-md="/info/raspberry-pi-5-llm.md">Copy as Markdown</button><a href="/info/raspberry-pi-5-llm.md">View .md</a></span>
       </div>
       <div class="prose">
-<p>A Raspberry Pi 5 can run small language models locally. In Ollama tests with 4-bit models it generates about 11 tokens per second with 1B models and about 5 with 3B models — enough for short voice answers, too slow for long conversation. Use the 8 GB or 16 GB board and an active cooler.</p>
-<h2 id="measured-speeds">Measured speeds<a class="anchor" href="#measured-speeds" aria-label="Link to this section">#</a></h2>
+<p>A Raspberry Pi 5 can run small language models locally. In published third-party Ollama tests with 4-bit models it generates about 11 tokens per second with 1B models and about 5 with 3B models — enough for short voice answers, too slow for long conversation. Use the 8 GB or 16 GB board and an active cooler.</p>
+<aside class="callout note"><p class="callout-title">Whose numbers these are</p><p>We haven't measured any of this ourselves — there is no pleeply prototype yet. Every speed figure on this page comes from third-party tests and guides listed under Sources. Your results will vary with model, quantization, prompt length and cooling.</p></aside>
+<h2 id="published-speeds-third-party-tests">Published speeds (third-party tests)<a class="anchor" href="#published-speeds-third-party-tests" aria-label="Link to this section">#</a></h2>
 <div class="table"><table><thead><tr><th>Model</th><th>Quantization</th><th>Tokens per second</th></tr></thead><tbody><tr><td>Gemma 3 1B</td><td>Q4_K_M</td><td>11.5</td></tr><tr><td>Llama 3.2 1B</td><td>Q4_K_M</td><td>11.2</td></tr><tr><td>Qwen 2.5 1.5B</td><td>Q4_K_M</td><td>10.0</td></tr><tr><td>SmolLM2 1.7B</td><td>Q4_K_M</td><td>8.2</td></tr><tr><td>Granite 3.1 2B</td><td>Q4_K_M</td><td>5.8</td></tr><tr><td>Qwen 2.5 3B</td><td>Q4_K_M</td><td>5.2</td></tr><tr><td>Llama 3.2 3B</td><td>Q4_K_M</td><td>4.7</td></tr></tbody></table></div>
-<p>Measured with Ollama on a Raspberry Pi 5 by the Stratosphere Linux IPS project. Larger models are much slower: about 1.5–2.5 tokens per second for 7B models on the 16 GB board.</p>
+<p>Measured with Ollama on a Raspberry Pi 5 by the Stratosphere Linux IPS project, not by pleeply. Larger models are much slower: bestllmfor reports about 1.5–2.5 tokens per second for 7B models on the 16 GB board.</p>
 <h2 id="which-model-to-pick">Which model to pick<a class="anchor" href="#which-model-to-pick" aria-label="Link to this section">#</a></h2>
 <ul><li><strong>For a voice assistant:</strong> a 1–1.5B model (Gemma 3 1B, Llama 3.2 1B, Qwen 2.5 1.5B) keeps answers to a few seconds.</li><li><strong>For better answers:</strong> a 3B model (Qwen 2.5 3B, Llama 3.2 3B) is about half as fast but follows instructions better.</li><li><strong>7B and up:</strong> it fits on the 16 GB board, but at 1.5–2.5 tokens per second a one-paragraph answer takes close to a minute.</li></ul>
 <h2 id="install-ollama">Install Ollama<a class="anchor" href="#install-ollama" aria-label="Link to this section">#</a></h2>
@@ -73,16 +74,21 @@
 <p>For commands and short answers, yes: guides report about 5–8 seconds per request with a small model, Whisper and Piper. For natural back-and-forth it's slow; faster hardware helps most at the language-model step. Compare options in <a href="/info/run-ai-at-home/">Choose your hardware</a>.</p>
 <h2 id="faq">FAQ<a class="anchor" href="#faq" aria-label="Link to this section">#</a></h2>
 <h3 id="can-a-raspberry-pi-5-run-llama">Can a Raspberry Pi 5 run Llama?<a class="anchor" href="#can-a-raspberry-pi-5-run-llama" aria-label="Link to this section">#</a></h3>
-<p>Yes. Llama 3.2 1B runs at about 11 tokens per second and Llama 3.2 3B at about 4.7 tokens per second with 4-bit quantization in Ollama.</p>
+<p>Yes. In third-party Ollama tests (Stratosphere Linux IPS), Llama 3.2 1B ran at about 11 tokens per second and Llama 3.2 3B at about 4.7 with 4-bit quantization.</p>
 <h3 id="what-is-the-best-llm-for-a-raspberry-pi-5">What is the best LLM for a Raspberry Pi 5?<a class="anchor" href="#what-is-the-best-llm-for-a-raspberry-pi-5" aria-label="Link to this section">#</a></h3>
-<p>For speed, Gemma 3 1B or Llama 3.2 1B at about 11 tokens per second. For better answers at a usable speed, Qwen 2.5 3B or Llama 3.2 3B at about 5 tokens per second.</p>
+<p>For speed, Gemma 3 1B or Llama 3.2 1B — about 11 tokens per second in third-party tests. For better answers at a usable speed, Qwen 2.5 3B or Llama 3.2 3B — about 5 tokens per second in the same tests.</p>
 <h3 id="can-a-raspberry-pi-5-run-a-7b-model">Can a Raspberry Pi 5 run a 7B model?<a class="anchor" href="#can-a-raspberry-pi-5-run-a-7b-model" aria-label="Link to this section">#</a></h3>
-<p>On the 16 GB board, yes, but slowly — about 1.5–2.5 tokens per second.</p>
+<p>On the 16 GB board, yes, but slowly — about 1.5–2.5 tokens per second, according to third-party reports.</p>
 <h3 id="does-the-raspberry-pi-ai-hat-speed-up-llms">Does the Raspberry Pi AI HAT speed up LLMs?<a class="anchor" href="#does-the-raspberry-pi-ai-hat-speed-up-llms" aria-label="Link to this section">#</a></h3>
 <p>Independent tests found it doesn't speed up token generation for language models. It helps with vision and some speech workloads.</p>
 <h2 id="sources">Sources<a class="anchor" href="#sources" aria-label="Link to this section">#</a></h2>
 <ul><li>Speed table: <a href="https://stratospherelinuxips.readthedocs.io/en/develop/immune/research_rpi_llm_performance.html" rel="noopener" target="_blank">Stratosphere Linux IPS — LLM performance on Raspberry Pi 5</a></li><li>7B speeds, cooling and AI HAT: <a href="https://bestllmfor.com/best/raspberry-pi-5-llm/" rel="noopener" target="_blank">bestllmfor — Local LLM on Raspberry Pi 5</a></li><li>AI HAT+ 2 decode tests: <a href="https://computingforgeeks.com/edge-llm-jetson-orin-vs-ai-hat-2-vs-hailo-10h/" rel="noopener" target="_blank">ComputingForGeeks — Edge LLM: Jetson Orin vs AI HAT+ 2 vs Hailo-10H</a></li><li>End-to-end latency: <a href="https://www.promptquorum.com/power-local-llm/build-local-voice-assistant-2026" rel="noopener" target="_blank">PromptQuorum — Build a local voice assistant (2026)</a></li><li>Install script: <a href="https://ollama.com/download/linux" rel="noopener" target="_blank">Ollama — Download for Linux</a></li></ul>
       </div>
+      <section class="survey" aria-labelledby="survey-title">
+        <h2 id="survey-title">Want this without building a server?</h2>
+        <p>pleeply is an early project: a speaker with a built-in computer that runs open models at home. There's no prototype yet, and your answers decide what we build first.</p>
+        <div class="survey-actions"><a class="btn btn-lg" href="/?utm_source=guide_raspberry-pi-5-llm&utm_medium=docs&utm_campaign=guide_cta#join">Answer 5 quick questions →</a><span class="survey-micro">30 seconds · only email is required · no payment</span></div>
+      </section>
       <section class="join" aria-labelledby="join-title">
         <p class="join-kicker">pleeply Community</p>
         <h2 id="join-title">Keep going with the community</h2>
@@ -103,7 +109,7 @@
       </nav>
     </article>
   </main>
-  <aside class="toc" aria-label="On this page"><p>On this page</p><ul><li><a href="#measured-speeds">Measured speeds</a></li><li><a href="#which-model-to-pick">Which model to pick</a></li><li><a href="#install-ollama">Install Ollama</a></li><li><a href="#tips-for-speed">Tips for speed</a></li><li><a href="#is-a-pi-5-enough-for-a-voice-assistant">Is a Pi 5 enough for a voice assistant?</a></li><li><a href="#faq">FAQ</a></li><li><a href="#sources">Sources</a></li></ul></aside>
+  <aside class="toc" aria-label="On this page"><p>On this page</p><ul><li><a href="#published-speeds-third-party-tests">Published speeds (third-party tests)</a></li><li><a href="#which-model-to-pick">Which model to pick</a></li><li><a href="#install-ollama">Install Ollama</a></li><li><a href="#tips-for-speed">Tips for speed</a></li><li><a href="#is-a-pi-5-enough-for-a-voice-assistant">Is a Pi 5 enough for a voice assistant?</a></li><li><a href="#faq">FAQ</a></li><li><a href="#sources">Sources</a></li></ul></aside>
 </div>
 <footer class="foot">
   <div class="foot-in"><span class="mark">pleeply<i></i></span><span>© 2026 pleeply. In development.</span><span class="foot-links"><a href="/community">Community</a><a href="/llms.txt">llms.txt</a></span></div>

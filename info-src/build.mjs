@@ -253,6 +253,17 @@ const footer = () => `<footer class="foot">
 <script defer src="/_vercel/insights/script.js"></script>
 <script defer src="/assets/track.js"></script>`;
 
+// Короткий призыв к анкете спроса в конце каждого гайда. UTM — в query (app.js читает location.search),
+// а #join в конце открывает форму (app.js сравнивает location.hash строго с '#join').
+function surveyBlock(p) {
+  const href = `/?utm_source=guide_${p.slug || 'index'}&utm_medium=docs&utm_campaign=guide_cta#join`;
+  return `<section class="survey" aria-labelledby="survey-title">
+        <h2 id="survey-title">Want this without building a server?</h2>
+        <p>pleeply is an early project: a speaker with a built-in computer that runs open models at home. There's no prototype yet, and your answers decide what we build first.</p>
+        <div class="survey-actions"><a class="btn btn-lg" href="${href}">Answer 5 quick questions →</a><span class="survey-micro">30 seconds · only email is required · no payment</span></div>
+      </section>`;
+}
+
 // Блок «Вступить в сообщество» в конце каждой статьи — как «Дальше — вместе с сообществом» у edgelab
 function joinBlock() {
   if (!FORUM) return '';
@@ -319,6 +330,7 @@ ${topbar('docs')}
       <div class="prose">
 ${content}
       </div>
+      ${surveyBlock(p)}
       ${joinBlock()}
       <p class="ai-note">This page is also available as <a href="${p.mdUrl}">Markdown</a>. For the full docs index, see <a href="/llms.txt">llms.txt</a>.</p>
       <nav class="pager" aria-label="Previous and next">

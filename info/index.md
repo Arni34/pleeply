@@ -2,7 +2,7 @@
 
 > Guides to running a private AI assistant at home — how local voice assistants work, what hardware you need, how smart speakers handle your voice, and where pleeply fits in.
 
-Source: https://pleeply.vercel.app/info/ · Updated 2026-10-24
+Source: https://pleeply.vercel.app/info/ · Updated 2026-11-14
 
 You can run an AI assistant at home that listens, answers and remembers without sending your voice to a company's servers. These docs explain how that works, what it takes to build one yourself, and how it compares with cloud speakers like Alexa.
 
@@ -13,9 +13,9 @@ You can run an AI assistant at home that listens, answers and remembers without 
 
 - [What is a local AI assistant?](https://pleeply.vercel.app/info/local-ai-assistant/) — how on-device AI differs from cloud assistants, and what you give up.
 - [How a local voice assistant works](https://pleeply.vercel.app/info/how-local-voice-assistants-work/) — the pipeline from wake word to spoken answer, and where the delay comes from.
-- [Do smart speakers send your voice to the cloud?](https://pleeply.vercel.app/info/smart-speaker-privacy/) — what changed for Amazon Echo in March 2025.
+- [Do smart speakers send your voice to the cloud?](https://pleeply.vercel.app/info/smart-speaker-privacy/) — what Amazon switched off on three Echo models in March 2025.
 - [Choose your hardware](https://pleeply.vercel.app/info/run-ai-at-home/) — from a Raspberry Pi to a PC with a graphics card.
-- [Run an LLM on a Raspberry Pi 5](https://pleeply.vercel.app/info/raspberry-pi-5-llm/) — measured speeds and which models to pick.
+- [Run an LLM on a Raspberry Pi 5](https://pleeply.vercel.app/info/raspberry-pi-5-llm/) — third-party speed tests and which models to pick.
 - [Use a local LLM with Home Assistant](https://pleeply.vercel.app/info/home-assistant-local-llm/) — Assist, Ollama and the Voice Preview Edition.
 - [How much RAM a local LLM needs](https://pleeply.vercel.app/info/local-llm-memory/) — rules of thumb for 8, 16, 24 and 48 GB.
 - [Private alternatives to Alexa](https://pleeply.vercel.app/info/alexa-alternatives/) — compared on privacy, cost and effort.
@@ -47,4 +47,4 @@ pleeply is in development. The waitlist is open.
 
 ## How these pages are written
 
-Every number and date links to its source at the bottom of the page. Speeds on small hardware vary a lot with the model, the quantization and the runtime, so treat them as ranges, not promises. Each page shows when it was last checked.
+Every number and date links to its source at the bottom of the page. We haven't benchmarked anything ourselves yet — there is no pleeply prototype — so every speed figure in these docs comes from third-party tests. Speeds on small hardware vary a lot with the model, the quantization and the runtime, so treat them as ranges, not promises. Each page shows when it was last checked.

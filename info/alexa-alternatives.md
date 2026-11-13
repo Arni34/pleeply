@@ -2,7 +2,7 @@
 
 > Voice assistants that don't send your voice to Amazon — Home Assistant Assist with local AI, open-source assistants, DIY Raspberry Pi builds and local AI devices — compared on privacy, cost and effort.
 
-Source: https://pleeply.vercel.app/info/alexa-alternatives/ · Updated 2026-10-24
+Source: https://pleeply.vercel.app/info/alexa-alternatives/ · Updated 2026-11-14
 
 If you want a voice assistant that doesn't send your voice to Amazon, the main options are Home Assistant's Assist with local speech and an Ollama model, an open-source assistant such as OpenVoiceOS, a DIY Raspberry Pi build, or a device that runs its AI on board. Each trades some convenience for privacy.
 
@@ -54,4 +54,6 @@ You can use an Echo as a front end for Home Assistant, but your voice requests a
 - [The Next Web — Google's first speaker in six years is really a $10-a-month Gemini subscription](https://thenextweb.com/news/google-home-speaker-gemini-99-subscription)
 - [Home Assistant — Voice Preview Edition announcement](https://www.home-assistant.io/blog/2024/12/19/voice-preview-edition-the-era-of-open-voice/)
 - [TechCrunch — Amazon's Echo will send all voice recordings to the cloud, starting March 28](https://techcrunch.com/2025/03/15/amazons-echo-will-send-all-voice-recordings-to-the-cloud-starting-march-28)
+- [The Register — report on Amazon's email ending on-device Alexa processing](https://www.theregister.com/2025/03/17/amazon_kills_on_device_alexa/)
+- [AP via NY1 — Amazon ends little-used privacy feature that let Echo users opt out of sending recordings](https://ny1.com/nyc/all-boroughs/ap-top-news/2025/03/19/amazon-ends-little-used-privacy-feature-that-let-echo-users-opt-out-of-sending-recordings-to-company)
 - [Open Voice OS — About](https://www.openvoiceos.org/about)

@@ -2,12 +2,15 @@
 
 > Compare the ways to run a private AI assistant at home — Raspberry Pi 5, Jetson Orin Nano Super, Mac mini, a PC with a GPU, Home Assistant Voice, or a ready-made device — by model size, speed and effort.
 
-Source: https://pleeply.vercel.app/info/run-ai-at-home/ · Updated 2026-10-24
+Source: https://pleeply.vercel.app/info/run-ai-at-home/ · Updated 2026-11-14
 
 You can run a private AI assistant on anything from a single-board computer to a desktop with a graphics card. Memory is what decides: it sets the largest model you can run, and the model's size sets how capable and how fast your assistant is.
 
 > **Short answer**
 > For a voice assistant with small 1–3B models, a Raspberry Pi 5 with 8 GB works, but answers take several seconds. For conversation-quality 7–8B models, use a machine with about 16 GB of memory, such as an Apple Silicon Mac mini. For the fastest small models on a low-power board, a Jetson Orin Nano Super.
+
+> **Whose numbers these are**
+> We haven't measured any of this ourselves — there is no pleeply prototype yet. Every speed figure on this page comes from third-party tests and guides listed under Sources. Your results will vary with model, quantization, prompt length and cooling.
 
 ## Choose your setup
 
@@ -15,7 +18,7 @@ You can run a private AI assistant on anything from a single-board computer to a
 ### [Raspberry Pi 5](https://pleeply.vercel.app/info/raspberry-pi-5-llm/)
 **Best for:** tinkerers and always-on, low-power setups.
 
-**Models:** 1–3B at about 5–11 tokens per second; 7B is very slow (about 1.5–2.5).
+**Models:** 1–3B at about 5–11 tokens per second in third-party tests; 7B is very slow (about 1.5–2.5).
 
 **Requirements:** the 8 GB or 16 GB board and an active cooler.
 
@@ -73,11 +76,11 @@ Details in [How much RAM a local LLM needs](https://pleeply.vercel.app/info/loca
 
 ### What is the cheapest way to run a local LLM at home?
 
-A Raspberry Pi 5 with 8 GB is the cheapest common option. It runs 1–3B models at roughly 5–11 tokens per second — fine for commands and short answers, slow for conversation.
+A Raspberry Pi 5 with 8 GB is the cheapest common option. Third-party tests show it running 1–3B models at roughly 5–11 tokens per second — fine for commands and short answers, slow for conversation.
 
 ### Is a Raspberry Pi 5 or a Jetson Orin Nano better for local AI?
 
-For language models, the Jetson Orin Nano Super is several times faster on small models because it has a CUDA GPU: published 3B results are roughly 22–43 tokens per second against about 5 on a Pi 5. The Pi 5 is cheaper, simpler and has more community guides.
+For language models, the Jetson Orin Nano Super is several times faster on small models because it has a CUDA GPU: published third-party 3B results are roughly 22–43 tokens per second against about 5 on a Pi 5. The Pi 5 is cheaper, simpler and has more community guides.
 
 ### Can a Mac mini run a local LLM?
 

@@ -1,12 +1,15 @@
 # Run an LLM on a Raspberry Pi 5
 
-> What a Raspberry Pi 5 can run — measured tokens per second for 1–3B models, which models to pick for a voice assistant, why cooling matters, and how to install Ollama.
+> What a Raspberry Pi 5 can run — third-party tokens-per-second results for 1–3B models, which models to pick for a voice assistant, why cooling matters, and how to install Ollama.
 
-Source: https://pleeply.vercel.app/info/raspberry-pi-5-llm/ · Updated 2026-10-24
+Source: https://pleeply.vercel.app/info/raspberry-pi-5-llm/ · Updated 2026-11-14
 
-A Raspberry Pi 5 can run small language models locally. In Ollama tests with 4-bit models it generates about 11 tokens per second with 1B models and about 5 with 3B models — enough for short voice answers, too slow for long conversation. Use the 8 GB or 16 GB board and an active cooler.
+A Raspberry Pi 5 can run small language models locally. In published third-party Ollama tests with 4-bit models it generates about 11 tokens per second with 1B models and about 5 with 3B models — enough for short voice answers, too slow for long conversation. Use the 8 GB or 16 GB board and an active cooler.
 
-## Measured speeds
+> **Whose numbers these are**
+> We haven't measured any of this ourselves — there is no pleeply prototype yet. Every speed figure on this page comes from third-party tests and guides listed under Sources. Your results will vary with model, quantization, prompt length and cooling.
+
+## Published speeds (third-party tests)
 
 | Model | Quantization | Tokens per second |
 |---|---|---|
@@ -18,7 +21,7 @@ A Raspberry Pi 5 can run small language models locally. In Ollama tests with 4-b
 | Qwen 2.5 3B | Q4_K_M | 5.2 |
 | Llama 3.2 3B | Q4_K_M | 4.7 |
 
-Measured with Ollama on a Raspberry Pi 5 by the Stratosphere Linux IPS project. Larger models are much slower: about 1.5–2.5 tokens per second for 7B models on the 16 GB board.
+Measured with Ollama on a Raspberry Pi 5 by the Stratosphere Linux IPS project, not by pleeply. Larger models are much slower: bestllmfor reports about 1.5–2.5 tokens per second for 7B models on the 16 GB board.
 
 ## Which model to pick
 
@@ -60,15 +63,15 @@ For commands and short answers, yes: guides report about 5–8 seconds per reque
 
 ### Can a Raspberry Pi 5 run Llama?
 
-Yes. Llama 3.2 1B runs at about 11 tokens per second and Llama 3.2 3B at about 4.7 tokens per second with 4-bit quantization in Ollama.
+Yes. In third-party Ollama tests (Stratosphere Linux IPS), Llama 3.2 1B ran at about 11 tokens per second and Llama 3.2 3B at about 4.7 with 4-bit quantization.
 
 ### What is the best LLM for a Raspberry Pi 5?
 
-For speed, Gemma 3 1B or Llama 3.2 1B at about 11 tokens per second. For better answers at a usable speed, Qwen 2.5 3B or Llama 3.2 3B at about 5 tokens per second.
+For speed, Gemma 3 1B or Llama 3.2 1B — about 11 tokens per second in third-party tests. For better answers at a usable speed, Qwen 2.5 3B or Llama 3.2 3B — about 5 tokens per second in the same tests.
 
 ### Can a Raspberry Pi 5 run a 7B model?
 
-On the 16 GB board, yes, but slowly — about 1.5–2.5 tokens per second.
+On the 16 GB board, yes, but slowly — about 1.5–2.5 tokens per second, according to third-party reports.
 
 ### Does the Raspberry Pi AI HAT speed up LLMs?
 
