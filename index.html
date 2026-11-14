@@ -699,6 +699,7 @@
      Стоит до app.js, чтобы form_open по ссылке /#join не терялся. -->
 <script src="/assets/track.js"></script>
 <script src="app.js"></script>
-<!-- Vercel Web Analytics в проекте не включён (скрипт отдавал 404 и ошибку в консоли) — визиты считает /assets/track.js. -->
+<!-- Vercel Web Analytics: запасной счётчик визитов, если таблица не ответит. -->
+<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>

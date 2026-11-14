@@ -250,6 +250,7 @@ function topbar(current) {
 const footer = () => `<footer class="foot">
   <div class="foot-in"><span class="mark">pleeply<i></i></span><span>© 2026 pleeply. In development.</span><span class="foot-links">${FORUM ? '<a href="/community">Community</a>' : ''}<a href="/llms.txt">llms.txt</a></span></div>
 </footer>
+<script defer src="/_vercel/insights/script.js"></script>
 <script defer src="/assets/track.js"></script>`;
 
 // Короткий призыв к анкете спроса в конце каждого гайда. UTM — в query (app.js читает location.search),
