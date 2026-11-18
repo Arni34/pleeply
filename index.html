@@ -344,6 +344,11 @@
   .list-card > p { margin-top: 10px; max-width: 52ch; font-size: 15.5px; }
   .device-img { margin-top: 20px; height: 210px; border-radius: 12px; display: flex; align-items: flex-end; justify-content: center; overflow: hidden; }
   .device-img img { width: 88%; height: auto; max-height: 92%; object-fit: contain; }
+  .tiers { list-style: none; margin: 20px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .tiers li { padding: 14px 16px; border-radius: 12px; background: var(--soft); display: flex; flex-direction: column; gap: 4px; }
+  .tiers b { font-weight: 500; color: var(--ink); font-size: 15px; }
+  .tiers span { font: 400 13px/1.3 var(--mono); color: var(--muted); }
+  .list-card .tiers + .small { margin-top: 14px; }
   form { margin-top: 24px; display: grid; gap: 18px; }
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .field { display: grid; gap: 8px; min-width: 0; }
@@ -459,10 +464,8 @@
       <a href="#privacy">Privacy</a>
       <a href="/info/">Guides</a>
       <a href="/community">Community</a>
-      <a class="m-only" href="#device">Device waitlist</a>
     </nav>
     <div class="nav-r">
-      <a class="pill pill-line" href="#device" data-cta="nav-device">Device waitlist</a>
       <a class="pill pill-dark" href="#early-access" data-cta="nav">Get early access</a>
       <button class="menu-btn" type="button" id="menu-btn" aria-expanded="false" aria-controls="nav-links" aria-label="Menu"><svg class="ic"><use href="#i-menu"/></svg></button>
     </div>
@@ -494,7 +497,7 @@
       <a class="pill pill-line" href="#hybrid">Hybrid AI</a>
       <a class="pill pill-line" href="#models">Model family</a>
       <a class="pill pill-line" href="#privacy">Privacy</a>
-      <a class="pill pill-line" href="#device">Device waitlist</a>
+      <a class="pill pill-line" href="#device">pleeply Pocket</a>
     </div>
   </div>
 </section>
@@ -885,18 +888,18 @@
       <details class="qa"><summary>Does my data leave my computer?</summary><p>In Local mode, no: prompts and files are processed on your device. When you choose a cloud model, your request goes to that provider and their privacy policy applies. pleeply is designed to ask before that happens.</p></details>
       <details class="qa"><summary>What are Saturn, Nova, Atlas and Orbit?</summary><p>Planned names for model setups inside pleeply, each aimed at a different kind of work. None of them is released yet, and they are not foundation models we trained from scratch.</p></details>
       <details class="qa"><summary>How much will it cost?</summary><p>We haven’t set pricing for pleeply Desktop. Joining early access is free and doesn’t commit you to anything.</p></details>
-      <details class="qa"><summary>What is the device waitlist?</summary><p>A separate list for pleeply Pocket, a small device that would run pleeply at home. It is in design, with planned prices from about $299 to $549. Join it only if you’d want the hardware.</p></details>
+      <details class="qa"><summary>What is pleeply Pocket?</summary><p>A small device that would run pleeply at home. It is in design, with planned prices from about $299 to $549. There’s no waitlist for it yet: pleeply Desktop comes first.</p></details>
     </div>
   </div>
 </section>
 
-<!-- ============ Get started: два списка ============ -->
+<!-- ============ Get started: запись на Desktop + информация о Pocket ============ -->
 <section class="sec" id="join" aria-labelledby="join-h">
   <div class="wrap">
     <div class="cta-head rv">
       <h2 id="join-h">Get started with pleeply</h2>
-      <p class="lead">The desktop app comes first. A pleeply device comes later. These are separate lists: join one or both.</p>
-      <div class="cta-pills"><a class="pill pill-dark pill-lg" href="#early-access" data-cta="final">Join early access</a><a class="pill pill-line pill-lg" href="#device" data-cta="final-device">Device waitlist</a></div>
+      <p class="lead">The desktop app comes first. pleeply Pocket comes later, and there’s no waitlist for it yet.</p>
+      <div class="cta-pills"><a class="pill pill-dark pill-lg" href="#early-access" data-cta="final">Join early access</a></div>
     </div>
 
     <div class="lists">
@@ -978,62 +981,22 @@
           <div class="done-h"><i><svg class="ic"><use href="#i-check"/></svg></i><span>You’re on the Desktop early-access list.</span></div>
           <p>We’ll email you when invites start. Know someone who’d want it? Share your link.</p>
           <div class="share"><input type="text" readonly aria-label="Share link" data-share><button class="pill pill-line" type="button" data-copy><span>Copy</span></button></div>
-          <a class="next" href="#device">Want the device too? Join the device waitlist <svg class="ic"><use href="#i-arrow"/></svg></a>
         </div>
       </article>
 
-      <!-- B. Device -->
+      <!-- B. Pocket: только информация, без записи -->
       <article class="list-card rv d1" id="device">
         <div class="list-top"><span class="kick">Hardware · later</span><span class="tag hollow">In design</span></div>
         <h3>pleeply Pocket device</h3>
         <p>A small device that runs pleeply at home, no computer needed. There is no working unit yet, and prices are planned.</p>
         <div class="device-img t-night"><img src="/assets/stills/pocket-side-v2.webp" width="1600" height="636" alt="Concept render of pleeply Pocket from the side" loading="lazy" decoding="async"></div>
 
-        <form id="form-device" data-list="device" novalidate>
-          <div class="field">
-            <label for="v-email">Email</label>
-            <input id="v-email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required aria-describedby="v-email-err">
-            <div class="err" id="v-email-err">Check your email address.</div>
-          </div>
-          <div class="field">
-            <label for="v-name">Name <span class="opt">(optional)</span></label>
-            <input id="v-name" name="name" type="text" autocomplete="name" maxlength="80">
-          </div>
-          <div class="field">
-            <span class="lbl" id="v-tier-l">Which one would you buy?</span>
-            <div class="seg" role="radiogroup" aria-labelledby="v-tier-l">
-              <label><input type="radio" name="tier" value="pocket"><span>Pocket · ~$499</span></label>
-              <label><input type="radio" name="tier" value="one"><span>One · ~$299</span></label>
-              <label><input type="radio" name="tier" value="pro"><span>Pro · ~$549</span></label>
-            </div>
-          </div>
-          <div class="field">
-            <label for="v-budget">What would you pay for a device like this?</label>
-            <select id="v-budget" name="budget">
-              <option value="">Choose</option><option value="lt300">Under $300</option><option value="300_499">$300–499</option>
-              <option value="500_699">$500–699</option><option value="700p">$700 or more</option><option value="unsure">Not sure</option>
-            </select>
-          </div>
-          <div class="field">
-            <span class="lbl" id="v-dep-l">Would you put down a fully refundable $49 deposit for one of the first units?</span>
-            <div class="seg" role="radiogroup" aria-labelledby="v-dep-l">
-              <label><input type="radio" name="deposit" value="yes"><span>Yes</span></label>
-              <label><input type="radio" name="deposit" value="maybe"><span>Depends</span></label>
-              <label><input type="radio" name="deposit" value="no"><span>No</span></label>
-            </div>
-          </div>
-          <label class="check"><input type="checkbox" name="call" value="yes"><span>I’m up for a 15-minute call with the founder</span></label>
-          <div class="hp" aria-hidden="true"><label>Company <input type="text" name="company" tabindex="-1" autocomplete="off"></label></div>
-          <button class="pill pill-line pill-lg btn-block" type="submit">Join the device waitlist</button>
-          <p class="small">No payment now. We’ll only email you about pleeply.</p>
-        </form>
-
-        <div class="done" role="status" aria-live="polite">
-          <div class="done-h"><i><svg class="ic"><use href="#i-check"/></svg></i><span>You’re on the device waitlist.</span></div>
-          <p>We’ll write when there’s a working unit to show. Share your link with someone who’d want one.</p>
-          <div class="share"><input type="text" readonly aria-label="Share link" data-share><button class="pill pill-line" type="button" data-copy><span>Copy</span></button></div>
-          <a class="next" href="#early-access">Want the desktop app too? Join early access <svg class="ic"><use href="#i-arrow"/></svg></a>
-        </div>
+        <ul class="tiers" aria-label="Planned versions">
+          <li><b>One</b><span>~$299</span></li>
+          <li><b>Pocket</b><span>~$499</span></li>
+          <li><b>Pro</b><span>~$549</span></li>
+        </ul>
+        <p class="small">Planned prices. No waitlist yet: we’re building pleeply Desktop first.</p>
       </article>
     </div>
   </div>
@@ -1049,11 +1012,11 @@
       </div>
       <div><h4>Product</h4><ul>
         <li><a href="#product">pleeply Desktop</a></li><li><a href="#hybrid">Hybrid AI</a></li>
-        <li><a href="#models">Model family</a></li><li><a href="#privacy">Privacy</a></li></ul></div>
+        <li><a href="#models">Model family</a></li><li><a href="#privacy">Privacy</a></li><li><a href="#device">pleeply Pocket</a></li></ul></div>
       <div><h4>Learn</h4><ul>
         <li><a href="/info/">Local AI guides</a></li><li><a href="/community">Community</a></li><li><a href="#updates">Updates</a></li><li><a href="#faq">Questions</a></li></ul></div>
       <div><h4>Get started</h4><ul>
-        <li><a href="#early-access">Desktop early access</a></li><li><a href="#device">Device waitlist</a></li></ul></div>
+        <li><a href="#early-access">Desktop early access</a></li></ul></div>
     </div>
     <div class="legal"><span>pleeply © 2026</span><span>This page describes products in development. Plans, features and prices can change.</span></div>
   </div>

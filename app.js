@@ -1,4 +1,5 @@
-/* pleeply — главная (Desktop, только EN): два списка записи (desktop / device), события воронки, схема режимов.
+/* pleeply — главная (Desktop, только EN): запись на ранний доступ Desktop, события воронки, схема режимов.
+   Вейтлист на Pocket снят: устройство — на будущее, на странице только информация о нём.
    Прошлая версия (колонка Pocket, A/B заголовков) — archive/app.before-desktop.js */
 
 const CONFIG = {
@@ -86,9 +87,7 @@ const CONFIG = {
   });
 
   // ---- письмо о заявке (запасной канал, если база не ответит)
-  const TIERS = { pocket: 'Pocket · ~$499', one: 'One · ~$299', pro: 'Pro · ~$549' };
   const LOCAL_AI = { ollama: 'Ollama', lmstudio: 'LM Studio', own_hw: 'своё железо', cloud: 'только облако', none: 'ничего' };
-  const BUDGET = { lt300: 'до $300', '300_499': '$300–499', '500_699': '$500–699', '700p': '$700+', unsure: 'не знает' };
   const OS = { macos: 'macOS', windows: 'Windows', linux: 'Linux' };
   const RAM = { le8: '8 ГБ и меньше', 16: '16 ГБ', 32: '32 ГБ', '64p': '64 ГБ+', unsure: 'не знает' };
   const GPU = { apple: 'Apple Silicon', nvidia: 'NVIDIA', amd: 'AMD', integrated: 'Intel / встроенная', unsure: 'не знает' };
@@ -106,12 +105,9 @@ const CONFIG = {
       'Источник': source || firstReferrer() || 'прямой заход',
       'Пришёл по реф-ссылке': attr.ref || '—',
     };
-    const body = lead.list === 'desktop'
-      ? { subject: `pleeply: ранний доступ Desktop — ${lead.name}${call}`, 'Список': 'Desktop, ранний доступ', ...common,
-          'ОС': OS[lead.os] || '—', 'Память': RAM[lead.ram] || '—', 'Видеокарта': GPU[lead.gpu] || '—',
-          'Для чего': names(lead.use_cases, USE), 'ИИ сейчас': names(lead.local_ai, LOCAL_AI) }
-      : { subject: `pleeply: лист ожидания устройства — ${TIERS[lead.tier] || 'модель не выбрана'}${call}`, 'Список': 'Устройство', ...common,
-          'Вариант': TIERS[lead.tier] || '—', 'Бюджет': BUDGET[lead.budget] || '—', 'Депозит $49': lead.deposit || '—' };
+    const body = { subject: `pleeply: ранний доступ Desktop — ${lead.name}${call}`, 'Список': 'Desktop, ранний доступ', ...common,
+      'ОС': OS[lead.os] || '—', 'Память': RAM[lead.ram] || '—', 'Видеокарта': GPU[lead.gpu] || '—',
+      'Для чего': names(lead.use_cases, USE), 'ИИ сейчас': names(lead.local_ai, LOCAL_AI) };
     fetch('https://api.web3forms.com/submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
@@ -133,7 +129,7 @@ const CONFIG = {
       .catch(() => track('lead_save_failed', `${lead.list}:network`));
   }
 
-  // ---- две формы: desktop (имя обязательно) и device
+  // ---- форма раннего доступа Desktop (имя обязательно)
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   function showErr(input, ok) {
     input.classList.toggle('bad', !ok);
@@ -151,8 +147,8 @@ const CONFIG = {
     const checked = (n) => [...form.querySelectorAll(`[name="${n}"]:checked`)].map((i) => i.value);
     const joinedKey = `pl_joined_${which}`;
 
-    // Уже записан на этом устройстве — сразу показываем «готово» (pl_joined — ключ старой формы устройства)
-    if (store.get(joinedKey) || (which === 'device' && store.get('pl_joined'))) card.classList.add('sent');
+    // Уже записан на этом устройстве — сразу показываем «готово»
+    if (store.get(joinedKey)) card.classList.add('sent');
 
     form.addEventListener('focusin', () => once(`pl_fo_${which}`, () => track('form_open', which)));
     form.addEventListener('input', (e) => { if (e.target.classList.contains('bad')) showErr(e.target, true); });
@@ -179,14 +175,10 @@ const CONFIG = {
 
       if (!value('company')) { // ловушка для ботов пуста — значит человек
         const lead = { list: which, email, name, call: el('call') && el('call').checked ? 'yes' : '' };
-        if (which === 'desktop') {
-          Object.assign(lead, { os: value('os'), ram: value('ram'), gpu: value('gpu'), use_cases: checked('use_cases'), local_ai: checked('local_ai') });
-        } else {
-          Object.assign(lead, { tier: value('tier'), budget: value('budget'), deposit: value('deposit') });
-        }
+        Object.assign(lead, { os: value('os'), ram: value('ram'), gpu: value('gpu'), use_cases: checked('use_cases'), local_ai: checked('local_ai') });
         saveLead(lead);
         notify(lead);
-        track('signup', which === 'device' && lead.tier ? `device:${lead.tier}` : which);
+        track('signup', which);
         store.set(joinedKey, '1');
       }
       card.classList.add('sent');
