@@ -6,6 +6,7 @@
 // Источник заявки = источник её визита (waitlist_leads.session), иначе её собственные utm/referrer.
 import crypto from 'node:crypto';
 import { sql, getUser, esc } from './_lib/forum.js';
+import { ensureLeadsTable } from './_lib/leads.js';
 
 function tokenOk(req) {
   const want = process.env.STATS_TOKEN || '';
@@ -20,7 +21,8 @@ const leadsByDay = (days, withTest) => sql`
          coalesce(nullif(lower(utm_source), ''),
            case when coalesce(referrer, '') = '' or referrer like '%pleeply%' then 'direct' else referrer end) as source,
          coalesce(nullif(lower(utm_campaign), ''), '') as campaign,
-         count(*)::int as leads
+         count(*)::int as leads,
+         count(*) filter (where list = 'desktop')::int as desktop
   from waitlist_leads
   where created_at >= now() - make_interval(days => ${days})
     and (${withTest} or (coalesce(lower(utm_source), '') <> 'test' and email not like '%@example.com'))
@@ -64,6 +66,7 @@ export default async function handler(req, res) {
       if (user?.role !== 'admin') { res.statusCode = 401; return res.end('{"error":"Unauthorized."}'); }
       const withTest = req.query.test === '1';
       const [t] = await sql`select to_regclass('site_events') is not null as ev, to_regclass('waitlist_leads') is not null as wl`;
+      if (t.wl) await ensureLeadsTable();
       const leads = t.wl ? await leadsByDay(days0, withTest) : [];
       const visits = t.ev ? await visitsByDay(days0, withTest) : [];
       const total = leads.reduce((a, r) => a + r.leads, 0);
@@ -85,6 +88,7 @@ export default async function handler(req, res) {
       return page(res, 200, `<h1>Данных пока нет</h1><p class="muted">Таблицы создаются при первом событии и первой заявке:
         site_events — ${t.ev ? 'есть' : 'нет'}, waitlist_leads — ${t.wl ? 'есть' : 'нет'}.</p>`);
     }
+    await ensureLeadsTable(); // колонки list/name/os… появляются здесь, даже если новых заявок ещё не было
 
     const rows = await sql`
       with s as (
@@ -104,7 +108,7 @@ export default async function handler(req, res) {
         from s where ${withTest} or not is_test group by source
       ),
       l as (
-        select w.tier,
+        select w.tier, w.list,
                coalesce(s.source, nullif(lower(w.utm_source), ''),
                  case when coalesce(w.referrer, '') = '' or w.referrer like '%pleeply%' then 'direct' else w.referrer end) as source
         from waitlist_leads w left join s on s.session = w.session
@@ -115,6 +119,7 @@ export default async function handler(req, res) {
       ),
       lg as (
         select source, count(*) as leads,
+               count(*) filter (where list = 'desktop') as desktop,
                count(*) filter (where tier = 'pocket') as pocket,
                count(*) filter (where tier = 'one') as one,
                count(*) filter (where tier = 'pro') as pro
@@ -122,7 +127,7 @@ export default async function handler(req, res) {
       )
       select coalesce(v.source, lg.source) as source,
              coalesce(v.visits, 0) as visits, coalesce(v.guide, 0) as guide, coalesce(v.model, 0) as model,
-             coalesce(v.form, 0) as form, coalesce(lg.leads, 0) as leads,
+             coalesce(v.form, 0) as form, coalesce(lg.leads, 0) as leads, coalesce(lg.desktop, 0) as desktop,
              coalesce(lg.pocket, 0) as pocket, coalesce(lg.one, 0) as one, coalesce(lg.pro, 0) as pro
       from v full join lg on lg.source = v.source
       order by visits desc, leads desc`;
@@ -147,14 +152,14 @@ export default async function handler(req, res) {
     const daily = await leadsByDay(days, withTest);
 
     const tot = rows.reduce((a, r) => {
-      for (const k of ['visits', 'guide', 'model', 'form', 'leads', 'pocket', 'one', 'pro']) a[k] = (a[k] || 0) + Number(r[k]);
+      for (const k of ['visits', 'guide', 'model', 'form', 'leads', 'desktop', 'pocket', 'one', 'pro']) a[k] = (a[k] || 0) + Number(r[k]);
       return a;
     }, {});
 
     const link = (d, label) => `<a href="/stats?days=${d}${withTest ? '&test=1' : ''}"${d === days ? ' aria-current="page"' : ''}>${label}</a>`;
     const tr = (r, cls = '') => `<tr class="${cls}"><td>${esc(r.source)}</td><td>${num(r.visits)}</td><td>${num(r.guide)}</td>
       <td>${num(r.model)}</td><td>${num(r.form)}</td><td>${num(r.leads)}</td><td>${pct(r.leads, r.visits)}</td>
-      <td>${num(r.pocket)}</td><td>${num(r.one)}</td><td>${num(r.pro)}</td></tr>`;
+      <td>${num(r.desktop)}</td><td>${num(r.pocket)}</td><td>${num(r.one)}</td><td>${num(r.pro)}</td></tr>`;
 
     page(res, 200, `
       <h1>Визиты → заявки</h1>
@@ -169,12 +174,12 @@ export default async function handler(req, res) {
       </div>
       <h2>По источникам</h2>
       <table><thead><tr><th>Источник</th><th>Визиты</th><th>С гайдом</th><th>Открыли модель</th><th>Открыли форму</th>
-        <th>Заявки</th><th>Конв.</th><th>Pocket</th><th>One</th><th>Pro</th></tr></thead>
-      <tbody>${rows.map((r) => tr(r)).join('') || '<tr><td colspan="10" class="muted">Пока пусто</td></tr>'}
+        <th>Заявки</th><th>Конв.</th><th>Desktop</th><th>Pocket</th><th>One</th><th>Pro</th></tr></thead>
+      <tbody>${rows.map((r) => tr(r)).join('') || '<tr><td colspan="11" class="muted">Пока пусто</td></tr>'}
       ${rows.length ? tr({ source: 'Всего', ...tot }, 'total') : ''}</tbody></table>
       <h2>Заявки по дням</h2>
-      <table><thead><tr><th>День (UTC)</th><th>Источник</th><th>Кампания</th><th>Заявки</th></tr></thead>
-      <tbody>${daily.map((d) => `<tr><td>${esc(d.day)}</td><td style="text-align:left">${esc(d.source)}</td><td style="text-align:left">${esc(d.campaign) || '—'}</td><td>${num(d.leads)}</td></tr>`).join('') || '<tr><td colspan="4" class="muted">Пока пусто</td></tr>'}</tbody></table>
+      <table><thead><tr><th>День (UTC)</th><th>Источник</th><th>Кампания</th><th>Заявки</th><th>Из них Desktop</th></tr></thead>
+      <tbody>${daily.map((d) => `<tr><td>${esc(d.day)}</td><td style="text-align:left">${esc(d.source)}</td><td style="text-align:left">${esc(d.campaign) || '—'}</td><td>${num(d.leads)}</td><td>${num(d.desktop)}</td></tr>`).join('') || '<tr><td colspan="5" class="muted">Пока пусто</td></tr>'}</tbody></table>
       <p class="muted">JSON для скриптов: <code>/api/stats?format=json&amp;days=${days}</code> с заголовком <code>Authorization: Bearer STATS_TOKEN</code>.</p>
       <h2>Модели (визиты)</h2>
       <table><thead><tr><th>Модель</th><th>Увидели карточку</th><th>Открыли подробнее</th><th>Нажали «Reserve»</th><th>Заявки</th></tr></thead>

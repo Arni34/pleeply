@@ -7,6 +7,7 @@ import { attribute } from './_lib/source.js';
 
 const EVENTS = new Set([
   'pageview', 'guide_view', 'model_view', 'model_open', 'pricing_view', 'tier_click', 'form_open', 'signup', 'lead_save_failed',
+  'cta_click', 'waitlist_view', 'mode_pick',
 ]);
 const BOT = /bot|crawl|spider|slurp|headless|lighthouse|pagespeed|preview|facebookexternalhit|embedly|curl|wget|python|node-fetch|axios/i;
 const text = (v, max) => String(v ?? '').trim().slice(0, max);

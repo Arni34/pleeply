@@ -1,189 +1,34 @@
-/* pleeply — смоук-тест спроса: тексты EN/RU, варианты заголовка, вейтлист и события воронки. */
+/* pleeply — главная (Desktop, только EN): два списка записи (desktop / device), события воронки, схема режимов.
+   Прошлая версия (колонка Pocket, A/B заголовков) — archive/app.before-desktop.js */
 
 const CONFIG = {
-  // URL веб-приложения Apps Script (…/exec) из sheets-webhook.gs.
-  // Пока пусто — заявки и события копятся в localStorage (pleeply.outbox() в консоли).
-  endpoint: '',
-  // Письмо о каждой заявке. Основной путь — Web3Forms: ключ доступа с web3forms.com
-  // (публичный, рассчитан на код страницы, письма идут на почту, к которой он привязан).
+  // Письмо о каждой заявке через Web3Forms. Ключ публичный, рассчитан на код страницы:
+  // письма идут на почту, к которой он привязан. Основное хранилище — Neon через /api/waitlist.
   web3formsKey: '975f3c98-d0a3-4f86-a0fc-504125c833b5',
-  // Запасной путь — formsubmit.co, работает только после активации формы по письму.
-  notify: 'arnibb35@gmail.com',
-  variants: ['own', 'privacy', 'offline'],
-};
-
-// Варианты заголовка для теста посыла (H7). ?v=privacy закрепляет вариант, без него — случайный.
-const HEADLINES = {
-  own: { en: 'Your own AI.<br>It lives at home.', ru: 'Свой ИИ.<br>Живёт у тебя дома.' },
-  privacy: { en: 'An AI that never leaves your house.', ru: 'ИИ, который не выходит из дома.' },
-  offline: { en: 'AI that works when the internet doesn’t.', ru: 'ИИ, который работает без интернета.' },
-};
-
-const SHARE_TEXT = {
-  en: 'pleeply — a speaker that runs AI at home, no cloud. I joined the waitlist:',
-  ru: 'pleeply — колонка, где ИИ работает дома, без облака. Я в листе ожидания:',
-};
-
-// Английский текст живёт в index.html, здесь только перевод.
-const RU = {
-  title: 'pleeply – свой ИИ у тебя дома',
-  'nav.l1': 'Линейка',
-  'nav.l2': 'Как это работает',
-  'nav.l3': 'Гайды',
-  'nav.l4': 'Сообщество',
-  'nav.cta': 'В лист ожидания',
-  'hero.sub': 'pleeply — колонка со встроенным компьютером. Она запускает открытые ИИ-модели прямо на устройстве, хранит личную память о тебе и не зависит от облака.',
-  'hero.cta1': 'Зарезервировать',
-  'hero.note': 'В разработке. Сегодня ничего не платишь. Напишем, когда откроем резервы.',
-  'p.scroll': 'Листай вниз, чтобы заглянуть внутрь',
-  'p.label': 'pleeply Pocket · дизайн прототипа',
-  'p.hint': 'Тяните — поворот · листайте — откроется',
-  'p.loading': 'Загружаем 3D',
-  'cap1.t': 'Внутри Raspberry Pi 5',
-  'cap1.d': 'С активным охлаждением. Открытые языковые модели работают прямо на устройстве.',
-  'cap2.t': 'Аккумулятор 3000 мА·ч',
-  'cap2.d': 'Заряжается по USB-C, включается ползунком.',
-  'cap3.t': 'Динамик и микрофон',
-  'cap3.d': 'Динамик 40 мм и I2S-микрофон стоят прямо за нижней панелью.',
-  'cap4.t': 'Нажми и говори',
-  'cap4.d': 'Кнопка утоплена, чтобы её не нажимал стол. Качелька громкости — на верхнем торце.',
-  'cap5.t': 'Звучит через своё имя',
-  'cap5.d': 'Динамик играет через точечную надпись «pleeply.» на дне.',
-  'runs.h': 'Запускает открытые модели, которые ты уже знаешь.',
-  'price.h': 'Выбери то, что купил бы на самом деле.',
-  'pocket.tag': 'Прототип',
-  'pocket.d': 'Карманный ИИ с аккумулятором и кнопкой «нажми и говори». Первые экземпляры собираем вручную.',
-  'pocket.spec': 'Raspberry Pi 5 · компактные модели 1–3B · аккумулятор 3000 мА·ч',
-  reserve: 'Зарезервировать бесплатно',
-  'pocket.more': 'Смотреть в 3D',
-  'one.tag': 'Колонка',
-  'one.d': 'Сама колонка. Быстро работает с компактными открытыми моделями: помощь на каждый день, умный дом, память.',
-  'one.spec': 'Встроенный компьютер и массив микрофонов · модели до ~8B · работает офлайн',
-  more: 'Подробнее',
-  'pro.tag': 'Колонка+',
-  'pro.d': 'Больше памяти и мощности для крупных и умных моделей.',
-  'pro.spec': 'Всё, что в One · модели до ~32B · длиннее память',
-  'price.fine': 'Ожидаемые цены. Характеристики предварительные и могут измениться в процессе разработки. Резерв бесплатный и ни к чему не обязывает.',
-  'proof.q': '28 марта 2025 года Amazon отключил на Echo Dot 4-го поколения, Echo Show 10 и Echo Show 15 настройку «Do Not Send Voice Recordings». <em>Приватность, которую дали настройкой, можно забрать обновлением.</em>',
-  'proof.p': 'Настройка была только на этих трёх моделях, только в США и на английском, и, по словам Amazon, ею пользовались меньше 0,03% клиентов. Причина — генеративные ИИ-функции, которым нужно облако. Источники: <a href="https://techcrunch.com/2025/03/15/amazons-echo-will-send-all-voice-recordings-to-the-cloud-starting-march-28" target="_blank" rel="noopener">TechCrunch</a>, <a href="https://www.theregister.com/2025/03/17/amazon_kills_on_device_alexa/" target="_blank" rel="noopener">The Register</a>, <a href="https://ny1.com/nyc/all-boroughs/ap-top-news/2025/03/19/amazon-ends-little-used-privacy-feature-that-let-echo-users-opt-out-of-sending-recordings-to-company" target="_blank" rel="noopener">AP</a>. pleeply устроен наоборот: модель работает на устройстве, у тебя дома.',
-  'proof.link': 'Читать статью',
-  'rules.h': 'Приватность встроена, а не прикручена.',
-  'built.cta': 'Покажи устройство',
-  'bubble.q': 'Что я говорил про день рождения мамы?',
-  'art1.a': 'Тюльпаны, 12-го.',
-  'art.ondevice': 'На устройстве',
-  'feat1.t': 'Голос обрабатывается в комнате, а не на сервере.',
-  'art2.r1': 'Слово-активатор',
-  'art2.r2': 'Распознавание речи',
-  'art2.r3': 'Языковая модель',
-  'art2.r4': 'Синтез голоса',
-  'feat2.t': 'Каждый шаг идёт на устройстве: слово-активатор, распознавание, модель и голос.',
-  'art3.net': 'Интернет',
-  'art3.q': 'Поставь таймер на 10 минут',
-  'art3.a': 'Таймер на 10 минут запущен.',
-  'feat3.t': 'Работает, даже когда пропал интернет.',
-  'art4.h': 'Память',
-  'art4.r1': 'День рождения мамы: тюльпаны, 12-го',
-  'art4.r2': 'Кофе: овсяное молоко, без сахара',
-  'art4.r3': 'Дети ложатся в 21:00',
-  'feat4.t': 'Память хранится на устройстве, и её можно править.',
-  'art5.h': 'Модель',
-  'feat5.t': 'Меняй открытые модели, когда выходят лучше.',
-  'art6.h': 'Назови колонку',
-  'art6.v': 'Кухня',
-  'art6.btn': 'Дальше',
-  'art6.note': 'Без почты и аккаунта',
-  'feat6.t': 'Без аккаунта и регистрации.',
-  'how.eyebrow': 'Как это работает',
-  'how.h': 'Говоришь. Думает. Помнит.',
-  'how.p': 'Ты говоришь. Думает открытая языковая модель на компьютере внутри. Память остаётся на устройстве: её можно посмотреть, исправить или удалить.',
-  'how.cta': 'Как устроен локальный ассистент',
-  'next.h': 'Твой следующий шаг.',
-  'next.cta1': 'Встать в лист ожидания',
-  'next.cta2': 'Вступить в сообщество',
-  'uses.h': 'Под то, как ты живёшь.',
-  'use1.t': 'Личный ассистент',
-  'use1.d': 'Спрашивай, ставь таймеры, думай вслух. Ответ считается прямо в комнате.',
-  'use2.t': 'Заметки и память',
-  'use2.d': 'Расскажи, что важно. Память живёт на устройстве: её можно посмотреть, исправить или удалить.',
-  'use3.t': 'Умный дом',
-  'use3.d': 'Управляй домом голосом без поездки в облако.',
-  'use4.t': 'Дети и семья',
-  'use4.d': 'Колонка, которая не отправляет голоса твоей семьи на серверы компаний.',
-  'use5.t': 'Работа и документы',
-  'use5.d': 'Обдумывай работу вслух и храни заметки на своём устройстве.',
-  'use6.t': 'Свои модели',
-  'use6.d': 'Запускай Llama, Qwen, Mistral или Gemma и меняй их, когда выходят лучше.',
-  'guide.h': 'Гайды по локальному ИИ.',
-  'guide.p': 'Бесплатные гайды о том, как запустить ИИ дома: железо, модели, память, приватность и умный дом. У каждого есть источники. Пока на английском.',
-  'guide.cta': 'Открыть гайды',
-  'doc.hw': 'Железо',
-  'doc.privacy': 'Приватность',
-  'res.h': 'Что ещё почитать.',
-  'res.all': 'Все гайды',
-  'res1.type': 'Гайд',
-  'res1.t': 'Языковая модель на Raspberry Pi 5',
-  'res2.type': 'Сравнение',
-  'res2.t': 'Открытые голосовые ассистенты: сравнение',
-  'res3.type': 'Разбор',
-  'res3.t': 'Приватные альтернативы Alexa',
-  'foot.products': 'Устройства',
-  'foot.learn': 'Узнать',
-  'foot.guides': 'Гайды',
-  'foot.faq': 'Что такое pleeply?',
-  'foot.hw': 'Выбрать железо',
-  'foot.community': 'Сообщество',
-  'foot.forum': 'Форум',
-  'foot.join': 'Вступить',
-  'foot.about': 'Колонка со встроенным компьютером. Открытые модели, личная память, без облака. В разработке.',
-  'final.h': 'Твой ИИ должен жить у тебя.',
-  'final.cta': 'Встать в лист ожидания',
-  'com.cta': 'Открыть сообщество',
-  footer: '© 2026 pleeply. В разработке.',
-  'foot.top': 'Наверх ↑',
-  'f.h': 'Лист ожидания',
-  'f.lead': 'Пять коротких вопросов, 30 секунд. Без оплаты.',
-  'f.email': 'Почта',
-  'f.err': 'Проверь адрес почты.',
-  'f.tier': 'Что бы ты купил?',
-  'f.local': 'На чём сейчас запускаешь локальный ИИ?',
-  'l.own': 'Свой сервер / видеокарта',
-  'l.cloud': 'Только облачный ИИ (ChatGPT и т. п.)',
-  'l.none': 'Пока ни на чём',
-  'f.budget': 'Сколько заплатил бы за такое устройство?',
-  'b.pick': 'Выбери вилку',
-  'b.lt300': 'До $300',
-  'b.700p': '$700 и больше',
-  'b.unsure': 'Пока не знаю',
-  'f.deposit': 'Внёс бы возвратный депозит $49, чтобы получить одно из первых устройств?',
-  'd.yes': 'Да',
-  'd.maybe': 'Зависит',
-  'd.no': 'Нет',
-  'f.call': 'Готов на 15-минутное интервью с основателем? Напишем на почту, чтобы выбрать время.',
-  'call.yes': 'Да, давай',
-  'call.no': 'Не сейчас',
-  'f.submit': 'Встать в лист',
-  'f.small': 'Пишем только про pleeply.',
-  's.h': 'Ты в списке.',
-  's.p': 'Знаешь, кому он нужен? Поделись ссылкой.',
-  's.copy': 'Копировать',
-  's.x': 'Поделиться в X',
-  's.community': 'Вступить в сообщество',
-  's.copied': 'Скопировано',
+  // Версия посыла на главной (пишется в заявку, чтобы сравнивать с прошлыми вариантами)
+  variant: 'desktop2', // desktop1 — тёмная/светлая версия ноября, desktop2 — раскладка как у openai.com
 };
 
 (() => {
+  'use strict';
+
+  // ---- хранилища: в приватном режиме и при запрете cookie доступ может бросать исключение
+  const safe = (getter) => {
+    let s = null;
+    try { s = getter(); } catch { /* недоступно */ }
+    return {
+      get: (k) => { try { return s ? s.getItem(k) : null; } catch { return null; } },
+      set: (k, v) => { try { if (s) s.setItem(k, v); } catch { /* переполнено или запрещено */ } },
+    };
+  };
+  const store = safe(() => window.localStorage);
+  const sess = safe(() => window.sessionStorage);
   const qs = new URLSearchParams(location.search);
-  const safe = (s) => ({
-    get(k) { try { return s.getItem(k); } catch { return null; } },
-    set(k, v) { try { s.setItem(k, v); } catch { /* приватный режим */ } },
-  });
-  const store = safe(window.localStorage);
-  const sess = safe(window.sessionStorage);
   const rid = () => Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-3);
   const readJSON = (k, fallback) => { try { return JSON.parse(store.get(k)) ?? fallback; } catch { return fallback; } };
+  const reduceMotion = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
 
-  // ---- контекст визита
+  // ---- контекст визита (те же ключи, что в assets/track.js)
   const session = sess.get('pl_session') || rid();
   sess.set('pl_session', session);
   const myRef = store.get('pl_my_ref') || rid();
@@ -202,227 +47,230 @@ const RU = {
 
   let referrer = '';
   try { referrer = document.referrer ? new URL(document.referrer).hostname : ''; } catch { /* битый referrer */ }
+  // Внешний referrer первой страницы визита (его хранит assets/track.js), иначе referrer текущей страницы
+  const firstReferrer = () => { const r = sess.get('pl_first_ref'); return r !== null ? r : referrer; };
 
-  let variant = qs.get('v');
-  if (!CONFIG.variants.includes(variant)) variant = store.get('pl_variant');
-  if (!CONFIG.variants.includes(variant)) variant = CONFIG.variants[Math.floor(Math.random() * CONFIG.variants.length)];
-  store.set('pl_variant', variant);
+  const lang = 'en'; // сайт только на английском
 
-  const navLang = (navigator.language || 'en').toLowerCase();
-  let lang = qs.get('lang') || store.get('pl_lang') || (/^(ru|kk|uk|be)/.test(navLang) ? 'ru' : 'en');
-  if (!['en', 'ru'].includes(lang)) lang = 'en';
-
-  // ---- отправка в таблицу
-  function send(payload) {
-    const data = { ts: new Date().toISOString(), session, lang, variant, referrer, ...attr, ...payload };
-    // События воронки — в Neon через assets/track.js (/api/track → site_events). Сама анкета идёт в saveLead.
-    // 'view' там уже посчитан как pageview; у заявки в события уходит только выбранная модель, без почты.
-    if (window.plTrack) {
-      if (payload.type === 'signup') window.plTrack('signup', payload.tier);
-      else if (payload.event !== 'view') window.plTrack(payload.event, payload.detail);
-    }
-    if (!CONFIG.endpoint) {
-      const box = readJSON('pl_outbox', []);
-      box.push(data);
-      store.set('pl_outbox', JSON.stringify(box.slice(-200)));
-      console.info('[pleeply] endpoint не задан — сохранено локально:', data);
-      return;
-    }
-    fetch(CONFIG.endpoint, {
-      method: 'POST',
-      mode: 'no-cors',
-      keepalive: true,
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(data),
-    }).catch(() => {});
-  }
-  const track = (event, detail = '') => send({ type: 'event', event, detail });
+  // ---- события воронки → assets/track.js → /api/track (site_events). Почта туда не попадает.
+  const track = (event, detail = '') => { if (window.plTrack) window.plTrack(event, String(detail)); };
   const once = (key, fn) => { if (!sess.get(key)) { sess.set(key, '1'); fn(); } };
 
-  // ---- письмо о заявке
-  const TIERS = { pocket: 'Pocket · $499', one: 'One · $299', pro: 'Pro · $549' };
+  // ---- ссылка «поделиться» с реф-кодом
+  const shareUrl = () => `${location.origin}${location.pathname}?ref=${myRef}`;
+  const updateShare = () => document.querySelectorAll('[data-share]').forEach((i) => { i.value = shareUrl(); });
+  updateShare();
+
+  document.querySelectorAll('[data-copy]').forEach((btn) => btn.addEventListener('click', async () => {
+    const input = btn.parentElement.querySelector('[data-share]');
+    try { await navigator.clipboard.writeText(input.value); } catch { input.select(); document.execCommand('copy'); }
+    const label = btn.querySelector('span');
+    if (label) label.textContent = 'Copied';
+  }));
+
+  // ---- шапка: фон при прокрутке и меню на телефоне
+  const nav = document.getElementById('nav');
+  const menuBtn = document.getElementById('menu-btn');
+  const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 8);
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+  const setMenu = (open) => { nav.classList.toggle('open', open); menuBtn.setAttribute('aria-expanded', String(open)); };
+  menuBtn.addEventListener('click', () => setMenu(!nav.classList.contains('open')));
+  document.getElementById('nav-links').addEventListener('click', (e) => { if (e.target.closest('a')) setMenu(false); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
+
+  // ---- клики по кнопкам «Ранний доступ» / «Посмотреть»
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest && e.target.closest('[data-cta]');
+    if (a) track('cta_click', a.dataset.cta);
+  });
+
+  // ---- письмо о заявке (запасной канал, если база не ответит)
+  const TIERS = { pocket: 'Pocket · ~$499', one: 'One · ~$299', pro: 'Pro · ~$549' };
   const LOCAL_AI = { ollama: 'Ollama', lmstudio: 'LM Studio', own_hw: 'своё железо', cloud: 'только облако', none: 'ничего' };
   const BUDGET = { lt300: 'до $300', '300_499': '$300–499', '500_699': '$500–699', '700p': '$700+', unsure: 'не знает' };
-  function notify(s) {
+  const OS = { macos: 'macOS', windows: 'Windows', linux: 'Linux' };
+  const RAM = { le8: '8 ГБ и меньше', 16: '16 ГБ', 32: '32 ГБ', '64p': '64 ГБ+', unsure: 'не знает' };
+  const GPU = { apple: 'Apple Silicon', nvidia: 'NVIDIA', amd: 'AMD', integrated: 'Intel / встроенная', unsure: 'не знает' };
+  const USE = { chat: 'чат и тексты', code: 'код', docs: 'поиск и документы', agents: 'агенты', offline: 'приватно без сети' };
+  const names = (vals, dict) => vals.map((v) => dict[v] || v).join(', ') || '—';
+
+  function notify(lead) {
+    if (!CONFIG.web3formsKey) return;
     const source = [attr.utm_source, attr.utm_medium, attr.utm_campaign].filter(Boolean).join(' / ');
-    const subject = `pleeply: заявка — ${TIERS[s.tier] || s.tier}${s.call === 'yes' ? ' · готов на звонок' : ''}`;
-    const fields = {
-      email: s.email,
-      'Вариант': TIERS[s.tier] || s.tier,
-      'Локальный ИИ сейчас': s.local_ai.map((v) => LOCAL_AI[v] || v).join(', ') || '—',
-      'Бюджет': BUDGET[s.budget] || '—',
-      'Депозит $49': s.deposit || '—',
-      'Интервью 15 мин': s.call === 'yes' ? 'да' : s.call === 'no' ? 'нет' : '—',
-      'Источник': source || referrer || 'прямой заход',
-      'Заголовок': variant,
-      'Язык': lang,
+    const call = lead.call === 'yes' ? ' · готов на звонок' : '';
+    const common = {
+      email: lead.email,
+      'Имя': lead.name || '—',
+      'Интервью 15 мин': lead.call === 'yes' ? 'да' : '—',
+      'Источник': source || firstReferrer() || 'прямой заход',
       'Пришёл по реф-ссылке': attr.ref || '—',
-      'Реф-код': myRef,
     };
-    const post = (url, body) => fetch(url, {
+    const body = lead.list === 'desktop'
+      ? { subject: `pleeply: ранний доступ Desktop — ${lead.name}${call}`, 'Список': 'Desktop, ранний доступ', ...common,
+          'ОС': OS[lead.os] || '—', 'Память': RAM[lead.ram] || '—', 'Видеокарта': GPU[lead.gpu] || '—',
+          'Для чего': names(lead.use_cases, USE), 'ИИ сейчас': names(lead.local_ai, LOCAL_AI) }
+      : { subject: `pleeply: лист ожидания устройства — ${TIERS[lead.tier] || 'модель не выбрана'}${call}`, 'Список': 'Устройство', ...common,
+          'Вариант': TIERS[lead.tier] || '—', 'Бюджет': BUDGET[lead.budget] || '—', 'Депозит $49': lead.deposit || '—' };
+    fetch('https://api.web3forms.com/submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify(body),
+      body: JSON.stringify({ access_key: CONFIG.web3formsKey, from_name: 'pleeply', ...body }),
     }).catch(() => {});
-
-    if (CONFIG.web3formsKey) {
-      post('https://api.web3forms.com/submit', {
-        access_key: CONFIG.web3formsKey, subject, from_name: 'pleeply waitlist', ...fields,
-      });
-    } else if (CONFIG.notify) {
-      post(`https://formsubmit.co/ajax/${CONFIG.notify}`, {
-        _subject: subject, _template: 'table', _captcha: 'false', ...fields,
-      });
-    }
   }
 
-  // ---- анкета в базу (Neon, таблица waitlist_leads через /api/waitlist).
-  // Письмо Web3Forms остаётся запасным каналом, если база не ответит.
-  // Внешний referrer первой страницы визита (его хранит assets/track.js), иначе referrer текущей страницы.
-  function firstReferrer() {
-    try { const r = sessionStorage.getItem('pl_first_ref'); if (r !== null) return r; } catch { /* приватный режим */ }
-    return referrer;
-  }
-  function saveLead(s) {
+  // ---- заявка в базу (Neon, таблица waitlist_leads через /api/waitlist)
+  function saveLead(lead) {
     fetch('/api/waitlist', {
       method: 'POST',
       keepalive: true,
       headers: { 'Content-Type': 'application/json', 'X-Pleeply': '1' },
       body: JSON.stringify({
-        email: s.email, tier: s.tier, local_ai: s.local_ai, budget: s.budget, deposit: s.deposit, call: s.call,
-        lang, variant, session, referrer: firstReferrer(), my_ref: myRef, ref: attr.ref || '',
+        ...lead, lang, variant: CONFIG.variant, session, referrer: firstReferrer(), my_ref: myRef, ref: attr.ref || '',
         utm_source: attr.utm_source || '', utm_medium: attr.utm_medium || '', utm_campaign: attr.utm_campaign || '',
       }),
-    }).then((r) => { if (!r.ok) track('lead_save_failed', String(r.status)); })
-      .catch(() => track('lead_save_failed', 'network'));
+    }).then((r) => { if (!r.ok) track('lead_save_failed', `${lead.list}:${r.status}`); })
+      .catch(() => track('lead_save_failed', `${lead.list}:network`));
   }
 
-  // ---- язык
-  const nodes = [...document.querySelectorAll('[data-i]')];
-  const EN = { title: document.title, 's.copied': 'Copied' };
-  nodes.forEach((n) => { EN[n.dataset.i] = n.innerHTML; });
-  const headline = document.getElementById('headline');
-
-  const form = document.getElementById('form');
-  const shareInput = document.getElementById('share-url');
-  const shareX = document.getElementById('share-x');
-  const copyBtn = document.getElementById('copy');
-
-  function shareUrl() {
-    return `${location.origin}${location.pathname}?ref=${myRef}${lang === 'ru' ? '&lang=ru' : ''}`;
-  }
-  function updateShare() {
-    const url = shareUrl();
-    shareInput.value = url;
-    shareX.href = `https://x.com/intent/tweet?text=${encodeURIComponent(SHARE_TEXT[lang])}&url=${encodeURIComponent(url)}`;
+  // ---- две формы: desktop (имя обязательно) и device
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  function showErr(input, ok) {
+    input.classList.toggle('bad', !ok);
+    input.setAttribute('aria-invalid', String(!ok));
+    const msg = document.getElementById(input.getAttribute('aria-describedby'));
+    if (msg) msg.classList.toggle('on', !ok);
   }
 
-  function applyLang(l) {
-    lang = l;
-    store.set('pl_lang', l);
-    document.documentElement.lang = l;
-    const dict = l === 'ru' ? RU : EN;
-    nodes.forEach((n) => {
-      const v = dict[n.dataset.i] ?? EN[n.dataset.i];
-      if (v != null) n.innerHTML = v;
-    });
-    headline.innerHTML = HEADLINES[variant][l];
-    document.title = dict.title || EN.title;
-    document.querySelectorAll('[data-lang]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === l)));
-    updateShare();
-  }
-  document.querySelectorAll('[data-lang]').forEach((b) => b.addEventListener('click', () => applyLang(b.dataset.lang)));
-  applyLang(lang);
+  document.querySelectorAll('form[data-list]').forEach((form) => {
+    const which = form.dataset.list;
+    const card = form.closest('.list-card');
+    const done = card.querySelector('.done');
+    const el = (n) => form.elements.namedItem(n);
+    const value = (n) => { const x = el(n); return x ? String(x.value || '') : ''; };
+    const checked = (n) => [...form.querySelectorAll(`[name="${n}"]:checked`)].map((i) => i.value);
+    const joinedKey = `pl_joined_${which}`;
 
-  // ---- воронка: визит → увидел цены → клик по цене → открыл форму → заявка
-  once('pl_ev_view', () => track('view'));
+    // Уже записан на этом устройстве — сразу показываем «готово» (pl_joined — ключ старой формы устройства)
+    if (store.get(joinedKey) || (which === 'device' && store.get('pl_joined'))) card.classList.add('sent');
 
-  const tiers = document.getElementById('tiers');
-  if ('IntersectionObserver' in window) {
-    const io = new IntersectionObserver((entries) => {
-      if (entries.some((e) => e.isIntersecting)) {
-        once('pl_ev_pricing', () => track('pricing_view'));
-        io.disconnect();
+    form.addEventListener('focusin', () => once(`pl_fo_${which}`, () => track('form_open', which)));
+    form.addEventListener('input', (e) => { if (e.target.classList.contains('bad')) showErr(e.target, true); });
+
+    // «Пока ничем» и «только облако» не сочетаются с остальными вариантами
+    const EXCLUSIVE = ['none', 'cloud'];
+    form.querySelectorAll('[name=local_ai]').forEach((box) => box.addEventListener('change', () => {
+      if (!box.checked) return;
+      form.querySelectorAll('[name=local_ai]').forEach((other) => {
+        if (other !== box && (EXCLUSIVE.includes(box.value) || EXCLUSIVE.includes(other.value))) other.checked = false;
+      });
+    }));
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = value('email').trim();
+      const name = value('name').trim().slice(0, 80);
+      const okEmail = EMAIL_RE.test(email);
+      const okName = which !== 'desktop' || name.length > 0;
+      showErr(el('email'), okEmail);
+      if (which === 'desktop') showErr(el('name'), okName);
+      if (!okName) { el('name').focus(); return; }
+      if (!okEmail) { el('email').focus(); return; }
+
+      if (!value('company')) { // ловушка для ботов пуста — значит человек
+        const lead = { list: which, email, name, call: el('call') && el('call').checked ? 'yes' : '' };
+        if (which === 'desktop') {
+          Object.assign(lead, { os: value('os'), ram: value('ram'), gpu: value('gpu'), use_cases: checked('use_cases'), local_ai: checked('local_ai') });
+        } else {
+          Object.assign(lead, { tier: value('tier'), budget: value('budget'), deposit: value('deposit') });
+        }
+        saveLead(lead);
+        notify(lead);
+        track('signup', which === 'device' && lead.tier ? `device:${lead.tier}` : which);
+        store.set(joinedKey, '1');
       }
-    }, { threshold: 0.35 });
-    io.observe(tiers);
-  }
-
-  // ---- форма
-  const dlg = document.getElementById('dlg');
-  const err = document.getElementById('email-err');
-
-  function openForm(tier, source) {
-    if (tier) form.tier.value = tier;
-    track('form_open', tier ? `${source}:${tier}` : source);
-    if (store.get('pl_joined')) form.classList.add('sent');
-    if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
-    if (!form.classList.contains('sent')) setTimeout(() => form.email.focus(), 60);
-  }
-
-  document.querySelectorAll('[data-tier]').forEach((b) => b.addEventListener('click', () => {
-    track('tier_click', b.dataset.tier);
-    openForm(b.dataset.tier, 'tier');
-  }));
-  document.querySelectorAll('[data-open]').forEach((b) => b.addEventListener('click', () => openForm(null, b.dataset.open)));
-  document.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', () => dlg.close()));
-  dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
-
-  // Прямая ссылка на регистрацию: pleeply.vercel.app/#join сразу открывает форму.
-  const openFromHash = () => { if (location.hash === '#join' && !dlg.open) openForm(null, 'link'); };
-  window.addEventListener('hashchange', openFromHash);
-  openFromHash();
-
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const email = form.email.value.trim();
-    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
-    err.classList.toggle('on', !ok);
-    if (!ok) { form.email.focus(); return; }
-    if (!form.company.value) {
-      const signup = {
-        type: 'signup',
-        email,
-        tier: form.tier.value,
-        local_ai: [...form.querySelectorAll('[name=local_ai]:checked')].map((i) => i.value),
-        budget: form.budget.value,
-        deposit: form.deposit.value || '',
-        call: form.call.value || '',
-        my_ref: myRef,
-      };
-      send(signup);
-      saveLead(signup);
-      notify(signup);
-      store.set('pl_joined', '1');
-    }
-    form.classList.add('sent');
-    updateShare();
-  });
-
-  // «Пока ни на чём» и «только облако» не сочетаются с остальными вариантами.
-  const EXCLUSIVE = ['none', 'cloud'];
-  form.querySelectorAll('[name=local_ai]').forEach((box) => box.addEventListener('change', () => {
-    if (!box.checked) return;
-    form.querySelectorAll('[name=local_ai]').forEach((other) => {
-      if (other !== box && (EXCLUSIVE.includes(box.value) || EXCLUSIVE.includes(other.value))) other.checked = false;
+      card.classList.add('sent');
+      updateShare();
+      done.setAttribute('tabindex', '-1');
+      done.focus({ preventScroll: true });
+      card.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' });
     });
-  }));
-
-  copyBtn.addEventListener('click', async () => {
-    try { await navigator.clipboard.writeText(shareInput.value); } catch { shareInput.select(); document.execCommand('copy'); }
-    copyBtn.textContent = (lang === 'ru' ? RU : EN)['s.copied'];
   });
+
+  // Блок записи попал в экран — «увидел списки»
+  const join = document.getElementById('join');
+  if (join && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((x) => x.isIntersecting)) { once('pl_ev_waitlist', () => track('waitlist_view')); io.disconnect(); }
+    }, { threshold: 0.25 });
+    io.observe(join);
+  }
+
+  // ---- схема гибридного режима: Local → Cloud → Auto, пока пользователь сам не выберет
+  const map = document.getElementById('map');
+  const modeBtns = [...document.querySelectorAll('.mode')];
+  const ORDER = ['local', 'cloud', 'auto'];
+  let timer = null;
+  let manual = false;
+  const setMode = (m) => {
+    map.dataset.mode = m;
+    modeBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === m)));
+  };
+  const stopCycle = () => { clearInterval(timer); timer = null; };
+  modeBtns.forEach((b) => b.addEventListener('click', () => {
+    manual = true;
+    stopCycle();
+    setMode(b.dataset.mode);
+    once(`pl_mp_${b.dataset.mode}`, () => track('mode_pick', b.dataset.mode));
+  }));
+  if (map && !reduceMotion && 'IntersectionObserver' in window) {
+    new IntersectionObserver((entries) => entries.forEach((x) => {
+      if (x.isIntersecting && !manual && !timer) {
+        timer = setInterval(() => setMode(ORDER[(ORDER.indexOf(map.dataset.mode) + 1) % ORDER.length]), 3600);
+      } else if (!x.isIntersecting) stopCycle();
+    }), { threshold: 0.4 }).observe(map);
+  }
+
+
 
   // ---- появление блоков при скролле
   const rv = document.querySelectorAll('.rv');
-  if ('IntersectionObserver' in window) {
-    const io = new IntersectionObserver((entries) => entries.forEach((e) => {
-      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  if ('IntersectionObserver' in window && !reduceMotion) {
+    const io = new IntersectionObserver((entries) => entries.forEach((x) => {
+      if (x.isIntersecting) { x.target.classList.add('in'); io.unobserve(x.target); }
     }), { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
     rv.forEach((n) => io.observe(n));
   } else {
     rv.forEach((n) => n.classList.add('in'));
   }
 
-  window.pleeply = { outbox: () => readJSON('pl_outbox', []), variant, session };
+  // ---- строка «спроси» на первом экране. Продукта ещё нет, поэтому отправка честно говорит об этом
+  // и ведёт к форме раннего доступа. Набранный текст никуда не отправляется и не сохраняется.
+  const ask = document.getElementById('ask');
+  if (ask) {
+    const input = ask.querySelector('textarea');
+    const sendBtn = ask.querySelector('.send');
+    const sync = () => { sendBtn.disabled = !input.value.trim(); };
+    input.addEventListener('input', sync);
+    sync();
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); if (input.value.trim()) ask.requestSubmit(); }
+    });
+    ask.querySelectorAll('[data-mini]').forEach((b) => b.addEventListener('click', () => {
+      ask.querySelectorAll('[data-mini]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    }));
+    ask.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!input.value.trim()) return;
+      track('cta_click', 'prompt');
+      document.querySelector('.hero').classList.add('asked');
+      setTimeout(() => {
+        document.getElementById('early-access').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+        const name = document.getElementById('d-name');
+        if (name) name.focus({ preventScroll: true });
+      }, 1400);
+    });
+  }
+
+  window.pleeply = { session, variant: CONFIG.variant };
 })();

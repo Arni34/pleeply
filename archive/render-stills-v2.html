@@ -1,0 +1,148 @@
+<!doctype html>
+<!-- Рендеры Pocket v2 (ноябрь 2026): корпус лежит на полу с мягкой тенью, студийные софтбоксы в отражениях,
+     зелёный контровой свет в цвет логотипа (#3e9b5a), Neutral tone mapping. Не публикуется (archive/ в .vercelignore).
+     Снять кадр: Chrome --headless=new --screenshot=out.png --window-size=1600,1200 --force-device-scale-factor=2
+     --default-background-color=00000000 --virtual-time-budget=20000 "http://localhost:4194/archive/render-stills-v2.html?view=hero" -->
+<html>
+<head>
+<meta charset="utf-8">
+<title>render</title>
+<style>html, body { margin: 0; background: transparent; overflow: hidden; } canvas { display: block; width: 100vw; height: 100vh; }</style>
+<script type="importmap">{"imports":{"three":"/assets/vendor/three/three.module.min.js","three/addons/":"/assets/vendor/three/addons/"}}</script>
+</head>
+<body>
+<canvas></canvas>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { toCreasedNormals } from 'three/addons/utils/BufferGeometryUtils.js';
+import { PARTS } from '/assets/pocket3d.js';
+
+// Ракурсы задаёт камера (азимут и высота в градусах), а корпус спокойно лежит на полу
+const VIEWS = {
+  hero:    { az: 32,  el: 30, open: 0, fit: 1.18 },
+  side:    { az: -34, el: 9,  open: 0, fit: 1.06 },
+  explode: { az: 28,  el: 20, open: 1, fit: 1.12 },
+  top:     { az: 18,  el: 62, open: 0, fit: 1.2 },
+};
+const q = new URLSearchParams(location.search);
+const view = VIEWS[q.get('view')] || VIEWS.hero;
+const GREEN = 0x3e9b5a;
+
+const canvas = document.querySelector('canvas');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(window.devicePixelRatio || 1);
+renderer.setSize(innerWidth, innerHeight, false);
+renderer.setClearColor(0x000000, 0);
+renderer.toneMapping = THREE.NeutralToneMapping;
+renderer.toneMappingExposure = 1.1;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.VSMShadowMap;
+
+// Студийное окружение для отражений: тёмная комната и несколько светящихся софтбоксов
+function studio() {
+  const env = new THREE.Scene();
+  env.add(new THREE.Mesh(new THREE.BoxGeometry(24, 24, 24), new THREE.MeshBasicMaterial({ color: 0x080808, side: THREE.BackSide })));
+  const box = (w, h, power, pos, color = 0xffffff) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: new THREE.Color(color).multiplyScalar(power), side: THREE.DoubleSide }));
+    m.position.set(...pos);
+    m.lookAt(0, 0, 0);
+    env.add(m);
+  };
+  box(6, 2.2, 2.6, [-2.5, 8, -3]);    // верхний софтбокс сзади-слева: полоса блика у заднего края крышки
+  box(2.4, 7, 2.2, [-8, 2.5, 2]);     // левая стрип-лампа
+  box(1.6, 7, 1.2, [8, 2, -1]);       // правая стрип-лампа
+  box(9, 0.5, 0.3, [0, -0.6, -9]);   // тонкая полоса сзади у пола — блик на гранях (зелёный в отражениях давал ложный цвет деталей)
+  box(5, 2, 0.35, [0, -2, 8]);        // слабый отражатель спереди снизу
+  return new THREE.PMREMGenerator(renderer).fromScene(env, 0.02).texture;
+}
+
+const scene = new THREE.Scene();
+scene.environment = studio();
+scene.environmentIntensity = 0.65;
+
+const key = new THREE.DirectionalLight(0xffffff, 1.9);
+key.position.set(-2.6, 6, 2.2);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+key.shadow.radius = 18;
+key.shadow.blurSamples = 25;
+key.shadow.bias = -0.0004;
+Object.assign(key.shadow.camera, { left: -2.4, right: 2.4, top: 2.4, bottom: -2.4, near: 0.5, far: 16 });
+const fill = new THREE.DirectionalLight(0xffffff, 0.42);
+fill.position.set(4, 1.2, 4);
+// Зелёного света нет: на плоских глянцевых гранях он давал ложный цвет деталей. Зелёный в кадре — только кнопка PTT.
+const rim2 = new THREE.DirectionalLight(0xffffff, 0.9);
+rim2.position.set(4.5, 2, -4);
+const back = new THREE.DirectionalLight(0xffffff, 0.5);
+back.position.set(-4, 1.6, -4);   // нейтральный контровой слева сзади — отделяет тёмные детали от фона
+scene.add(key, fill, rim2, back);
+
+function material(name, { color, metal, rough }) {
+  if (name === 'ptt') color = GREEN; // кнопка — точка логотипа
+  if (metal) return new THREE.MeshPhysicalMaterial({ color, metalness: 1, roughness: 0.3, envMapIntensity: 2.2 });
+  const shell = ['front', 'back', 'ptt_plate'].includes(name);
+  return new THREE.MeshPhysicalMaterial({
+    color, roughness: rough ?? (shell ? 0.44 : 0.4),
+    clearcoat: shell ? 0.4 : 0.55, clearcoatRoughness: shell ? 0.22 : 0.18,
+    sheen: shell ? 0.08 : 0, sheenRoughness: 0.8, sheenColor: new THREE.Color(0xffffff),
+    envMapIntensity: shell || name === 'battery' ? 1 : 2.6, // тёмным деталям — больше бликов, иначе на чёрном фоне их не видно
+  });
+}
+
+const camera = new THREE.PerspectiveCamera(28, innerWidth / innerHeight, 0.05, 100);
+const model = new THREE.Group();
+model.rotation.x = -Math.PI / 2;   // CAD: Z вверх → three.js: Y вверх
+model.scale.setScalar(0.01);       // мм → условные метры
+scene.add(model);
+
+new GLTFLoader().load('/assets/pocket.glb', (gltf) => {
+  const meshes = {};
+  gltf.scene.traverse((o) => { if (o.isMesh) meshes[o.name] = o; });
+  const shellBox = new THREE.Box3();
+  for (const name of ['front', 'back']) { meshes[name].geometry.computeBoundingBox(); shellBox.union(meshes[name].geometry.boundingBox); }
+  const center = shellBox.getCenter(new THREE.Vector3());
+  for (const [name, spec] of Object.entries(PARTS)) {
+    if (!meshes[name]) continue;
+    const mesh = new THREE.Mesh(toCreasedNormals(meshes[name].geometry, THREE.MathUtils.degToRad(35)), material(name, spec));
+    mesh.position.copy(center).negate().addScaledVector(new THREE.Vector3(...spec.explode), view.open);
+    mesh.castShadow = true;
+    model.add(mesh);
+  }
+  model.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(model);
+  const sphere = box.getBoundingSphere(new THREE.Sphere());
+
+  // Пол: прозрачный, видна только тень
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(12, 12), new THREE.ShadowMaterial({ opacity: 0.5 }));
+  floor.rotation.x = -Math.PI / 2;
+  floor.position.y = box.min.y - 0.002;
+  floor.receiveShadow = true;
+  scene.add(floor);
+  key.target.position.copy(sphere.center);
+  scene.add(key.target);
+
+  // Камера по азимуту/высоте, расстояние — чтобы модель целиком влезла в кадр
+  const az = THREE.MathUtils.degToRad(view.az), el = THREE.MathUtils.degToRad(view.el);
+  const vfov = THREE.MathUtils.degToRad(camera.fov);
+  const hfov = 2 * Math.atan(Math.tan(vfov / 2) * camera.aspect);
+  const dist = (sphere.radius * view.fit) / Math.sin(Math.min(vfov, hfov) / 2);
+  const target = sphere.center.clone();
+  camera.position.set(target.x + dist * Math.cos(el) * Math.sin(az), target.y + dist * Math.sin(el), target.z + dist * Math.cos(el) * Math.cos(az));
+  camera.lookAt(target);
+  renderer.render(scene, camera);
+
+  // Рамка непрозрачных пикселей (с тенью) — в <title>, для обрезки
+  const gl = renderer.getContext(), w = gl.drawingBufferWidth, h = gl.drawingBufferHeight;
+  const px = new Uint8Array(w * h * 4);
+  gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, px);
+  let x0 = w, y0 = h, x1 = -1, y1 = -1;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    if (px[(y * w + x) * 4 + 3] > 6) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  }
+  document.title = `bbox ${x0} ${h - 1 - y1} ${x1 - x0 + 1} ${y1 - y0 + 1}`;
+});
+</script>
+</body>
+</html>

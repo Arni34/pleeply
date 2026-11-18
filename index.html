@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>pleeply – your own AI, at home</title>
-<meta name="description" content="pleeply is a speaker with a computer inside. It runs open AI models on the device, keeps a private memory of you, and doesn't need the cloud.">
-<meta property="og:title" content="pleeply – your own AI. It lives at home.">
-<meta property="og:description" content="A speaker with a computer inside. Open models, private memory, no cloud required. Join the waitlist.">
+<title>pleeply – Your AI. Your Device. Your Privacy.</title>
+<meta name="description" content="pleeply Desktop brings local AI models, cloud models you choose and personal AI agents together in one desktop app. In development: join early access.">
+<meta property="og:title" content="pleeply – Your AI. Your Device. Your Privacy.">
+<meta property="og:description" content="One AI ecosystem on your computer: run compatible models locally, connect the cloud only when you choose. Join early access.">
 <meta property="og:image" content="https://pleeply.vercel.app/og.png">
 <meta property="og:url" content="https://pleeply.vercel.app/">
 <meta name="twitter:image" content="https://pleeply.vercel.app/og.png">
@@ -14,692 +14,1055 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://pleeply.vercel.app/">
 <link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
-<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" content="#000000">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
   {"@type":"Organization","@id":"https://pleeply.vercel.app/#org","name":"pleeply","url":"https://pleeply.vercel.app/","logo":{"@type":"ImageObject","url":"https://pleeply.vercel.app/icon-512.png","width":512,"height":512}},
   {"@type":"WebSite","@id":"https://pleeply.vercel.app/#website","name":"pleeply","url":"https://pleeply.vercel.app/","publisher":{"@id":"https://pleeply.vercel.app/#org"}}
 ]}
 </script>
+<script>document.documentElement.classList.add('js');try{localStorage.setItem('pl_variant','desktop2')}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@900&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
-<link rel="preload" href="/assets/pocket.glb" as="fetch" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  /* Палитра прежняя: белый, тёплые серые, почти чёрный и зелёная точка логотипа */
+  /* Ноябрь 2026: главная pleeply по схеме openai.com (тёмная тема) — строка «спроси» на первом экране, сетки карточек
+     с тонированными картинками, маленькие заголовки разделов, тёмные «таблетки». Geist / Geist Mono,
+     зелёный логотипа #3e9b5a (assets/logo.svg). Прошлая версия — archive/index.before-openai-layout.html */
   :root {
-    --bg: #ffffff; --card: #f4f3ef; --card-2: #ebe9e3; --ink: #1f1f1d; --text: #3a3a37; --muted: #6b6b66; --soft: #9a9a94;
-    --line: rgba(31,31,29,.12); --panel: #0e0f0d; --green: #75a24c; --green-hover: #6a9444; --green-ink: #4f7531;
-    --r: 16px; --r-btn: 8px; --wrap: 1376px; --pad: clamp(16px, 2.4vw, 32px);
-    --sans: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    --serif: "Instrument Serif", Georgia, serif;
+    --bg: #000000; --soft: #171717; --soft-2: #262626; --panel: #1a1a1a;
+    --ink: #ffffff; --text: #d4d4d4; --muted: #9b9b9b;
+    --line: rgba(255,255,255,.1); --line-2: rgba(255,255,255,.16); --line-3: rgba(255,255,255,.28);
+    /* зелёный логотипа — знак и заливки; на чёрном текст и иконки светлее (контраст 6:1+) */
+    --g: #3e9b5a; --g-2: #5cbf7a; --g-3: #6fcf8c; --g-4: #a8e2b9;
+    --r: 8px; --wrap: 1440px; --pad: clamp(20px, 2.4vw, 32px);
+    --sans: "Geist", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+    --mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   }
   * { box-sizing: border-box; }
-  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; scroll-padding-top: 80px; color-scheme: dark; }
   body { margin: 0; background: var(--bg); color: var(--text); font: 400 16px/1.6 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
-  a { color: inherit; }
+  ::selection { background: rgba(62,155,90,.45); color: #fff; }
+  a { color: inherit; text-decoration: none; }
   button { font: inherit; color: inherit; cursor: pointer; }
-  img { display: block; max-width: 100%; height: auto; }
+  img, svg { display: block; max-width: 100%; }
+  p { margin: 0; }
+  ul { margin: 0; padding: 0; list-style: none; }
+  h1, h2, h3, h4 { margin: 0; color: var(--ink); font-weight: 500; letter-spacing: -0.02em; line-height: 1.15; }
   .wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 var(--pad); }
-  h1, h2, h3 { margin: 0; color: var(--ink); font-weight: 500; letter-spacing: -0.01em; line-height: 1.1; }
-  h2 { font-size: clamp(32px, 3.4vw, 48px); text-wrap: balance; }
-  em { font-family: var(--serif); font-style: italic; font-weight: 400; letter-spacing: 0; }
-
-  .mark { font-family: "Inter Tight", var(--sans); font-weight: 900; letter-spacing: -0.055em; line-height: 1; white-space: nowrap; text-decoration: none; color: var(--ink); }
-  .mark i { display: inline-block; width: .2em; height: .2em; border-radius: 50%; background: var(--green); margin-left: .06em; vertical-align: .08em; }
-
-  /* Кнопки как у island.io: скругление 8px и стрелка ↳ */
-  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: var(--r-btn); padding: 10px 16px;
-    font-size: 15px; font-weight: 500; line-height: 1.4; text-decoration: none; white-space: nowrap; transition: background .2s ease, color .2s ease, box-shadow .2s ease; }
-  .btn::after { content: "↳"; }
-  .btn-main { background: var(--green); color: #0e0f0d; }
-  .btn-main:hover { background: var(--green-hover); }
-  .btn-dark { background: var(--panel); color: #fff; }
-  .btn-dark:hover { background: #2a2b28; }
-  .btn-light { background: #fff; color: var(--ink); }
-  .btn-light:hover { background: var(--card); }
-  .btn-line { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); }
-  .btn-line:hover { box-shadow: inset 0 0 0 1px var(--ink); }
-  .btn:focus-visible, .chip input:focus-visible + span, .seg input:focus-visible + span { outline: 2px solid var(--green); outline-offset: 3px; }
-  .ctas { display: flex; gap: 8px; flex-wrap: wrap; }
-
-  /* Шапка: знак слева, справа две плашки */
-  .nav { position: fixed; inset: 0 0 auto 0; z-index: 30; height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 var(--pad); }
-  .nav::before { content: ""; position: absolute; inset: 0 0 -16px 0; z-index: -1; pointer-events: none; background: linear-gradient(#fff 55%, rgba(255,255,255,0)); }
-  .nav .mark { font-size: 24px; }
-  .nav-right { display: flex; align-items: center; gap: 8px; }
-  .nav-group { display: flex; align-items: center; gap: 2px; padding: 4px; border-radius: 10px; background: rgba(244,243,239,.92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-  .nav-group a { padding: 6px 12px; border-radius: 6px; font-size: 14px; text-decoration: none; color: var(--ink); transition: background .2s ease; }
-  .nav-group a:hover { background: #fff; }
-  .lang button { border: 0; background: none; padding: 6px 9px; border-radius: 6px; font-size: 13px; font-weight: 500; color: var(--muted); }
-  .lang button[aria-pressed="true"] { background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgba(20,20,18,.08); }
-  .nav .btn { padding: 6px 12px; font-size: 14px; }
-
-  /* Первый экран и устройство в 3D: текст слева, Pocket справа; прокрутка открывает корпус */
-  .pin { position: relative; height: 430vh; }
-  .sticky { position: sticky; top: 0; height: 100vh; height: 100svh; display: flex; flex-direction: column; padding: 64px 12px 12px; }
-  .stage { position: relative; flex: 1; border-radius: var(--r); overflow: hidden; isolation: isolate; color: #f3f2ec;
-    background: radial-gradient(90% 90% at 68% 46%, #2c2e2a 0%, #161714 46%, #0b0c0a 100%); }
-  .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: pan-y; cursor: grab; }
-  .stage canvas:active { cursor: grabbing; }
-  .stage .fallback { position: absolute; right: 5%; top: 50%; width: min(50%, 720px); transform: translateY(-50%); display: none; filter: drop-shadow(0 40px 50px rgba(0,0,0,.45)); }
-  .stage.no-gl .fallback { display: block; }
-  .stage.no-gl canvas, .stage.no-gl .loading { display: none; }
-
-  .hero-copy { position: absolute; z-index: 2; left: clamp(24px, 5.4vw, 88px); top: 50%; width: min(560px, 44%);
-    opacity: var(--hero, 1); transform: translateY(calc(-50% - (1 - var(--hero, 1)) * 40px)); }
-  .stage.past-hero .hero-copy { visibility: hidden; }
-  .hero-copy h1 { color: #fff; font-size: clamp(40px, 4.4vw, 64px); }
-  .hero-copy .sub { color: rgba(243,242,236,.78); font-size: clamp(16px, 1.25vw, 18px); margin: 20px 0 28px; max-width: 42ch; }
-  .hero-copy .note { margin: 16px 0 0; font-size: 13px; color: rgba(243,242,236,.55); }
-  .scroll-hint { position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%); margin: 0; font-size: 13px; color: rgba(243,242,236,.55); opacity: var(--hero, 1); pointer-events: none; white-space: nowrap; }
-
-  .stage-top { position: absolute; inset: 22px 24px auto 24px; display: flex; justify-content: space-between; gap: 16px; font-size: 13px; font-weight: 500; pointer-events: none; }
-  .stage-top .hint { color: rgba(243,242,236,.55); text-align: right; }
-  .bar { position: absolute; left: 24px; right: 24px; top: 54px; height: 2px; background: rgba(243,242,236,.12); border-radius: 2px; overflow: hidden; pointer-events: none; }
-  .bar i { display: block; height: 100%; width: 0; background: var(--green); }
-  .stage-top, .bar { opacity: 0; transition: opacity .5s ease; }
-  .stage.opened .stage-top, .stage.opened .bar { opacity: 1; }
-  .loading { position: absolute; right: 22%; top: 50%; transform: translateY(-50%); font-size: 13px; color: rgba(243,242,236,.5); transition: opacity .5s ease; pointer-events: none; }
-  .stage.ready .loading { opacity: 0; }
-
-  .caps { position: absolute; right: 24px; bottom: 24px; width: min(360px, calc(100% - 48px)); height: 150px; pointer-events: none; }
-  .cap { position: absolute; inset: auto 0 0 0; padding: 18px 20px; border-radius: 12px; background: #fff; color: var(--ink);
-    opacity: 0; transform: translateY(14px); transition: opacity .45s ease, transform .45s cubic-bezier(.2,.7,.2,1); }
-  .cap.on { opacity: 1; transform: none; }
-  .cap h3 { font-size: 20px; margin: 0 0 4px; }
-  .cap p { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.45; }
-
-  /* Разделы */
-  .sec { padding-top: clamp(80px, 9vw, 128px); }
-  .sec-head { text-align: center; max-width: 760px; margin: 0 auto clamp(32px, 4vw, 48px); }
-  .head-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; flex-wrap: wrap; margin-bottom: clamp(32px, 4vw, 48px); }
-  .head-row h2 { max-width: 30ch; text-wrap: balance; }
-
-  /* Модели — на месте логотипов клиентов */
-  .runs { padding-top: clamp(56px, 6vw, 80px); text-align: center; }
-  .runs p { margin: 0 0 26px; color: var(--ink); font-weight: 500; }
-  .runs ul { list-style: none; margin: 0; padding: 0; display: flex; justify-content: center; flex-wrap: wrap; gap: 12px clamp(40px, 7vw, 112px); }
-  .runs li { font-size: clamp(24px, 2.4vw, 34px); font-weight: 600; letter-spacing: -0.03em; color: #a6a6a0; }
-
-  /* Линейка */
-  .prod-hero { border-radius: var(--r); background: linear-gradient(180deg, #e7e5df 0%, #f1f0ec 55%, #f6f5f2 100%); text-align: center; padding: clamp(40px, 5vw, 72px) var(--pad) 0; overflow: hidden; }
-  .tag { display: block; font-size: 14px; font-weight: 500; color: var(--muted); margin-bottom: 10px; }
-  .prod-hero h3 { font-size: clamp(40px, 4.6vw, 64px); }
-  .prod-hero > p:not(.price-line) { max-width: 46ch; margin: 16px auto 0; }
-  .price-line { margin: 18px 0 24px; font-size: 15px; color: var(--muted); }
-  .price-line b { color: var(--ink); font-weight: 600; font-size: 18px; margin-right: 4px; }
-  .prod-hero .ctas { justify-content: center; }
-  .prod-hero img { width: min(760px, 94%); margin: clamp(28px, 4vw, 52px) auto -7%; filter: drop-shadow(0 40px 46px rgba(20,20,18,.16)); }
-  .prod-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
-  .prod { border-radius: var(--r); background: var(--card); padding: clamp(28px, 3.4vw, 48px); display: flex; flex-direction: column; min-height: 380px; }
-  .prod h3 { font-size: clamp(32px, 3.2vw, 44px); }
-  .prod > p { margin: 14px 0 0; max-width: 40ch; }
-  .prod .price-line { margin-top: auto; padding-top: 32px; }
-  .fine { font-size: 13px; color: var(--soft); text-align: center; margin: 20px auto 0; max-width: 70ch; }
-
-  /* Цитата с источником, как отзыв у island.io */
-  .quote { text-align: center; max-width: 1040px; margin: 0 auto; }
-  .quote blockquote { margin: 0; font-size: clamp(30px, 3.4vw, 48px); line-height: 1.15; letter-spacing: -0.01em; color: var(--ink); font-weight: 500; }
-  .quote p { max-width: 58ch; margin: 24px auto 28px; color: var(--muted); }
-  .quote p a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
-
-  /* «Встроено, а не прикручено»: карточки с маленькими интерфейсами */
-  .feats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px 20px; }
-  .feat-art { aspect-ratio: 1 / 1; border-radius: var(--r); background: var(--card); display: grid; place-items: center; padding: 28px; overflow: hidden; }
-  .feat h3 { font-size: 17px; line-height: 1.4; letter-spacing: 0; margin-top: 16px; max-width: 34ch; }
-  .ui { width: min(100%, 330px); display: grid; gap: 8px; font-size: 14px; line-height: 1.35; color: var(--ink); }
-  .ui-card { background: #fff; border-radius: 10px; padding: 12px 14px; box-shadow: 0 1px 2px rgba(20,20,18,.06), 0 10px 24px -14px rgba(20,20,18,.22); }
-  .ui-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; background: #fff; border-radius: 8px; box-shadow: 0 1px 2px rgba(20,20,18,.06); }
-  .ui-h { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); padding: 0 2px; }
-  .bub { max-width: 84%; padding: 9px 12px; border-radius: 14px; }
-  .bub.q { justify-self: start; background: #fff; border-bottom-left-radius: 4px; box-shadow: 0 1px 2px rgba(20,20,18,.06); }
-  .bub.a { justify-self: end; background: var(--panel); color: #fff; border-bottom-right-radius: 4px; }
-  .pill { justify-self: center; display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; color: var(--muted); padding: 4px 9px; border-radius: 999px; background: #fff; }
-  .pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
-  .ok { color: var(--green-ink); font-weight: 600; font-size: 12px; white-space: nowrap; }
-  .toggle { flex: none; width: 30px; height: 18px; border-radius: 999px; background: #d6d4ce; position: relative; }
-  .toggle::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.2); }
-  .toggle.on { background: var(--green); }
-  .toggle.on::after { left: 14px; }
-  .input { margin: 8px 0; padding: 9px 12px; border-radius: 8px; box-shadow: inset 0 0 0 1px var(--line); background: #fff; }
-  .ui-btn { background: var(--panel); color: #fff; text-align: center; padding: 9px; border-radius: 8px; font-weight: 500; }
+  .ic { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  .mono { font-family: var(--mono); }
   .muted { color: var(--muted); }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  :focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; border-radius: 6px; }
 
-  /* Тёмный баннер «Как это работает» */
-  .banner { border-radius: var(--r); overflow: hidden; color: #f3f2ec; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); align-items: center; gap: 24px;
-    padding: clamp(32px, 5vw, 72px); min-height: 520px; background: radial-gradient(80% 100% at 74% 50%, #2c2e2a 0%, #161714 50%, #0b0c0a 100%); }
-  .banner .label { font-size: 14px; font-weight: 500; color: rgba(243,242,236,.65); margin: 0 0 14px; }
-  .banner h2 { color: #fff; }
-  .banner p { color: rgba(243,242,236,.72); margin: 18px 0 28px; max-width: 44ch; }
-  .banner img { width: 100%; max-width: 620px; justify-self: center; filter: drop-shadow(0 30px 40px rgba(0,0,0,.45)); }
+  /* ---------- «таблетки» ---------- */
+  .pill { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 0 16px; border: 0; border-radius: 999px;
+    font: 500 14px/1 var(--sans); white-space: nowrap; transition: background .2s ease, box-shadow .2s ease; }
+  .pill .ic { width: 15px; height: 15px; }
+  .pill-dark { background: var(--ink); color: #000; }
+  .pill-dark:hover { background: #e2e2e2; }
+  .pill-line { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1px var(--line-2); }
+  .pill-line:hover { background: var(--soft); }
+  .pill-lg { height: 44px; padding: 0 20px; font-size: 15px; }
+  .link { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 500; color: var(--ink); white-space: nowrap; }
+  .link .ic { width: 14px; height: 14px; transition: transform .2s ease; }
+  .link:hover .ic { transform: translateX(2px); }
 
-  /* Следующий шаг */
-  .next { border-radius: var(--r); background: var(--panel); display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; padding: 24px 28px; }
-  .next h2 { color: #fff; font-size: clamp(24px, 2.4vw, 32px); }
-
-  /* Сценарии: слева заголовок и снимок, справа плитки */
-  .uses { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 12px; align-items: stretch; }
-  .uses-side { display: flex; flex-direction: column; gap: 28px; }
-  .uses-img { flex: 1; border-radius: var(--r); background: var(--card); display: grid; place-items: center; padding: 32px 24px; min-height: 260px; }
-  .uses-img img { filter: drop-shadow(0 26px 30px rgba(20,20,18,.16)); }
-  .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .tile { position: relative; border-radius: var(--r); background: var(--card); min-height: 188px; padding: 24px; display: flex; flex-direction: column; justify-content: center; align-items: center;
-    text-align: center; text-decoration: none; overflow: hidden; transition: background .25s ease; }
-  .tile h3 { font-size: 18px; letter-spacing: 0; transition: transform .4s cubic-bezier(.2,.7,.2,1); }
-  .tile .d { position: absolute; left: 24px; right: 24px; bottom: 20px; margin: 0; font-size: 14px; line-height: 1.45; color: var(--muted);
-    opacity: 0; transform: translateY(8px); transition: opacity .3s ease, transform .4s cubic-bezier(.2,.7,.2,1); }
-  .tile:hover, .tile:focus-visible { background: var(--card-2); }
-  .tile:hover h3, .tile:focus-visible h3 { transform: translateY(-30px); }
-  .tile:hover .d, .tile:focus-visible .d { opacity: 1; transform: none; }
-  @media (hover: none) {
-    .tile { justify-content: flex-start; align-items: flex-start; text-align: left; min-height: 0; }
-    .tile .d { position: static; opacity: 1; transform: none; margin-top: 8px; }
-  }
-
-  /* Гайды */
-  .guide { border-radius: var(--r); background: var(--card); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; align-items: center; padding: clamp(32px, 5vw, 64px); overflow: hidden; }
-  .guide p { margin: 16px 0 28px; max-width: 44ch; }
-  .docs { display: grid; gap: 10px; justify-items: end; }
-  .doc { width: min(400px, 100%); background: #fff; border-radius: 12px; padding: 16px 20px; box-shadow: 0 1px 2px rgba(20,20,18,.06), 0 12px 28px -18px rgba(20,20,18,.3); text-decoration: none; transition: transform .35s cubic-bezier(.2,.7,.2,1); }
-  .doc:nth-child(2) { margin-right: 6%; }
-  .doc:hover { transform: translateX(-4px); }
-  .doc small { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
-  .doc b { display: block; font-weight: 500; color: var(--ink); line-height: 1.35; }
-
-  /* Ещё почитать */
-  .res { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-  .res a { display: block; text-decoration: none; }
-  .thumb { position: relative; aspect-ratio: 16 / 10; border-radius: var(--r); background: var(--card); display: grid; place-items: center; padding: 24px; overflow: hidden; transition: background .25s ease; }
-  .res a:hover .thumb { background: var(--card-2); }
-  .thumb img { position: absolute; inset: 22px; width: calc(100% - 44px); height: calc(100% - 44px); object-fit: contain; filter: drop-shadow(0 18px 22px rgba(20,20,18,.14)); }
-  .chip-tag { display: inline-block; margin-top: 14px; font-size: 12px; font-weight: 500; padding: 2px 8px; border-radius: 4px; background: var(--card-2); color: var(--ink); }
-  .res h3 { margin-top: 10px; font-size: 18px; line-height: 1.35; letter-spacing: 0; }
-
-  /* Подвал, как у island.io: тёмный, колонки и плашка со следующим шагом */
-  footer { background: var(--panel); color: rgba(243,242,236,.72); margin-top: clamp(80px, 9vw, 128px); }
-  .foot { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 1.3fr); gap: 32px; padding-top: 56px; padding-bottom: 40px; }
-  .foot h4 { margin: 0 0 16px; color: #fff; font-size: 14px; font-weight: 500; }
-  .foot ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; font-size: 14px; }
-  .foot a { text-decoration: none; }
-  .foot a:hover { color: #fff; }
-  .foot .mark { color: #fff; font-size: 30px; }
-  .foot .about p { font-size: 14px; margin: 14px 0 0; max-width: 32ch; }
-  .foot-bar { background: #f6f5f2; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding: 20px 24px; }
-  .foot-bar h2 { font-size: clamp(22px, 2vw, 28px); }
-  .foot-bottom { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-top: 28px; padding-bottom: 32px; font-size: 13px; }
-  .foot-bottom a { text-decoration: none; }
-  .foot-bottom a:hover { color: #fff; }
-
-  /* Окно заявки */
-  dialog { border: 0; padding: 0; border-radius: var(--r); width: min(560px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); background: #fff; color: var(--ink); box-shadow: 0 40px 80px -30px rgba(0,0,0,.45); }
-  dialog::backdrop { background: rgba(14,15,13,.5); backdrop-filter: blur(4px); }
-  .dlg { padding: 28px 28px 26px; }
-  .dlg-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
-  .dlg h3 { font-size: 28px; margin: 0; }
-  .dlg .lead { margin: 6px 0 22px; color: var(--muted); font-size: 15px; }
-  .x { border: 0; background: var(--card); width: 34px; height: 34px; border-radius: 8px; font-size: 20px; line-height: 1; flex: none; }
-  .field { margin-bottom: 20px; }
-  .field > label, .field > .lbl { display: block; font-weight: 500; font-size: 15px; margin-bottom: 9px; }
-  input[type=email] { width: 100%; font: inherit; font-size: 16px; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--line); background: #fff; color: var(--ink); }
-  input[type=email]:focus { outline: none; border-color: var(--ink); }
-  .err { color: #a3402e; font-size: 14px; margin-top: 7px; display: none; }
-  .err.on { display: block; }
-  .chips, .seg { display: flex; flex-wrap: wrap; gap: 6px; }
-  .chip input, .seg input { position: absolute; opacity: 0; pointer-events: none; }
-  .chip span, .seg span { display: inline-block; padding: 8px 12px; border-radius: 8px; background: var(--card); font-size: 14px; cursor: pointer; user-select: none; transition: background .15s ease, color .15s ease; }
-  .chip input:checked + span, .seg input:checked + span { background: var(--panel); color: #fff; }
-  select { width: 100%; font: inherit; font-size: 15px; padding: 11px 12px; border-radius: 8px; border: 1px solid var(--line); background: #fff; color: var(--ink); }
-  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
-  .dlg form .btn { width: 100%; margin-top: 4px; padding: 13px 16px; }
-  .small { font-size: 13px; color: var(--soft); text-align: center; margin: 12px 0 0; }
-  .done { display: none; text-align: center; padding: 18px 0 6px; }
-  .done .big { width: 56px; height: 56px; border-radius: 50%; background: var(--green); margin: 0 auto 18px; display: grid; place-items: center; color: #fff; font-size: 26px; font-weight: 700; }
-  .done p { color: var(--muted); margin: 10px auto 20px; max-width: 34ch; }
-  .share { display: flex; gap: 8px; }
-  .share input { flex: 1; min-width: 0; font: inherit; font-size: 14px; padding: 11px 12px; border-radius: 8px; border: 1px solid var(--line); background: #fff; color: var(--muted); }
-  .done .btn { margin-top: 10px; }
-  form.sent { display: none; }
-  form.sent + .done { display: block; }
-
-  /* Появление при прокрутке (класс in ставит app.js) */
-  .rv { opacity: 0; transform: translateY(18px); transition: opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); }
-  .rv.in { opacity: 1; transform: none; }
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { animation: none !important; transition: none !important; }
-    .rv { opacity: 1; transform: none; }
-    html { scroll-behavior: auto; }
-  }
-
-  @media (max-width: 1080px) {
+  /* ---------- шапка ---------- */
+  .nav { position: sticky; top: 0; z-index: 50; background: rgba(0,0,0,.78); -webkit-backdrop-filter: saturate(180%) blur(16px); backdrop-filter: saturate(180%) blur(16px); transition: box-shadow .2s ease; }
+  .nav.scrolled { box-shadow: 0 1px 0 var(--line); }
+  .nav-in { height: 64px; display: flex; align-items: center; gap: 24px; }
+  .brand { display: inline-flex; align-items: center; gap: 8px; color: var(--ink); font: 600 20px/1 var(--sans); letter-spacing: -0.04em; }
+  .brand svg { width: 28px; height: 28px; color: var(--g); }
+  .nav-links { display: flex; gap: 2px; }
+  .nav-links a { padding: 8px 10px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--muted); transition: color .2s ease, background .2s ease; }
+  .nav-links a:hover { color: var(--ink); background: var(--soft); }
+  .nav-links .m-only { display: none; }
+  .nav-r { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .menu-btn { display: none; width: 36px; height: 36px; border: 0; border-radius: 999px; background: var(--soft); align-items: center; justify-content: center; }
+  @media (max-width: 960px) {
+    .menu-btn { display: inline-flex; }
     .nav-links { display: none; }
-    .uses { grid-template-columns: 1fr; }
-    .uses-img { min-height: 220px; }
-    .foot { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .foot .about { grid-column: 1 / -1; grid-row: 1; }
+    .nav.open { box-shadow: 0 1px 0 var(--line); }
+    .nav.open .nav-links { display: flex; position: absolute; top: 64px; left: 0; right: 0; flex-direction: column; padding: 8px var(--pad) 20px; background: #000; box-shadow: 0 1px 0 var(--line); }
+    .nav.open .nav-links a { padding: 12px 10px; font-size: 16px; color: var(--ink); }
+    .nav.open .nav-links .m-only { display: block; }
+    .nav-r .pill-line { display: none; }
   }
-  /* На узком экране текст первого экрана сверху, Pocket под ним (порог тот же, что в pocket3d.js) */
-  @media (max-width: 899px) {
-    .hero-copy { left: 20px; right: 20px; top: 26px; width: auto; transform: translateY(calc((1 - var(--hero, 1)) * -30px)); }
-    .hero-copy h1 { font-size: clamp(34px, 7.4vw, 52px); }
-    .hero-copy .sub { margin: 14px 0 20px; font-size: 16px; }
-    .stage .fallback { right: 50%; top: auto; bottom: 8%; width: 82%; transform: translateX(50%); }
-    .loading { right: 50%; top: auto; bottom: 22%; transform: translateX(50%); }
-    .prod-row, .banner, .guide { grid-template-columns: 1fr; }
-    .feats { grid-template-columns: 1fr 1fr; }
-    .res { grid-template-columns: 1fr; }
-    .docs { justify-items: stretch; }
-    .doc:nth-child(2) { margin-right: 0; }
-  }
-  @media (max-width: 640px) {
-    .nav .btn { display: none; }
-    .sticky { padding: 64px 8px 8px; }
-    .hero-copy .note { display: none; }
-    .stage-top { inset: 16px 16px auto 16px; font-size: 12px; }
-    .stage-top .hint { display: none; }
-    .bar { left: 16px; right: 16px; top: 42px; }
-    .caps { left: 12px; right: 12px; bottom: 12px; width: auto; }
-    .cap { padding: 14px 16px; }
-    .cap h3 { font-size: 18px; }
-    .feats { grid-template-columns: 1fr; }
-    .feat-art { aspect-ratio: 4 / 3; }
-    .tiles { grid-template-columns: 1fr; }
-    .prod { min-height: 0; }
-    .foot { grid-template-columns: 1fr 1fr; }
-    .next { padding: 22px 20px; }
+
+  /* ---------- первый экран: строка «спроси» ---------- */
+  .hero { padding: clamp(64px, 11vh, 132px) 0 clamp(48px, 7vw, 88px); text-align: center; }
+  .hero h1 { font-size: clamp(30px, 3.6vw, 44px); letter-spacing: -0.03em; }
+  .hero .sub { margin: 14px auto 0; max-width: 620px; font-size: 17px; color: var(--muted); }
+  .ask { max-width: 768px; margin: 36px auto 0; padding: 18px 14px 12px 22px; text-align: left; border-radius: 28px; background: #1c1c1c;
+    box-shadow: 0 0 0 1px var(--line), 0 10px 40px -16px rgba(0,0,0,.8); }
+  .ask textarea { display: block; width: 100%; min-height: 56px; padding: 0 8px 0 0; border: 0; outline: 0; resize: none; background: transparent;
+    font: 400 17px/1.5 var(--sans); color: var(--ink); }
+  .ask textarea::placeholder { color: #8f8f8f; }
+  .ask-row { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+  .mini { display: inline-flex; gap: 2px; padding: 3px; border-radius: 999px; background: var(--soft-2); }
+  .mini button { height: 28px; padding: 0 12px; border: 0; border-radius: 999px; background: none; font: 500 13px/1 var(--sans); color: var(--muted); }
+  .mini button[aria-pressed="true"] { background: #3a3a3a; color: var(--ink); }
+  .send { margin-left: auto; width: 36px; height: 36px; border: 0; border-radius: 50%; background: var(--ink); color: #000; display: grid; place-items: center; transition: background .2s ease; }
+  .send:disabled { background: #333; color: #777; cursor: default; }
+  .send .ic { width: 16px; height: 16px; }
+  .ask-msg { display: none; max-width: 768px; margin: 14px auto 0; padding: 14px 18px; border-radius: 16px; background: var(--soft); text-align: left; font-size: 15px; color: var(--text); }
+  .ask-msg b { color: var(--ink); font-weight: 500; }
+  .asked .ask-msg { display: block; }
+  .ask-note { max-width: 768px; margin: 12px auto 0; font-size: 13px; color: var(--muted); }
+  .chips-row { max-width: 860px; margin: 22px auto 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+
+  /* ---------- разделы и карточки ---------- */
+  .sec { padding-top: clamp(56px, 7vw, 96px); }
+  .sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+  .sec-head h2 { font-size: 22px; letter-spacing: -0.01em; }
+  .sec-note { display: flex; align-items: flex-start; gap: 10px; margin: -8px 0 24px; max-width: 760px; font-size: 14px; color: var(--muted); }
+  .sec-note .ic { width: 16px; height: 16px; margin-top: 3px; color: var(--g-3); }
+  .sec-note b { color: var(--ink); font-weight: 500; }
+
+  .tile { display: block; min-width: 0; }
+  .media { position: relative; overflow: hidden; border-radius: var(--r); aspect-ratio: 1 / 1; background: var(--soft); }
+  .media.wide { aspect-ratio: 16 / 9; container-type: inline-size; }
+  .media.r43 { aspect-ratio: 4 / 3; }
+  .tile h3 { margin-top: 14px; font-size: 18px; line-height: 1.3; letter-spacing: -0.01em; }
+  .tile.big h3 { font-size: 22px; }
+  .tile .desc { margin-top: 6px; max-width: 56ch; font-size: 15px; line-height: 1.55; }
+  .meta { margin-top: 6px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; font-size: 14px; font-weight: 500; color: var(--muted); }
+  .meta .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--g); }
+  .meta .dot.hollow { background: none; box-shadow: inset 0 0 0 1.5px var(--muted); }
+  a.tile:hover h3 { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+  .media > img { width: 100%; height: 100%; object-fit: contain; transition: transform .5s cubic-bezier(.2,.7,.2,1); }
+  a.tile:hover .media > img { transform: scale(1.03); }
+
+  /* мягкие тонированные фоны карточек — в духе абстрактных картинок openai.com */
+  .t-green { background: radial-gradient(70% 60% at 25% 20%, #1d4d2c 0, transparent 70%), radial-gradient(60% 70% at 85% 90%, #2a6b40 0, transparent 70%), #0b1a10; }
+  .t-mint { background: radial-gradient(70% 60% at 78% 15%, #1b4943 0, transparent 70%), radial-gradient(60% 60% at 18% 90%, #215b51 0, transparent 70%), #0a1816; }
+  .t-sand { background: radial-gradient(70% 60% at 20% 15%, #4a3820 0, transparent 70%), radial-gradient(60% 60% at 85% 85%, #5a4224 0, transparent 70%), #17110a; }
+  .t-slate { background: radial-gradient(70% 60% at 80% 20%, #273042 0, transparent 70%), radial-gradient(60% 60% at 15% 85%, #303c55 0, transparent 70%), #0e1218; }
+  .t-night { background: radial-gradient(55% 50% at 50% 70%, rgba(62,155,90,.38) 0, transparent 70%), radial-gradient(80% 60% at 50% 0%, #1d211e 0, transparent 70%), #0a0b0a; }
+
+  .feat { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 1fr); gap: 24px; }
+  .feat-side { display: grid; gap: 28px; align-content: start; }
+  .feat-side .media { aspect-ratio: 16 / 10; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px 24px; }
+  .grid4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 40px 24px; }
+  @media (max-width: 1000px) { .feat { grid-template-columns: 1fr; } .feat-side { grid-template-columns: 1fr 1fr; } .grid3, .grid4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 600px) { .feat-side, .grid3, .grid4 { grid-template-columns: 1fr; } .media.wide { aspect-ratio: 4 / 5; } .feat-side .media { aspect-ratio: 4 / 3; } }
+
+  /* картинки внутри карточек: белая панель-иллюстрация, глиф, крупный текст */
+  .panel { position: absolute; left: 11%; right: 11%; top: 50%; transform: translateY(-50%); padding: 14px; border-radius: 12px; background: var(--panel);
+    box-shadow: inset 0 0 0 1px var(--line), 0 18px 44px -18px rgba(0,0,0,.85); font-size: 13px; line-height: 1.45; color: var(--text); text-align: left; }
+  .panel-lbl { font: 500 10px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 2px 0 8px; }
+  .mrow { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; background: var(--soft-2); color: var(--ink); }
+  .mrow + .mrow { margin-top: 6px; }
+  .mrow .ic { width: 15px; height: 15px; color: var(--g-3); }
+  .mrow small { margin-left: auto; font: 500 11px/1 var(--mono); color: var(--muted); white-space: nowrap; }
+  .mrow.on { background: rgba(62,155,90,.16); box-shadow: inset 0 0 0 1px rgba(92,191,122,.5); }
+  .mrow.off { color: var(--muted); }
+  .mrow b { margin-left: auto; font-weight: 500; }
+  .bub { padding: 8px 11px; border-radius: 10px; background: var(--soft-2); color: var(--ink); }
+  .bub.me { margin-left: 18%; background: #333; }
+  .bub + .bub { margin-top: 6px; }
+  .bub-tag { margin-top: 6px; font: 500 10.5px/1 var(--mono); color: var(--g-3); }
+  .tgl { margin-left: auto; width: 30px; height: 18px; border-radius: 9px; background: var(--ink); position: relative; flex: none; }
+  .tgl::after { content: ""; position: absolute; top: 2px; left: 14px; width: 14px; height: 14px; border-radius: 50%; background: #000; }
+  .slider { margin-top: 10px; height: 5px; border-radius: 3px; background: #3a3a3a; position: relative; }
+  .slider::before { content: ""; position: absolute; inset: 0 38% 0 0; border-radius: 3px; background: var(--ink); }
+  .slider::after { content: ""; position: absolute; top: -5px; left: calc(62% - 7px); width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.6); }
+  .mrow.col { display: block; }
+  .mrow.col small { float: right; }
+  .chipm { display: inline-flex; align-items: center; gap: 6px; margin: 0 4px 6px 0; padding: 6px 10px; border-radius: 999px; background: var(--soft-2); color: var(--ink); font-size: 12.5px; }
+  .chipm::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--g); }
+  .panel-foot { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); display: flex; gap: 8px; align-items: center; color: var(--muted); font-size: 12.5px; }
+  .panel-foot .ic { width: 14px; height: 14px; color: var(--g-3); }
+  .bar { height: 6px; border-radius: 3px; background: #3a3a3a; overflow: hidden; margin: 10px 0 2px; }
+  .bar::after { content: ""; display: block; height: 100%; background: var(--ink); }
+  .radio { width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--line-3); flex: none; }
+  .mrow.on .radio { box-shadow: inset 0 0 0 4px var(--g); }
+  .fake-btn { margin-top: 8px; height: 32px; border-radius: 999px; display: grid; place-items: center; background: var(--ink); color: #000; font-weight: 500; }
+  .glyph { position: absolute; inset: 0; margin: auto; width: 46%; height: 46%; overflow: visible; }
+  .bigtxt { position: absolute; inset: 0; display: grid; place-items: center; padding: 12%; text-align: center; font-size: clamp(26px, 2.8vw, 40px); font-weight: 500; letter-spacing: -0.03em; line-height: 1.1; color: var(--ink); }
+  .bigtxt small { display: block; margin-top: 10px; font: 500 12px/1.3 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .modes-art { position: absolute; inset: 0; display: grid; place-content: center; gap: 10px; }
+  .modes-art span { display: flex; align-items: center; gap: 10px; width: 200px; padding: 12px 16px; border-radius: 12px; background: rgba(255,255,255,.05); color: var(--muted); font-weight: 500; font-size: 15px; }
+  .modes-art span.on { background: var(--panel); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line), 0 12px 30px -12px rgba(0,0,0,.8); }
+  .modes-art .ic { width: 18px; height: 18px; color: var(--g-3); }
+  .night-cap { position: absolute; left: 16px; top: 14px; font: 500 11px/1 var(--mono); letter-spacing: .1em; color: rgba(255,255,255,.7); }
+
+  /* ---------- макет приложения в главной карточке ---------- */
+  .media .app { position: absolute; left: 7%; right: 7%; top: 9%; }
+  .app { border-radius: 12px; overflow: hidden; background: #212121; box-shadow: 0 0 0 1px rgba(255,255,255,.1), 0 30px 80px -24px rgba(0,0,0,.9); font: 400 13px/1.5 var(--sans); color: var(--text); text-align: left; }
+  .app-bar { height: 36px; display: flex; align-items: center; gap: 12px; padding: 0 14px; border-bottom: 1px solid var(--line); background: #1a1a1a; }
+  .app-dots { display: flex; gap: 7px; }
+  .app-dots i { width: 10px; height: 10px; border-radius: 50%; background: #3a3a3a; }
+  .app-title { margin: 0 auto; font: 500 12px/1 var(--mono); color: var(--muted); }
+  .app-tag { font: 500 10.5px/1 var(--mono); letter-spacing: .06em; color: var(--g-3); padding: 5px 8px; border-radius: 6px; background: rgba(62,155,90,.12); }
+  .app-body { display: grid; grid-template-columns: 196px 1fr 236px; min-height: 470px; }
+  .app-side { padding: 14px 10px; display: flex; flex-direction: column; gap: 2px; border-right: 1px solid var(--line); background: var(--soft); }
+  .side-brand { display: flex; align-items: center; gap: 8px; padding: 4px 8px 14px; font: 600 15px/1 var(--sans); letter-spacing: -0.035em; color: var(--ink); }
+  .side-brand svg { width: 22px; height: 22px; color: var(--g); }
+  .side-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; color: var(--muted); }
+  .side-item .ic { width: 16px; height: 16px; }
+  .side-item.on { background: #2b2b2b; color: var(--ink); }
+  .side-item small { margin-left: auto; padding: 3px 5px; border-radius: 4px; font: 500 10px/1 var(--mono); letter-spacing: .06em; color: var(--muted); box-shadow: inset 0 0 0 1px var(--line-2); }
+  .side-foot { margin-top: auto; padding: 10px; border-radius: 10px; background: #262626; box-shadow: inset 0 0 0 1px var(--line); font-size: 12px; }
+  .side-foot b { display: block; font: 500 10px/1.4 var(--mono); letter-spacing: .08em; color: var(--muted); }
+  .app-main { display: flex; flex-direction: column; min-width: 0; }
+  .app-top { display: flex; align-items: center; gap: 10px; padding: 11px 16px; border-bottom: 1px solid var(--line); }
+  .pick { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 8px; background: var(--soft-2); box-shadow: inset 0 0 0 1px var(--line); color: var(--ink); font-weight: 500; white-space: nowrap; }
+  .pick i { width: 7px; height: 7px; border-radius: 50%; background: var(--g); }
+  .pick svg { width: 12px; height: 12px; color: var(--muted); }
+  .seg-ui { margin-left: auto; display: inline-flex; padding: 3px; border-radius: 9px; background: var(--soft-2); }
+  .seg-ui span { padding: 4px 11px; border-radius: 7px; font: 500 12px/1.2 var(--sans); color: var(--muted); }
+  .seg-ui span.on { background: #3a3a3a; color: var(--ink); }
+  .msgs { flex: 1; padding: 20px 20px 8px; display: flex; flex-direction: column; gap: 12px; }
+  .msg { max-width: 82%; padding: 10px 14px; border-radius: 14px; }
+  .msg-me { align-self: flex-end; background: #303030; color: var(--ink); }
+  .msg-ai { align-self: flex-start; padding-left: 0; }
+  .msg-ai .q { margin-top: 8px; padding: 11px 14px; border-radius: 10px; box-shadow: inset 0 0 0 1px var(--line); color: var(--ink); }
+  .msg-meta { margin-top: 10px; display: inline-flex; align-items: center; gap: 8px; font: 500 11px/1.3 var(--mono); color: var(--g-3); }
+  .msg-meta .ic { width: 13px; height: 13px; }
+  .compose { margin: 6px 16px 16px; display: flex; align-items: center; gap: 10px; padding: 9px 9px 9px 14px; border-radius: 18px; box-shadow: inset 0 0 0 1px var(--line-2); color: var(--muted); }
+  .compose span { flex: 1; }
+  .compose i { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--ink); color: #000; }
+  .compose i svg { width: 13px; height: 13px; }
+  .app-hw { padding: 16px; display: flex; flex-direction: column; gap: 10px; border-left: 1px solid var(--line); background: var(--soft); }
+  .hw-h { margin-top: 4px; font: 500 10px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .hw-row { display: flex; justify-content: space-between; gap: 8px; padding: 8px 11px; border-radius: 8px; background: #262626; box-shadow: inset 0 0 0 1px var(--line); }
+  .hw-row span { color: var(--muted); }
+  .hw-row b { color: var(--ink); font-weight: 500; }
+  .fit { display: grid; grid-template-columns: 40px 1fr auto; align-items: center; gap: 10px; font-size: 12px; }
+  .fit > span { font-family: var(--mono); color: var(--ink); }
+  .fit u { position: relative; height: 6px; border-radius: 3px; background: #333; text-decoration: none; overflow: hidden; }
+  .fit u::after { content: ""; position: absolute; inset: 0 auto 0 0; width: var(--w); border-radius: 3px; background: var(--c, var(--g)); }
+  .fit b { min-width: 58px; text-align: right; font-weight: 500; color: var(--muted); }
+  .fit-note { margin-top: auto; padding: 10px 11px; border-radius: 8px; background: rgba(62,155,90,.16); color: var(--g-4); font-size: 12px; }
+  @container (max-width: 900px) { .app-body { grid-template-columns: 180px 1fr; } .app-hw { display: none; } }
+  @container (max-width: 560px) { .app-body { grid-template-columns: 1fr; } .app-side { display: none; } .media .app { left: 5%; right: 5%; top: 6%; } .seg-ui span { padding: 4px 8px; } }
+
+  /* ---------- гибридный режим ---------- */
+  .split2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(32px, 5vw, 72px); align-items: start; }
+  .statement { font-size: clamp(28px, 3vw, 40px); font-weight: 500; letter-spacing: -0.03em; line-height: 1.15; color: var(--ink); }
+  .statement span { color: var(--muted); }
+  .lead { margin-top: 16px; max-width: 54ch; font-size: 17px; color: var(--text); }
+  .modes { margin-top: 28px; }
+  .mode { display: grid; gap: 6px; width: 100%; padding: 18px 0; border: 0; border-top: 1px solid var(--line); background: none; text-align: left; color: var(--muted); font-size: 15px; line-height: 1.55; }
+  .mode:last-child { border-bottom: 1px solid var(--line); }
+  .mode-h { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em; color: var(--muted); }
+  .mode-h .mono { margin-left: auto; font-size: 12px; }
+  .mode[aria-pressed="true"] { color: var(--text); }
+  .mode[aria-pressed="true"] .mode-h { color: var(--ink); }
+  .mode[aria-pressed="true"] .mode-h .ic { color: var(--g-3); }
+  .map { position: relative; padding: 36px clamp(16px, 3vw, 36px) 28px; border-radius: var(--r); display: flex; flex-direction: column; align-items: center; }
+  .hn { position: relative; z-index: 1; display: flex; align-items: center; gap: 10px; padding: 11px 15px; border-radius: 12px; background: var(--panel);
+    box-shadow: inset 0 0 0 1px var(--line), 0 10px 28px -14px rgba(0,0,0,.8); color: var(--ink); font-size: 14px; font-weight: 500; transition: box-shadow .35s ease; }
+  .hn .ic { width: 18px; height: 18px; color: var(--g-3); }
+  .hn small { display: block; font-size: 12px; font-weight: 400; color: var(--muted); }
+  .hn-app svg { width: 26px; height: 26px; color: var(--g); }
+  .hn-app b { font: 600 17px/1 var(--sans); letter-spacing: -0.035em; }
+  .hl { width: 1px; height: 30px; background: rgba(255,255,255,.26); }
+  .hl.live, .map[data-mode="local"] .br-local .hl, .map[data-mode="cloud"] .br-cloud .hl, .map[data-mode="auto"] .br .hl {
+    background: repeating-linear-gradient(180deg, var(--g-2) 0 6px, transparent 6px 12px); background-size: 1px 12px; animation: flow .7s linear infinite; }
+  @keyframes flow { to { background-position: 0 12px; } }
+  .note { position: relative; width: 100%; min-height: 44px; padding: 8px 0; display: grid; place-items: center; }
+  .note::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: rgba(255,255,255,.26); }
+  .note span { position: relative; max-width: 92%; padding: 5px 12px; border-radius: 999px; background: var(--panel); box-shadow: inset 0 0 0 1px rgba(92,191,122,.45);
+    font: 500 12px/1.4 var(--mono); color: var(--g-3); text-align: center; opacity: 0; transition: opacity .35s ease; }
+  .split { position: relative; width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding-top: 34px; }
+  .split::before { content: ""; position: absolute; top: 0; left: 50%; height: 18px; width: 1px; background: rgba(255,255,255,.26); }
+  .split::after { content: ""; position: absolute; top: 18px; left: 25%; right: 25%; height: 1px; background: rgba(255,255,255,.26); }
+  .br { display: flex; flex-direction: column; align-items: center; transition: opacity .35s ease; }
+  .br .hl { height: 24px; margin-top: -16px; }
+  .br .hl-tall { height: 58px; }
+  .br .hl-short { height: 10px; margin-top: 0; }
+  .br .hn { width: 100%; }
+  .gate { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px; border-radius: 999px; background: var(--panel); box-shadow: inset 0 0 0 1px var(--line-2);
+    font: 500 11.5px/1 var(--mono); color: var(--muted); white-space: nowrap; transition: color .35s ease, box-shadow .35s ease; }
+  .gate .ic { width: 13px; height: 13px; }
+  .out { width: 100%; margin-top: 24px; padding: 13px 16px; border-radius: 12px; background: rgba(0,0,0,.45); box-shadow: inset 0 0 0 1px var(--line);
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; }
+  .out .mono { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .out b { display: none; font-size: 14px; font-weight: 500; color: var(--ink); }
+  .map[data-mode="local"] .br-cloud, .map[data-mode="cloud"] .br-local { opacity: .35; }
+  .map[data-mode="local"] .br-local .hn, .map[data-mode="cloud"] .br-cloud .hn, .map[data-mode="auto"] .br .hn { box-shadow: inset 0 0 0 1.5px var(--g-2), 0 10px 28px -14px rgba(0,0,0,.8); }
+  .map[data-mode="cloud"] .gate, .map[data-mode="auto"] .gate { color: var(--g-4); box-shadow: inset 0 0 0 1px var(--g); }
+  .map[data-mode="auto"] .note span { opacity: 1; }
+  .map[data-mode="local"] .out [data-out="local"], .map[data-mode="cloud"] .out [data-out="cloud"], .map[data-mode="auto"] .out [data-out="auto"] { display: inline; }
+  .consent { margin-top: 24px; display: flex; gap: 12px; align-items: flex-start; padding: 16px 18px; border-radius: 12px; background: var(--soft); font-size: 15px; }
+  .consent .ic { margin-top: 2px; color: var(--g-3); }
+  .consent b { color: var(--ink); font-weight: 500; }
+  @media (max-width: 900px) { .split2 { grid-template-columns: 1fr; } }
+  @media (max-width: 520px) { .br .hn { padding: 10px; font-size: 13px; } .br .hn .ic { display: none; } }
+
+  /* ---------- приватность ---------- */
+  .plist li { padding: 20px 0; border-top: 1px solid var(--line); }
+  .plist li:last-child { border-bottom: 1px solid var(--line); }
+  .plist h3 { display: flex; align-items: center; gap: 10px; font-size: 18px; }
+  .plist h3 .ic { color: var(--g-3); }
+  .plist p { margin-top: 6px; font-size: 15px; }
+  .honest { margin-top: 24px; padding: 20px 22px; border-radius: 12px; background: var(--soft); font-size: 15px; }
+  .honest b { display: block; margin-bottom: 6px; font-size: 16px; font-weight: 500; color: var(--ink); }
+
+  /* ---------- новости-строки ---------- */
+  .rows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 40px; }
+  .row-item { display: grid; grid-template-columns: clamp(96px, 12vw, 160px) minmax(0, 1fr); gap: 20px; align-items: center; }
+  .row-item .media { width: 100%; }
+  .row-item h3 { margin-top: 0; font-size: 18px; }
+  .row-item svg.big-ic { position: absolute; inset: 0; margin: auto; width: 34%; height: 34%; color: var(--g-3); fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+  .row-item svg.logo-ic { position: absolute; inset: 0; margin: auto; width: 56%; height: 56%; color: var(--g); }
+  @media (max-width: 760px) { .rows { grid-template-columns: 1fr; } }
+
+  /* ---------- вопросы ---------- */
+  .faq { border-top: 1px solid var(--line); }
+  .qa { border-bottom: 1px solid var(--line); }
+  .qa summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 20px 0; color: var(--ink); font-size: 17px; font-weight: 500; }
+  .qa summary::-webkit-details-marker { display: none; }
+  .qa summary::after { content: ""; flex: none; width: 24px; height: 24px; border-radius: 50%;
+    background: linear-gradient(var(--ink), var(--ink)) center / 10px 1.5px no-repeat, linear-gradient(var(--ink), var(--ink)) center / 1.5px 10px no-repeat; transition: transform .25s ease; }
+  .qa[open] summary::after { transform: rotate(45deg); }
+  .qa p { padding: 0 48px 22px 0; max-width: 76ch; font-size: 15.5px; }
+
+  /* ---------- «Get started» и две формы ---------- */
+  .cta-head { text-align: center; }
+  .cta-head h2 { font-size: clamp(34px, 4vw, 48px); letter-spacing: -0.03em; }
+  .cta-head .lead { margin: 14px auto 0; }
+  .cta-pills { margin-top: 26px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+  .lists { margin-top: 48px; display: grid; grid-template-columns: 7fr 5fr; gap: 24px; align-items: start; }
+  .list-card { padding: clamp(22px, 3vw, 32px); border-radius: 16px; background: #0d0d0d; box-shadow: inset 0 0 0 1px var(--line-2); }
+  .list-card.primary { box-shadow: inset 0 0 0 1px var(--line-3), 0 24px 60px -30px rgba(62,155,90,.35); }
+  .list-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .kick { font-size: 14px; font-weight: 500; color: var(--muted); }
+  .tag { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 999px; background: var(--soft); font-size: 13px; font-weight: 500; color: var(--text); }
+  .tag::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--g); }
+  .tag.hollow::before { background: none; box-shadow: inset 0 0 0 1.5px var(--muted); }
+  .list-card h3 { margin-top: 14px; font-size: clamp(24px, 2.2vw, 30px); letter-spacing: -0.025em; }
+  .list-card > p { margin-top: 10px; max-width: 52ch; font-size: 15.5px; }
+  .device-img { margin-top: 20px; height: 210px; border-radius: 12px; display: flex; align-items: flex-end; justify-content: center; overflow: hidden; }
+  .device-img img { width: 88%; height: auto; max-height: 92%; object-fit: contain; }
+  form { margin-top: 24px; display: grid; gap: 18px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .field { display: grid; gap: 8px; min-width: 0; }
+  .field > label, .lbl { font-size: 14px; font-weight: 500; color: var(--ink); }
+  .opt { font-weight: 400; color: var(--muted); }
+  input[type=text], input[type=email], select { width: 100%; height: 44px; padding: 0 14px; border: 0; border-radius: 10px; background: var(--soft); color: var(--ink);
+    box-shadow: inset 0 0 0 1px var(--line); font: 400 15px/1 var(--sans); transition: box-shadow .2s ease, background .2s ease; }
+  input::placeholder { color: #8f8f8f; }
+  input:focus, select:focus { outline: none; background: #1f1f1f; box-shadow: inset 0 0 0 1.5px var(--ink); }
+  select { appearance: none; -webkit-appearance: none; padding-right: 36px; cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%239b9b9b' stroke-width='1.6'%3E%3Cpath d='M2 4.5l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center; }
+  .err { display: none; font-size: 13px; color: #ff8f80; }
+  .err.on { display: block; }
+  input.bad { box-shadow: inset 0 0 0 1.5px #ff8f80; }
+  .seg, .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .seg label, .chip { position: relative; cursor: pointer; }
+  .seg input, .chip input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .seg span, .chip span { display: inline-flex; align-items: center; height: 36px; padding: 0 14px; border-radius: 999px; background: transparent; box-shadow: inset 0 0 0 1px var(--line-2);
+    font-size: 14px; color: var(--text); white-space: nowrap; transition: background .2s ease, color .2s ease; }
+  .seg label:hover span, .chip:hover span { background: var(--soft); }
+  .seg input:checked + span, .chip input:checked + span { background: var(--ink); color: #000; box-shadow: none; }
+  .seg input:focus-visible + span, .chip input:focus-visible + span { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .more { display: grid; gap: 18px; padding-top: 18px; border-top: 1px solid var(--line); }
+  .more-h { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .more-h b { font-size: 15px; font-weight: 500; color: var(--ink); }
+  .more-h span { font-size: 13px; color: var(--muted); }
+  .check { display: flex; gap: 12px; align-items: flex-start; cursor: pointer; font-size: 14.5px; }
+  .check input { appearance: none; -webkit-appearance: none; flex: none; display: grid; place-items: center; width: 20px; height: 20px; margin: 1px 0 0; border-radius: 6px; background: var(--soft); box-shadow: inset 0 0 0 1px var(--line-3); cursor: pointer; }
+  .check input:checked { background: var(--ink); box-shadow: none; }
+  .check input:checked::after { content: ""; width: 10px; height: 6px; border: 2px solid #000; border-top: 0; border-right: 0; transform: translateY(-1px) rotate(-45deg); }
+  .small { font-size: 13px; color: var(--muted); }
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .btn-block { width: 100%; }
+  .done { display: none; margin-top: 24px; padding: 22px; border-radius: 12px; background: var(--soft); }
+  .sent form { display: none; }
+  .sent .done { display: grid; gap: 12px; }
+  .done-h { display: flex; align-items: center; gap: 12px; color: var(--ink); font-size: 19px; font-weight: 500; line-height: 1.3; }
+  .done-h i { display: grid; place-items: center; flex: none; width: 32px; height: 32px; border-radius: 50%; background: var(--ink); color: #000; }
+  .done-h i svg { width: 15px; height: 15px; }
+  .share { display: flex; gap: 8px; }
+  .share input { flex: 1; min-width: 0; font-family: var(--mono); font-size: 13px; }
+  .share .pill { height: 44px; }
+  .done a.next { display: inline-flex; align-items: center; gap: 6px; font-weight: 500; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+  .done a.next .ic { width: 15px; height: 15px; }
+  @media (max-width: 1000px) { .lists { grid-template-columns: 1fr; } }
+  @media (max-width: 560px) { .row2 { grid-template-columns: 1fr; } }
+
+  /* ---------- подвал ---------- */
+  footer { margin-top: clamp(80px, 10vw, 128px); padding: 48px 0 32px; border-top: 1px solid var(--line); font-size: 14px; }
+  .foot { display: grid; grid-template-columns: 2fr repeat(3, 1fr); gap: 32px; }
+  .foot p { margin-top: 14px; max-width: 34ch; color: var(--muted); }
+  .foot h4 { margin-bottom: 14px; font-size: 14px; font-weight: 500; letter-spacing: 0; }
+  .foot li + li { margin-top: 10px; }
+  .foot ul a { color: var(--muted); }
+  .foot ul a:hover { color: var(--ink); }
+  .legal { margin-top: 48px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--muted); }
+  @media (max-width: 760px) { .foot { grid-template-columns: 1fr 1fr; } .foot > div:first-child { grid-column: 1 / -1; } }
+
+  /* ---------- появление при прокрутке (мягко, как у openai.com) ---------- */
+  .js .rv { opacity: 0; transform: translateY(12px); transition: opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1); }
+  .js .rv.in { opacity: 1; transform: none; }
+  .js .rv.d1 { transition-delay: .06s; } .js .rv.d2 { transition-delay: .12s; } .js .rv.d3 { transition-delay: .18s; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .js .rv { opacity: 1; transform: none; transition: none; }
+    .hl { animation: none !important; }
+    .media > img { transition: none; }
   }
 </style>
 </head>
 <body>
 
-<header class="nav">
-  <a class="mark" href="#top" aria-label="pleeply">pleeply<i></i></a>
-  <div class="nav-right">
-    <nav class="nav-group nav-links" aria-label="Main">
-      <a href="#reserve" data-i="nav.l1">Lineup</a>
-      <a href="#how" data-i="nav.l2">How it works</a>
-      <a href="/info/" data-i="nav.l3">Guides</a>
-      <a href="/community" data-i="nav.l4">Community</a>
+<!-- Знак и иконки: один раз, дальше через <use> -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="mark" viewBox="-60 -60 120 120">
+      <g transform="rotate(-18)"><path d="M -50 0 A 50 13 0 0 1 50 0" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></g>
+      <circle r="30" fill="currentColor"/>
+      <g transform="rotate(-18)"><path d="M -50 0 A 50 13 0 0 0 50 0" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></g>
+    </symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 4v-4A1.5 1.5 0 0 1 4 14.5z"/></symbol>
+    <symbol id="i-models" viewBox="0 0 24 24"><path d="M12 3l8 4.5-8 4.5-8-4.5zM4 12l8 4.5 8-4.5M4 16.5l8 4.5 8-4.5"/></symbol>
+    <symbol id="i-agents" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M8.5 6h7M7.2 8.3l3.6 7.4M16.8 8.3l-3.6 7.4"/></symbol>
+    <symbol id="i-memory" viewBox="0 0 24 24"><path d="M6 3.5h12v17l-6-4-6 4z"/><path d="M9.5 8h5M9.5 11h3"/></symbol>
+    <symbol id="i-control" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></symbol>
+    <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="6.5" y="6.5" width="11" height="11" rx="2"/><path d="M10 10h4v4h-4zM9.5 2.5v4M14.5 2.5v4M9.5 17.5v4M14.5 17.5v4M2.5 9.5h4M2.5 14.5h4M17.5 9.5h4M17.5 14.5h4"/></symbol>
+    <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7 18.5a4.5 4.5 0 0 1-.7-8.95A6 6 0 0 1 17.8 8.6 4.5 4.5 0 0 1 17 18.5z"/></symbol>
+    <symbol id="i-auto" viewBox="0 0 24 24"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M18 15l.8 2.2L21 18l-2.2.8L18 21l-.8-2.2L15 18l2.2-.8z"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2.2"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7.5 3v5.5c0 4.6-3.2 8.3-7.5 9.5-4.3-1.2-7.5-4.9-7.5-9.5V6z"/><path d="M9 12l2.2 2.2L15.5 10"/></symbol>
+    <symbol id="i-plug" viewBox="0 0 24 24"><path d="M9 3v4M15 3v4M7 7h10v4a5 5 0 0 1-10 0zM12 16v5"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6v.1"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 19.5c.6-3.3 3-5 6-5s5.4 1.7 6 5"/><path d="M16 5.2a3 3 0 0 1 0 5.6M18 14.6c1.6.6 2.7 2.1 3 4.4"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v15H5.5A1.5 1.5 0 0 0 4 20.5zM20 5.5A1.5 1.5 0 0 0 18.5 4H13v15h5.5a1.5 1.5 0 0 1 1.5 1.5z"/></symbol>
+  </defs>
+</svg>
+
+<header class="nav" id="nav">
+  <div class="wrap nav-in">
+    <a class="brand" href="#top" aria-label="pleeply"><svg aria-hidden="true"><use href="#mark"/></svg>pleeply</a>
+    <nav class="nav-links" id="nav-links" aria-label="Main">
+      <a href="#product">Product</a>
+      <a href="#hybrid">Hybrid AI</a>
+      <a href="#models">Models</a>
+      <a href="#privacy">Privacy</a>
+      <a href="/info/">Guides</a>
+      <a href="/community">Community</a>
+      <a class="m-only" href="#device">Device waitlist</a>
     </nav>
-    <div class="nav-group">
-      <div class="lang" role="group" aria-label="Language">
-        <button type="button" data-lang="en" aria-pressed="true">EN</button>
-        <button type="button" data-lang="ru" aria-pressed="false">RU</button>
-      </div>
-      <button class="btn btn-main" type="button" data-open="nav" data-i="nav.cta">Join waitlist</button>
+    <div class="nav-r">
+      <a class="pill pill-line" href="#device" data-cta="nav-device">Device waitlist</a>
+      <a class="pill pill-dark" href="#early-access" data-cta="nav">Get early access</a>
+      <button class="menu-btn" type="button" id="menu-btn" aria-expanded="false" aria-controls="nav-links" aria-label="Menu"><svg class="ic"><use href="#i-menu"/></svg></button>
     </div>
   </div>
 </header>
 
 <main id="top">
-  <!-- Первый экран: заявление слева, Pocket справа; дальше прокрутка открывает корпус -->
-  <section class="pin" id="inside" data-pin aria-label="pleeply Pocket">
-    <div class="sticky">
-      <div class="stage" data-stage>
-        <canvas aria-hidden="true"></canvas>
-        <img class="fallback" src="/assets/stills/pocket-hero.webp" alt="pleeply Pocket prototype" width="1400" height="1050">
-        <div class="hero-copy">
-          <h1 id="headline">Your own AI.<br>It lives at home.</h1>
-          <p class="sub" data-i="hero.sub">pleeply is a speaker with a computer inside. It runs open AI models right on the device, keeps a private memory of you, and doesn't need the cloud.</p>
-          <div class="ctas"><a class="btn btn-main" href="#reserve" data-i="hero.cta1">Reserve yours</a></div>
-          <p class="note" data-i="hero.note">In development. No payment today. We'll email you when reservations open.</p>
+<!-- ============ Первый экран ============ -->
+<section class="hero" aria-labelledby="hero-h">
+  <div class="wrap">
+    <h1 id="hero-h">Your AI. Your device. Your privacy.</h1>
+    <p class="sub">One AI ecosystem on your computer. Run models locally, connect to the cloud when you choose.</p>
+    <form class="ask" id="ask" novalidate>
+      <label class="sr" for="ask-input">Ask pleeply</label>
+      <textarea id="ask-input" rows="2" placeholder="Ask anything. It runs on your computer."></textarea>
+      <div class="ask-row">
+        <div class="mini" role="group" aria-label="Where it runs">
+          <button type="button" data-mini="local" aria-pressed="true">Local</button>
+          <button type="button" data-mini="cloud" aria-pressed="false">Cloud</button>
+          <button type="button" data-mini="auto" aria-pressed="false">Auto</button>
         </div>
-        <p class="scroll-hint" data-i="p.scroll">Scroll to look inside</p>
-        <div class="stage-top">
-          <span data-i="p.label">pleeply Pocket · prototype design</span>
-          <span class="hint" data-i="p.hint">Drag to rotate · Scroll to open</span>
-        </div>
-        <div class="bar"><i data-progress></i></div>
-        <div class="loading" data-i="p.loading">Loading 3D</div>
-        <div class="caps">
-          <article class="cap" data-cap="0.17,0.31"><h3 data-i="cap1.t">Raspberry Pi 5 inside</h3><p data-i="cap1.d">With an Active Cooler. Open language models run right on the device.</p></article>
-          <article class="cap" data-cap="0.31,0.45"><h3 data-i="cap2.t">3000 mAh battery</h3><p data-i="cap2.d">Charges over USB-C. A slide switch turns it on and off.</p></article>
-          <article class="cap" data-cap="0.45,0.59"><h3 data-i="cap3.t">Speaker and microphone</h3><p data-i="cap3.d">A 40 mm speaker and an I2S microphone sit right behind the bottom panel.</p></article>
-          <article class="cap" data-cap="0.59,0.73"><h3 data-i="cap4.t">Push to talk</h3><p data-i="cap4.d">The button is recessed so a table can't press it. The volume rocker sits on the top edge.</p></article>
-          <article class="cap" data-cap="0.86,1.01"><h3 data-i="cap5.t">It speaks through its name</h3><p data-i="cap5.d">The speaker plays through the dot-matrix “pleeply.” cut into the bottom.</p></article>
+        <button class="send" type="submit" aria-label="Send" disabled><svg class="ic"><use href="#i-send"/></svg></button>
+      </div>
+    </form>
+    <div class="ask-msg" role="status" aria-live="polite"><b>pleeply can’t answer yet.</b> The desktop app is in development. Join early access below and we’ll invite you to try it on your own computer.</div>
+    <p class="ask-note">Preview of pleeply Desktop, which is in development. What you type here isn’t sent or stored.</p>
+    <div class="chips-row">
+      <a class="pill pill-line" href="#product">Learn about pleeply Desktop</a>
+      <a class="pill pill-line" href="#hybrid">Hybrid AI</a>
+      <a class="pill pill-line" href="#models">Model family</a>
+      <a class="pill pill-line" href="#privacy">Privacy</a>
+      <a class="pill pill-line" href="#device">Device waitlist</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Главное ============ -->
+<section class="wrap" aria-labelledby="feat-h">
+  <h2 id="feat-h" class="sr">Featured</h2>
+  <div class="feat">
+    <a class="tile big rv" href="#product">
+      <div class="media wide t-green">
+        <div class="app" role="img" aria-label="Concept design of the pleeply desktop app: a chat window with a model picker, a Local, Cloud and Auto switch, and a panel showing which models fit this computer.">
+          <div class="app-bar" aria-hidden="true"><span class="app-dots"><i></i><i></i><i></i></span><span class="app-title">pleeply</span><span class="app-tag">CONCEPT</span></div>
+          <div class="app-body" aria-hidden="true">
+            <div class="app-side">
+              <div class="side-brand"><svg><use href="#mark"/></svg>pleeply</div>
+              <div class="side-item on"><svg class="ic"><use href="#i-chat"/></svg>Chat</div>
+              <div class="side-item"><svg class="ic"><use href="#i-models"/></svg>Models</div>
+              <div class="side-item"><svg class="ic"><use href="#i-agents"/></svg>Agents<small>LATER</small></div>
+              <div class="side-item"><svg class="ic"><use href="#i-memory"/></svg>Memory<small>LATER</small></div>
+              <div class="side-item"><svg class="ic"><use href="#i-control"/></svg>Control Center</div>
+              <div class="side-foot"><b>CLOUD REQUESTS</b>Ask me every time</div>
+            </div>
+            <div class="app-main">
+              <div class="app-top">
+                <span class="pick"><i></i>Qwen 2.5 · 7B<svg class="ic"><use href="#i-down"/></svg></span>
+                <span class="seg-ui"><span class="on">Local</span><span>Cloud</span><span>Auto</span></span>
+              </div>
+              <div class="msgs">
+                <div class="msg msg-me">Rewrite this so it sounds calmer and shorter.</div>
+                <div class="msg msg-ai">Here’s a calmer version:
+                  <div class="q">Hi Dana, thanks for the update. Could we move the review to Thursday? That gives me time to finish the numbers properly.</div>
+                  <div class="msg-meta"><svg class="ic"><use href="#i-cpu"/></svg>Ran on this computer · nothing sent</div>
+                </div>
+              </div>
+              <div class="compose"><span>Message Qwen 2.5 7B…</span><i><svg class="ic"><use href="#i-send"/></svg></i></div>
+            </div>
+            <div class="app-hw">
+              <div class="hw-h">This computer</div>
+              <div class="hw-row"><span>Chip</span><b>Apple M2</b></div>
+              <div class="hw-row"><span>Memory</span><b>16 GB</b></div>
+              <div class="hw-h">Model fit</div>
+              <div class="fit"><span>3B</span><u style="--w:100%"></u><b>Fast</b></div>
+              <div class="fit"><span>7–8B</span><u style="--w:86%"></u><b>Good</b></div>
+              <div class="fit"><span>14B</span><u style="--w:48%;--c:#2f6b42"></u><b>Slower</b></div>
+              <div class="fit"><span>70B</span><u style="--w:8%;--c:#24402d"></u><b>Too large</b></div>
+              <div class="fit-note">Recommended for you: 7–8B models in Local mode.</div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+      <h3>Introducing pleeply Desktop</h3>
+      <div class="meta"><span>Product</span><span class="dot"></span><span>In development · concept design</span></div>
+    </a>
 
-  <!-- Модели вместо логотипов клиентов -->
-  <section class="runs wrap" aria-labelledby="runs-h">
-    <p id="runs-h" data-i="runs.h">Runs the open models you already know.</p>
-    <ul><li>Llama</li><li>Qwen</li><li>Mistral</li><li>Gemma</li></ul>
-  </section>
-
-  <!-- Линейка -->
-  <section class="sec wrap" id="reserve">
-    <div class="sec-head rv"><h2 data-i="price.h">Pick the one you'd actually buy.</h2></div>
-    <div id="tiers">
-      <article class="prod-hero rv" data-model="pocket">
-        <span class="tag" data-i="pocket.tag">Prototype</span>
-        <h3>pleeply Pocket</h3>
-        <p data-i="pocket.d">A pocket-size AI with a battery and a push-to-talk button. The first units are assembled by hand.</p>
-        <p class="price-line"><b>$499</b> <span data-i="pocket.spec">Raspberry Pi 5 · compact models, 1–3B · 3000 mAh battery</span></p>
-        <div class="ctas">
-          <button class="btn btn-dark" type="button" data-tier="pocket" data-i="reserve">Reserve for free</button>
-          <a class="btn btn-line" href="#inside" data-i="pocket.more" data-model-open="pocket:3d">See it in 3D</a>
+    <div class="feat-side">
+      <a class="tile rv d1" href="#hybrid">
+        <div class="media t-mint" aria-hidden="true">
+          <div class="modes-art">
+            <span class="on"><svg class="ic"><use href="#i-cpu"/></svg>Local</span>
+            <span><svg class="ic"><use href="#i-cloud"/></svg>Cloud</span>
+            <span><svg class="ic"><use href="#i-auto"/></svg>Auto</span>
+          </div>
         </div>
-        <img src="/assets/stills/pocket-hero.webp" alt="pleeply Pocket, closed" width="1400" height="1050" loading="lazy">
+        <h3>Hybrid AI: local first, cloud with your consent</h3>
+        <div class="meta"><span>Product</span><span class="dot"></span><span>Planned</span></div>
+      </a>
+      <a class="tile rv d2" href="#device">
+        <div class="media t-night">
+          <span class="night-cap" aria-hidden="true">CONCEPT RENDER</span>
+          <img src="/assets/stills/pocket-hero-v2.webp" width="1600" height="1066" alt="Concept render of pleeply Pocket, a small white rounded device" loading="lazy" decoding="async" style="padding:9% 4% 2%">
+        </div>
+        <h3>pleeply Pocket: a device that runs it at home</h3>
+        <div class="meta"><span>Hardware</span><span class="dot hollow"></span><span>In design</span></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Продукт ============ -->
+<section class="sec" id="product" aria-labelledby="product-h">
+  <div class="wrap">
+    <div class="sec-head"><h2 id="product-h">pleeply Desktop</h2><a class="link" href="#early-access" data-cta="product">Join early access <svg class="ic"><use href="#i-arrow"/></svg></a></div>
+    <p class="sec-note"><svg class="ic"><use href="#i-info"/></svg><span><b>Nothing is released yet.</b> “First build” means planned for the first early-access build. “Later” means on the roadmap after that.</span></p>
+    <div class="grid3">
+      <article class="tile rv">
+        <div class="media r43 t-green" aria-hidden="true">
+          <div class="panel">
+            <div class="mrow on"><svg class="ic"><use href="#i-cpu"/></svg>Llama 3.1 · 8B<small>LOCAL</small></div>
+            <div class="bub me" style="margin-top:10px">Plan three days in Almaty for two.</div>
+            <div class="bub">Day 1: Medeu and Shymbulak in the morning, Kok-Tobe at sunset…</div>
+            <div class="bub-tag">LLAMA 3.1 8B · THIS COMPUTER</div>
+          </div>
+        </div>
+        <h3>pleeply Chat</h3>
+        <div class="meta"><span class="dot"></span><span>First build</span></div>
+        <p class="desc">One interface for different AI models. Switch models in the same conversation and see where every answer was computed.</p>
       </article>
-      <div class="prod-row">
-        <article class="prod rv" data-model="one">
-          <span class="tag" data-i="one.tag">Speaker</span>
-          <h3>pleeply One</h3>
-          <p data-i="one.d">The speaker. Fast with compact open models for everyday help, home control and memory.</p>
-          <p class="price-line"><b>$299</b> <span data-i="one.spec">Built-in computer and mic array · models up to ~8B · works offline</span></p>
-          <div class="ctas">
-            <button class="btn btn-dark" type="button" data-tier="one" data-i="reserve">Reserve for free</button>
-            <a class="btn btn-line" href="/info/pleeply/" data-i="more" data-model-open="one:more">Learn more</a>
+      <article class="tile rv d1">
+        <div class="media r43 t-sand" aria-hidden="true">
+          <div class="panel">
+            <div class="mrow">Llama 3.1 · 8B<small>4.9 GB · ✓</small></div>
+            <div class="mrow">Qwen 2.5 · 7B<small>4.7 GB · fits</small></div>
+            <div class="mrow">Mistral · 7B<small>4.1 GB · fits</small></div>
+            <div class="mrow off">Llama 3.1 · 70B<small>43 GB · too large</small></div>
           </div>
-        </article>
-        <article class="prod rv" data-model="pro">
-          <span class="tag" data-i="pro.tag">Speaker+</span>
-          <h3>pleeply Pro</h3>
-          <p data-i="pro.d">More memory and compute for larger, smarter models.</p>
-          <p class="price-line"><b>$549</b> <span data-i="pro.spec">Everything in One · models up to ~32B · longer memory</span></p>
-          <div class="ctas">
-            <button class="btn btn-dark" type="button" data-tier="pro" data-i="reserve">Reserve for free</button>
-            <a class="btn btn-line" href="/info/pleeply/" data-i="more" data-model-open="pro:more">Learn more</a>
+        </div>
+        <h3>pleeply Models</h3>
+        <div class="meta"><span class="dot"></span><span>First build</span></div>
+        <p class="desc">Discover, download and manage local and cloud models. Each one is checked against your hardware before you download it.</p>
+      </article>
+      <article class="tile rv d2">
+        <div class="media r43 t-slate" aria-hidden="true">
+          <div class="panel">
+            <div class="mrow">Cloud requests<small>ASK EVERY TIME</small></div>
+            <div class="mrow">GPU acceleration<span class="tgl"></span></div>
+            <div class="mrow col">Memory for models<small>10 GB</small><div class="slider"></div></div>
           </div>
-        </article>
-      </div>
-    </div>
-    <p class="fine rv" data-i="price.fine">Expected prices. Specs are planned and may change during development. Reserving is free and doesn't commit you to anything.</p>
-  </section>
-
-  <!-- Факт с источником -->
-  <section class="sec wrap">
-    <figure class="quote rv">
-      <blockquote data-i="proof.q">On March 28, 2025, Amazon switched off “Do Not Send Voice Recordings” on the Echo Dot (4th gen), Echo Show 10 and Echo Show 15. <em>Privacy that ships as a setting can be removed by an update.</em></blockquote>
-      <p data-i="proof.p">The option existed only on those three models, in the US, in English, and Amazon says fewer than 0.03% of customers used it. Its reason: generative AI features that need its cloud. Sources: <a href="https://techcrunch.com/2025/03/15/amazons-echo-will-send-all-voice-recordings-to-the-cloud-starting-march-28" target="_blank" rel="noopener">TechCrunch</a>, <a href="https://www.theregister.com/2025/03/17/amazon_kills_on_device_alexa/" target="_blank" rel="noopener">The Register</a>, <a href="https://ny1.com/nyc/all-boroughs/ap-top-news/2025/03/19/amazon-ends-little-used-privacy-feature-that-let-echo-users-opt-out-of-sending-recordings-to-company" target="_blank" rel="noopener">AP</a>. pleeply is built the other way around: the model runs on the device, in your home.</p>
-      <a class="btn btn-main" href="https://techcrunch.com/2025/03/15/amazons-echo-will-send-all-voice-recordings-to-the-cloud-starting-march-28" target="_blank" rel="noopener" data-i="proof.link">Read the story</a>
-    </figure>
-  </section>
-
-  <!-- Встроено, а не прикручено -->
-  <section class="sec wrap" id="built">
-    <div class="head-row">
-      <h2 class="rv" data-i="rules.h">Privacy is built in, not bolted on.</h2>
-      <a class="btn btn-dark rv" href="#inside" data-i="built.cta">Show me the device</a>
-    </div>
-    <div class="feats">
-      <div class="feat rv">
-        <div class="feat-art"><div class="ui">
-          <div class="bub q" data-i="bubble.q">What did I say about Mom's birthday?</div>
-          <div class="bub a" data-i="art1.a">Tulips, on the 12th.</div>
-          <span class="pill" data-i="art.ondevice">On device</span>
-        </div></div>
-        <h3 data-i="feat1.t">Your voice is processed in the room, not on a server.</h3>
-      </div>
-      <div class="feat rv">
-        <div class="feat-art"><div class="ui">
-          <div class="ui-row"><span data-i="art2.r1">Wake word</span><span class="ok">✓</span></div>
-          <div class="ui-row"><span data-i="art2.r2">Speech to text</span><span class="ok">✓</span></div>
-          <div class="ui-row"><span data-i="art2.r3">Language model</span><span class="ok">✓</span></div>
-          <div class="ui-row"><span data-i="art2.r4">Voice</span><span class="ok">✓</span></div>
-          <span class="pill" data-i="art.ondevice">On device</span>
-        </div></div>
-        <h3 data-i="feat2.t">Every step runs on the device: wake word, speech, model and voice.</h3>
-      </div>
-      <div class="feat rv">
-        <div class="feat-art"><div class="ui">
-          <div class="ui-row"><span data-i="art3.net">Internet</span><span class="toggle" aria-hidden="true"></span></div>
-          <div class="bub q" data-i="art3.q">Set a timer for 10 minutes</div>
-          <div class="bub a" data-i="art3.a">Timer set for 10 minutes.</div>
-        </div></div>
-        <h3 data-i="feat3.t">It keeps working when the internet is down.</h3>
-      </div>
-      <div class="feat rv">
-        <div class="feat-art"><div class="ui">
-          <span class="ui-h" data-i="art4.h">Memory</span>
-          <div class="ui-row"><span data-i="art4.r1">Mom's birthday: tulips, the 12th</span><span class="muted">✎</span></div>
-          <div class="ui-row"><span data-i="art4.r2">Coffee: oat milk, no sugar</span><span class="muted">✎</span></div>
-          <div class="ui-row"><span data-i="art4.r3">Kids' bedtime: 9 pm</span><span class="muted">✎</span></div>
-        </div></div>
-        <h3 data-i="feat4.t">Your memory lives on the device, where you can edit it.</h3>
-      </div>
-      <div class="feat rv">
-        <div class="feat-art"><div class="ui">
-          <span class="ui-h" data-i="art5.h">Model</span>
-          <div class="ui-row"><span>Llama 3.2 · 3B</span><span class="toggle on" aria-hidden="true"></span></div>
-          <div class="ui-row"><span>Qwen2.5 · 3B</span><span class="toggle" aria-hidden="true"></span></div>
-          <div class="ui-row"><span>Gemma 3 · 4B</span><span class="toggle" aria-hidden="true"></span></div>
-        </div></div>
-        <h3 data-i="feat5.t">Swap open models as better ones come out.</h3>
-      </div>
-      <div class="feat rv">
-        <div class="feat-art"><div class="ui">
-          <div class="ui-card">
-            <span class="ui-h" data-i="art6.h">Name your speaker</span>
-            <div class="input" data-i="art6.v">Kitchen</div>
-            <div class="ui-btn" data-i="art6.btn">Continue</div>
+        </div>
+        <h3>pleeply Control Center</h3>
+        <div class="meta"><span class="dot"></span><span>First build</span></div>
+        <p class="desc">Manage hardware, performance, privacy and model settings in one place.</p>
+      </article>
+      <article class="tile rv">
+        <div class="media r43 t-mint" aria-hidden="true">
+          <div class="panel">
+            <div class="mrow"><svg class="ic"><use href="#i-eye"/></svg>Read 12 saved articles</div>
+            <div class="mrow"><svg class="ic"><use href="#i-models"/></svg>Summarize key points</div>
+            <div class="mrow on"><svg class="ic"><use href="#i-shield"/></svg>Draft email · waits for you</div>
           </div>
-          <span class="pill" data-i="art6.note">No email or account needed</span>
-        </div></div>
-        <h3 data-i="feat6.t">No account and no sign-up.</h3>
-      </div>
+        </div>
+        <h3>pleeply Agents</h3>
+        <div class="meta"><span class="dot hollow"></span><span>Later</span></div>
+        <p class="desc">Personal AI agents for research, productivity and automation, with a check-in before any step that matters.</p>
+      </article>
+      <article class="tile rv d1">
+        <div class="media r43 t-green" aria-hidden="true">
+          <div class="panel">
+            <span class="chipm">Prefers short answers</span><span class="chipm">Writes in RU and EN</span><span class="chipm">Thesis on solar power</span>
+            <div class="panel-foot"><svg class="ic"><use href="#i-eye"/></svg>See, edit or delete anything it remembers</div>
+          </div>
+        </div>
+        <h3>pleeply Memory</h3>
+        <div class="meta"><span class="dot hollow"></span><span>Later</span></div>
+        <p class="desc">A personal context system that helps AI understand how you work, stored on your computer.</p>
+      </article>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- Как это работает -->
-  <section class="sec wrap" id="how">
-    <div class="banner rv">
-      <div>
-        <p class="label" data-i="how.eyebrow">How it works</p>
-        <h2 data-i="how.h">Talk. It thinks. It remembers.</h2>
-        <p data-i="how.p">You talk. An open language model on the computer inside thinks. Your memory stays on the device, where you can see, edit or delete it.</p>
-        <a class="btn btn-light" href="/info/how-local-voice-assistants-work/" data-i="how.cta">How a local assistant works</a>
+<!-- ============ Гибридный ИИ ============ -->
+<section class="sec" id="hybrid" aria-labelledby="hybrid-h">
+  <div class="wrap">
+    <div class="sec-head"><h2 id="hybrid-h">Hybrid AI</h2></div>
+    <div class="split2">
+      <div class="rv">
+        <p class="statement">Local when it can. <span>Cloud when you say so.</span></p>
+        <p class="lead">Three modes, one switch. pleeply is designed to show where every request runs, and to ask before anything leaves your computer.</p>
+        <div class="modes">
+          <button class="mode" type="button" data-mode="local" aria-pressed="true">
+            <span class="mode-h"><svg class="ic"><use href="#i-cpu"/></svg>Local<span class="mono">01</span></span>
+            <span>Run compatible models directly on your computer. Prompts and files stay on your device.</span>
+          </button>
+          <button class="mode" type="button" data-mode="cloud" aria-pressed="false">
+            <span class="mode-h"><svg class="ic"><use href="#i-cloud"/></svg>Cloud<span class="mono">02</span></span>
+            <span>Connect external AI providers when you need more computing power. You see the provider and approve before anything is sent.</span>
+          </button>
+          <button class="mode" type="button" data-mode="auto" aria-pressed="false">
+            <span class="mode-h"><svg class="ic"><use href="#i-auto"/></svg>Auto<span class="mono">03</span></span>
+            <span>Let pleeply recommend the right model and mode for the task and your hardware. Cloud still needs your yes.</span>
+          </button>
+        </div>
       </div>
-      <img src="/assets/stills/pocket-explode.webp" alt="pleeply Pocket taken apart: Raspberry Pi 5, battery, speaker and the case" width="1600" height="1261" loading="lazy">
+      <div class="map t-green rv d1" id="map" data-mode="local" aria-hidden="true">
+        <div class="hn"><svg class="ic"><use href="#i-chat"/></svg>Your request</div>
+        <div class="hl live"></div>
+        <div class="hn hn-app"><svg><use href="#mark"/></svg><b>pleeply</b></div>
+        <div class="note"><span>Suggests: Local · a 7B model fits your 16 GB</span></div>
+        <div class="split">
+          <div class="br br-local"><div class="hl hl-tall"></div>
+            <div class="hn"><svg class="ic"><use href="#i-cpu"/></svg><span>This computer<small>Compatible local model</small></span></div></div>
+          <div class="br br-cloud"><div class="hl"></div><div class="gate"><svg class="ic"><use href="#i-shield"/></svg>Asks you first</div><div class="hl hl-short"></div>
+            <div class="hn"><svg class="ic"><use href="#i-cloud"/></svg><span>Cloud provider<small>The one you connected</small></span></div></div>
+        </div>
+        <div class="out"><span class="mono">Leaves your computer:</span>
+          <b data-out="local">Nothing</b>
+          <b data-out="cloud">Your request, sent to the provider you approved</b>
+          <b data-out="auto">Only what you approve</b>
+        </div>
+      </div>
     </div>
-  </section>
+    <div class="consent rv"><svg class="ic"><use href="#i-shield"/></svg><p><b>Consent before cloud.</b> Before a request goes to a cloud provider, pleeply is designed to show which provider it is and what will be sent, then wait for your yes. You can also switch cloud off completely.</p></div>
+  </div>
+</section>
 
-  <!-- Следующий шаг -->
-  <section class="sec wrap">
-    <div class="next rv">
-      <h2 data-i="next.h">Take your next step.</h2>
-      <div class="ctas">
-        <button class="btn btn-main" type="button" data-open="next" data-i="next.cta1">Join the waitlist</button>
-        <a class="btn btn-light" href="/community/signup?next=%2Fcommunity" data-i="next.cta2">Join the community</a>
-      </div>
+<!-- ============ Модели ============ -->
+<section class="sec" id="models" aria-labelledby="models-h">
+  <div class="wrap">
+    <div class="sec-head"><h2 id="models-h">Model family</h2><span class="tag hollow">Planned concepts</span></div>
+    <p class="sec-note"><svg class="ic"><use href="#i-info"/></svg><span>Saturn, Nova, Atlas and Orbit are names for model setups we plan to offer inside pleeply. None of them is released yet, and they are not foundation models we trained from scratch.</span></p>
+    <div class="grid4">
+      <article class="tile rv" data-model="saturn">
+        <div class="media t-green" aria-hidden="true">
+          <svg class="glyph" viewBox="0 0 120 120">
+            <defs><radialGradient id="g-sat" cx="36%" cy="30%" r="80%"><stop offset="0" stop-color="#f0f8f2"/><stop offset=".35" stop-color="#79c48f"/><stop offset=".8" stop-color="#1f5c33"/><stop offset="1" stop-color="#12301c"/></radialGradient>
+              <clipPath id="c-sat" clipPathUnits="userSpaceOnUse"><rect x="-10" y="60" width="140" height="70"/></clipPath></defs>
+            <g transform="rotate(-18 60 60)"><ellipse cx="60" cy="60" rx="56" ry="13" fill="none" stroke="#79c48f" stroke-opacity=".7" stroke-width="5"/></g>
+            <circle cx="60" cy="60" r="27" fill="url(#g-sat)"/>
+            <g transform="rotate(-18 60 60)"><g clip-path="url(#c-sat)"><ellipse cx="60" cy="60" rx="56" ry="13" fill="none" stroke="#6fcf8c" stroke-width="5" stroke-opacity=".9"/></g></g>
+          </svg>
+        </div>
+        <h3>pleeply Saturn 3.0</h3>
+        <div class="meta"><span>General-purpose intelligence</span></div>
+        <p class="desc">The all-rounder for conversation, writing and reasoning, sized to what your computer can run.</p>
+      </article>
+      <article class="tile rv d1" data-model="nova">
+        <div class="media t-sand" aria-hidden="true">
+          <svg class="glyph" viewBox="0 0 120 120">
+            <defs><radialGradient id="g-nova" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#dcf0e2"/><stop offset=".3" stop-color="#a8d9b6"/><stop offset=".7" stop-color="#3e9b5a" stop-opacity=".45"/><stop offset="1" stop-color="#3e9b5a" stop-opacity="0"/></radialGradient></defs>
+            <circle cx="60" cy="60" r="44" fill="url(#g-nova)" opacity=".6"/>
+            <path d="M60 14 L65 55 L106 60 L65 65 L60 106 L55 65 L14 60 L55 55 Z" fill="#6fcf8c"/>
+            <path d="M60 36 L62 58 L84 60 L62 62 L60 84 L58 62 L36 60 L58 58 Z" fill="#6cbf86" transform="rotate(45 60 60)" opacity=".75"/>
+            <circle cx="60" cy="60" r="7" fill="#fff"/>
+          </svg>
+        </div>
+        <h3>pleeply Nova</h3>
+        <div class="meta"><span>Fast everyday assistance</span></div>
+        <p class="desc">Quick answers with a small memory footprint, made for instant replies and modest laptops.</p>
+      </article>
+      <article class="tile rv d2" data-model="atlas">
+        <div class="media t-slate" aria-hidden="true">
+          <svg class="glyph" viewBox="0 0 120 120">
+            <defs><radialGradient id="g-atlas" cx="38%" cy="32%" r="80%"><stop offset="0" stop-color="#c3e6cd"/><stop offset=".5" stop-color="#2f7d48"/><stop offset="1" stop-color="#0f2a18"/></radialGradient></defs>
+            <circle cx="60" cy="60" r="40" fill="url(#g-atlas)" stroke="#5cbf7a" stroke-opacity=".45"/>
+            <g fill="none" stroke="#e1f2e6" stroke-opacity=".5" stroke-width="1.2">
+              <ellipse cx="60" cy="60" rx="14" ry="40"/><ellipse cx="60" cy="60" rx="28" ry="40"/><path d="M60 20v80"/>
+              <ellipse cx="60" cy="60" rx="40" ry="10"/><path d="M24 42h72M24 78h72" stroke-opacity=".3"/>
+            </g>
+          </svg>
+        </div>
+        <h3>pleeply Atlas</h3>
+        <div class="meta"><span>Research and document analysis</span></div>
+        <p class="desc">Reads long documents and notes, pulls out what matters and points to where it came from.</p>
+      </article>
+      <article class="tile rv d3" data-model="orbit">
+        <div class="media t-mint" aria-hidden="true">
+          <svg class="glyph" viewBox="0 0 120 120">
+            <defs><radialGradient id="g-orbit" cx="38%" cy="32%" r="80%"><stop offset="0" stop-color="#f0f8f2"/><stop offset=".5" stop-color="#3e9b5a"/><stop offset="1" stop-color="#1a4a2a"/></radialGradient></defs>
+            <g fill="none" stroke="#3e9b5a" stroke-opacity=".6" stroke-width="1.3">
+              <ellipse cx="60" cy="60" rx="52" ry="18" transform="rotate(28 60 60)"/>
+              <ellipse cx="60" cy="60" rx="52" ry="18" transform="rotate(-28 60 60)" stroke-dasharray="3 5"/>
+            </g>
+            <circle cx="60" cy="60" r="15" fill="url(#g-orbit)"/>
+            <circle cx="100" cy="82" r="5" fill="#6fcf8c"/><circle cx="22" cy="81" r="3.5" fill="#6cbf86"/><circle cx="88" cy="28" r="3" fill="#3e9b5a"/>
+          </svg>
+        </div>
+        <h3>pleeply Orbit</h3>
+        <div class="meta"><span>Agent workflows and automation</span></div>
+        <p class="desc">Plans multi-step tasks and works with your tools, checking in before actions that matter.</p>
+      </article>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- Сценарии -->
-  <section class="sec wrap" id="uses">
-    <div class="uses">
-      <div class="uses-side">
-        <h2 class="rv" data-i="uses.h">Built for how you live.</h2>
-        <div class="uses-img rv"><img src="/assets/stills/pocket-side.webp" alt="pleeply Pocket from the side" width="1400" height="611" loading="lazy"></div>
-      </div>
-      <div class="tiles">
-        <a class="tile rv" href="/info/how-local-voice-assistants-work/"><h3 data-i="use1.t">Private assistant</h3><p class="d" data-i="use1.d">Ask questions, set timers, think out loud. Answers are computed in the room.</p></a>
-        <a class="tile rv" href="/info/pleeply/"><h3 data-i="use2.t">Notes &amp; memory</h3><p class="d" data-i="use2.d">Tell it what matters. Your memory lives on the device, where you can see, edit or delete it.</p></a>
-        <a class="tile rv" href="/info/home-assistant-local-llm/"><h3 data-i="use3.t">Smart home</h3><p class="d" data-i="use3.d">Control your home by voice without a round trip to the cloud.</p></a>
-        <a class="tile rv" href="/info/smart-speaker-privacy/"><h3 data-i="use4.t">Kids &amp; family</h3><p class="d" data-i="use4.d">A speaker at home that doesn't send your family's voices to company servers.</p></a>
-        <a class="tile rv" href="/info/local-ai-assistant/"><h3 data-i="use5.t">Work &amp; documents</h3><p class="d" data-i="use5.d">Think through work out loud and keep your notes on a device you own.</p></a>
-        <a class="tile rv" href="/info/local-llm-memory/"><h3 data-i="use6.t">Your own models</h3><p class="d" data-i="use6.d">Run Llama, Qwen, Mistral or Gemma, and swap them as better ones come out.</p></a>
-      </div>
+<!-- ============ Как это работает ============ -->
+<section class="sec" id="how" aria-labelledby="how-h">
+  <div class="wrap">
+    <div class="sec-head"><h2 id="how-h">How it works</h2></div>
+    <div class="grid3">
+      <article class="tile rv">
+        <div class="media r43 t-slate" aria-hidden="true">
+          <div class="panel">
+            <div class="mrow"><svg class="ic"><use href="#i-download"/></svg>Installing pleeply<small>100%</small></div>
+            <div class="bar"></div>
+            <div class="panel-foot"><svg class="ic"><use href="#i-lock"/></svg>Local mode works without a cloud account</div>
+          </div>
+        </div>
+        <h3>Download pleeply</h3>
+        <div class="meta"><span class="mono">01</span></div>
+        <p class="desc">Install the desktop app when your early-access invite arrives.</p>
+      </article>
+      <article class="tile rv d1">
+        <div class="media r43 t-green" aria-hidden="true">
+          <div class="panel">
+            <div class="mrow"><svg class="ic"><use href="#i-check"/></svg>Chip<b>Apple M2</b></div>
+            <div class="mrow"><svg class="ic"><use href="#i-check"/></svg>Memory<b>16 GB</b></div>
+            <div class="mrow"><svg class="ic"><use href="#i-check"/></svg>Graphics<b>10-core GPU</b></div>
+            <div class="mrow on" style="margin-top:8px">Best fit: 7–8B models in Local mode</div>
+          </div>
+        </div>
+        <h3>Let pleeply understand your hardware</h3>
+        <div class="meta"><span class="mono">02</span></div>
+        <p class="desc">It reads your chip, memory and graphics to see which models will run well.</p>
+      </article>
+      <article class="tile rv d2">
+        <div class="media r43 t-sand" aria-hidden="true">
+          <div class="panel">
+            <div class="mrow on"><span class="radio"></span>Qwen 2.5 · 7B<small>RECOMMENDED</small></div>
+            <div class="mrow"><span class="radio"></span>Llama 3.1 · 8B<small>LOCAL</small></div>
+            <div class="mrow"><span class="radio"></span>Cloud model<small>ASKS FIRST</small></div>
+            <div class="fake-btn">Start chatting</div>
+          </div>
+        </div>
+        <h3>Choose a model and start</h3>
+        <div class="meta"><span class="mono">03</span></div>
+        <p class="desc">Pick from the models that fit, or connect a cloud model when you need more power.</p>
+      </article>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- Гайды -->
-  <section class="sec wrap">
-    <div class="guide rv">
-      <div>
-        <h2 data-i="guide.h">Get the local AI guide.</h2>
-        <p data-i="guide.p">Free guides on running AI at home: hardware, models, memory, privacy and smart home. Each one cites its sources.</p>
-        <a class="btn btn-dark" href="/info/" data-i="guide.cta">Open the guides</a>
+<!-- ============ Приватность ============ -->
+<section class="sec" id="privacy" aria-labelledby="privacy-h">
+  <div class="wrap">
+    <div class="sec-head"><h2 id="privacy-h">Privacy</h2></div>
+    <div class="split2">
+      <div class="rv">
+        <p class="statement">Your data should belong to you. <span>Private by default where that’s possible, honest where it isn’t.</span></p>
       </div>
-      <div class="docs">
-        <a class="doc" href="/info/local-llm-memory/"><small data-i="doc.hw">Hardware</small><b>How much RAM do you need to run a local LLM?</b></a>
-        <a class="doc" href="/info/run-ai-at-home/"><small data-i="doc.hw">Hardware</small><b>Run AI at home: choose your hardware</b></a>
-        <a class="doc" href="/info/smart-speaker-privacy/"><small data-i="doc.privacy">Privacy</small><b>Do smart speakers send your voice to the cloud?</b></a>
+      <div class="rv d1">
+        <ul class="plist">
+          <li><h3><svg class="ic"><use href="#i-cpu"/></svg>Local processing</h3><p>Compatible models run on your computer. In Local mode, prompts and files stay on your device.</p></li>
+          <li><h3><svg class="ic"><use href="#i-plug"/></svg>Optional cloud</h3><p>Cloud models are an add-on, never a requirement. Connect a provider only if you want more power.</p></li>
+          <li><h3><svg class="ic"><use href="#i-eye"/></svg>Transparent handling</h3><p>Every answer shows where it ran: on your computer or with a named cloud provider.</p></li>
+          <li><h3><svg class="ic"><use href="#i-shield"/></svg>You control the cloud</h3><p>pleeply is designed to ask before the first request goes to any provider, and cloud can be switched off entirely.</p></li>
+        </ul>
+        <div class="honest"><b>The honest part</b>When you choose a cloud model, your request is processed on that provider’s servers under their privacy policy. pleeply can’t make cloud processing private. It can make sure you always know when it happens.</div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- Ещё почитать -->
-  <section class="sec wrap" id="learn">
-    <div class="head-row">
-      <h2 class="rv" data-i="res.h">There's lots more to learn.</h2>
-      <a class="btn btn-line rv" href="/info/" data-i="res.all">All guides</a>
-    </div>
-    <div class="res">
-      <a class="rv" href="/info/raspberry-pi-5-llm/">
-        <div class="thumb"><img src="/assets/stills/pocket-explode.webp" alt="" width="1600" height="1261" loading="lazy"></div>
-        <span class="chip-tag" data-i="res1.type">Guide</span><h3 data-i="res1.t">Run an LLM on a Raspberry Pi 5</h3>
+<!-- ============ Новости проекта (только реальные события) ============ -->
+<section class="sec" id="updates" aria-labelledby="updates-h">
+  <div class="wrap">
+    <div class="sec-head"><h2 id="updates-h">Recent updates</h2></div>
+    <div class="rows">
+      <a class="row-item rv" href="#early-access">
+        <div class="media t-green" aria-hidden="true"><svg class="logo-ic"><use href="#mark"/></svg></div>
+        <div><h3>pleeply Desktop early access is open</h3><div class="meta"><span>Product</span><span class="dot"></span><span>Nov 2026</span></div></div>
       </a>
-      <a class="rv" href="/info/open-source-voice-assistants/">
-        <div class="thumb"><div class="ui">
-          <div class="ui-row"><span>Home Assistant Assist</span></div>
-          <div class="ui-row"><span>OpenVoiceOS</span></div>
-          <div class="ui-row"><span>Rhasspy</span></div>
-        </div></div>
-        <span class="chip-tag" data-i="res2.type">Comparison</span><h3 data-i="res2.t">Open-source voice assistants compared</h3>
+      <a class="row-item rv d1" href="#device">
+        <div class="media t-sand"><img src="/assets/stills/pocket-explode-v2.webp" width="1400" height="1105" alt="Exploded view of the pleeply Pocket case parts" loading="lazy" decoding="async" style="padding:8%"></div>
+        <div><h3>Designing the pleeply Pocket case: six 3D-printed parts</h3><div class="meta"><span>Hardware</span><span class="dot hollow"></span><span>Oct 2026</span></div></div>
       </a>
-      <a class="rv" href="/info/alexa-alternatives/">
-        <div class="thumb"><img src="/assets/stills/pocket-bottom.webp" alt="" width="1400" height="770" loading="lazy"></div>
-        <span class="chip-tag" data-i="res3.type">Explainer</span><h3 data-i="res3.t">Private alternatives to Alexa</h3>
+      <a class="row-item rv" href="/community">
+        <div class="media t-slate" aria-hidden="true"><svg class="big-ic" viewBox="0 0 24 24"><use href="#i-users"/></svg></div>
+        <div><h3>The pleeply community forum is open</h3><div class="meta"><span>Community</span><span class="dot"></span><span>Oct 2026</span></div></div>
+      </a>
+      <a class="row-item rv d1" href="/info/">
+        <div class="media t-mint" aria-hidden="true"><svg class="big-ic" viewBox="0 0 24 24"><use href="#i-book"/></svg></div>
+        <div><h3>Guides to running AI at home</h3><div class="meta"><span>Guides</span><span class="dot"></span><span>Oct 2026</span></div></div>
       </a>
     </div>
-  </section>
+  </div>
+</section>
+
+<!-- ============ Гайды ============ -->
+<section class="sec" id="learn" aria-labelledby="learn-h">
+  <div class="wrap">
+    <div class="sec-head"><h2 id="learn-h">Learn about local AI</h2><a class="link" href="/info/">View all guides <svg class="ic"><use href="#i-arrow"/></svg></a></div>
+    <div class="grid3">
+      <a class="tile rv" href="/info/local-llm-memory/">
+        <div class="media r43 t-mint" aria-hidden="true"><div class="bigtxt"><span>8 → 48 GB<small>Memory and model size</small></span></div></div>
+        <h3>How much RAM do you need to run a local LLM?</h3>
+        <div class="meta"><span>Guide</span></div>
+      </a>
+      <a class="tile rv d1" href="/info/run-ai-at-home/">
+        <div class="media r43 t-sand" aria-hidden="true"><div class="bigtxt"><span>Pi 5 · Jetson · Mac · PC<small>Hardware compared</small></span></div></div>
+        <h3>Run AI at home: choose your hardware</h3>
+        <div class="meta"><span>Guide</span></div>
+      </a>
+      <a class="tile rv d2" href="/info/smart-speaker-privacy/">
+        <div class="media r43 t-slate" aria-hidden="true"><div class="bigtxt"><span>Voice → cloud?<small>What speakers send</small></span></div></div>
+        <h3>Do smart speakers send your voice to the cloud?</h3>
+        <div class="meta"><span>Guide</span></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Вопросы ============ -->
+<section class="sec" id="faq" aria-labelledby="faq-h">
+  <div class="wrap">
+    <div class="sec-head"><h2 id="faq-h">Questions</h2></div>
+    <div class="faq rv">
+      <details class="qa"><summary>Can I download pleeply today?</summary><p>Not yet. pleeply Desktop is in development. Join early access and we’ll email you when invites start. We won’t promise a date we can’t keep.</p></details>
+      <details class="qa"><summary>Will any AI model run on my computer?</summary><p>No. What runs locally depends on your memory and graphics. Small models (roughly 1–8B parameters) run on many recent laptops with 16 GB of memory; larger ones need more memory or a strong GPU. pleeply is designed to check your hardware and recommend models that fit.</p></details>
+      <details class="qa"><summary>Does my data leave my computer?</summary><p>In Local mode, no: prompts and files are processed on your device. When you choose a cloud model, your request goes to that provider and their privacy policy applies. pleeply is designed to ask before that happens.</p></details>
+      <details class="qa"><summary>What are Saturn, Nova, Atlas and Orbit?</summary><p>Planned names for model setups inside pleeply, each aimed at a different kind of work. None of them is released yet, and they are not foundation models we trained from scratch.</p></details>
+      <details class="qa"><summary>How much will it cost?</summary><p>We haven’t set pricing for pleeply Desktop. Joining early access is free and doesn’t commit you to anything.</p></details>
+      <details class="qa"><summary>What is the device waitlist?</summary><p>A separate list for pleeply Pocket, a small device that would run pleeply at home. It is in design, with planned prices from about $299 to $549. Join it only if you’d want the hardware.</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Get started: два списка ============ -->
+<section class="sec" id="join" aria-labelledby="join-h">
+  <div class="wrap">
+    <div class="cta-head rv">
+      <h2 id="join-h">Get started with pleeply</h2>
+      <p class="lead">The desktop app comes first. A pleeply device comes later. These are separate lists: join one or both.</p>
+      <div class="cta-pills"><a class="pill pill-dark pill-lg" href="#early-access" data-cta="final">Join early access</a><a class="pill pill-line pill-lg" href="#device" data-cta="final-device">Device waitlist</a></div>
+    </div>
+
+    <div class="lists">
+      <!-- A. Desktop -->
+      <article class="list-card primary rv" id="early-access">
+        <div class="list-top"><span class="kick">Software · first product</span><span class="tag">Early access</span></div>
+        <h3>pleeply Desktop</h3>
+        <p>Be among the first to try the app. We’ll invite people in waves, and your answers help us test on the computers people actually have.</p>
+
+        <form id="form-desktop" data-list="desktop" novalidate>
+          <div class="row2">
+            <div class="field">
+              <label for="d-name">Name</label>
+              <input id="d-name" name="name" type="text" autocomplete="name" maxlength="80" required aria-describedby="d-name-err">
+              <div class="err" id="d-name-err">Add your name.</div>
+            </div>
+            <div class="field">
+              <label for="d-email">Email</label>
+              <input id="d-email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required aria-describedby="d-email-err">
+              <div class="err" id="d-email-err">Check your email address.</div>
+            </div>
+          </div>
+
+          <div class="more">
+            <div class="more-h"><b>Your computer</b><span>Optional · helps us plan the waves</span></div>
+            <div class="field">
+              <span class="lbl" id="d-os-l">Operating system</span>
+              <div class="seg" role="radiogroup" aria-labelledby="d-os-l">
+                <label><input type="radio" name="os" value="macos"><span>macOS</span></label>
+                <label><input type="radio" name="os" value="windows"><span>Windows</span></label>
+                <label><input type="radio" name="os" value="linux"><span>Linux</span></label>
+              </div>
+            </div>
+            <div class="row2">
+              <div class="field">
+                <label for="d-ram">Memory (RAM)</label>
+                <select id="d-ram" name="ram">
+                  <option value="">Choose</option><option value="le8">8 GB or less</option><option value="16">16 GB</option>
+                  <option value="32">32 GB</option><option value="64p">64 GB or more</option><option value="unsure">Not sure</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="d-gpu">Graphics</label>
+                <select id="d-gpu" name="gpu">
+                  <option value="">Choose</option><option value="apple">Apple Silicon (M-series)</option><option value="nvidia">NVIDIA</option>
+                  <option value="amd">AMD</option><option value="integrated">Intel or built-in</option><option value="unsure">Not sure</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <span class="lbl" id="d-use-l">What would you use pleeply for?</span>
+              <div class="chips" role="group" aria-labelledby="d-use-l">
+                <label class="chip"><input type="checkbox" name="use_cases" value="chat"><span>Chat and writing</span></label>
+                <label class="chip"><input type="checkbox" name="use_cases" value="code"><span>Coding</span></label>
+                <label class="chip"><input type="checkbox" name="use_cases" value="docs"><span>Research and documents</span></label>
+                <label class="chip"><input type="checkbox" name="use_cases" value="agents"><span>Agents and automation</span></label>
+                <label class="chip"><input type="checkbox" name="use_cases" value="offline"><span>Private, offline work</span></label>
+              </div>
+            </div>
+            <div class="field">
+              <span class="lbl" id="d-ai-l">What do you use for AI today?</span>
+              <div class="chips" role="group" aria-labelledby="d-ai-l">
+                <label class="chip"><input type="checkbox" name="local_ai" value="ollama"><span>Ollama</span></label>
+                <label class="chip"><input type="checkbox" name="local_ai" value="lmstudio"><span>LM Studio</span></label>
+                <label class="chip"><input type="checkbox" name="local_ai" value="own_hw"><span>My own server or GPU</span></label>
+                <label class="chip"><input type="checkbox" name="local_ai" value="cloud"><span>Only cloud AI (ChatGPT etc.)</span></label>
+                <label class="chip"><input type="checkbox" name="local_ai" value="none"><span>Nothing yet</span></label>
+              </div>
+            </div>
+            <label class="check"><input type="checkbox" name="call" value="yes"><span>I’m up for a 15-minute call with the founder</span></label>
+          </div>
+
+          <div class="hp" aria-hidden="true"><label>Company <input type="text" name="company" tabindex="-1" autocomplete="off"></label></div>
+          <button class="pill pill-dark pill-lg btn-block" type="submit">Join early access</button>
+          <p class="small">Free, no payment. We’ll only email you about pleeply.</p>
+        </form>
+
+        <div class="done" role="status" aria-live="polite">
+          <div class="done-h"><i><svg class="ic"><use href="#i-check"/></svg></i><span>You’re on the Desktop early-access list.</span></div>
+          <p>We’ll email you when invites start. Know someone who’d want it? Share your link.</p>
+          <div class="share"><input type="text" readonly aria-label="Share link" data-share><button class="pill pill-line" type="button" data-copy><span>Copy</span></button></div>
+          <a class="next" href="#device">Want the device too? Join the device waitlist <svg class="ic"><use href="#i-arrow"/></svg></a>
+        </div>
+      </article>
+
+      <!-- B. Device -->
+      <article class="list-card rv d1" id="device">
+        <div class="list-top"><span class="kick">Hardware · later</span><span class="tag hollow">In design</span></div>
+        <h3>pleeply Pocket device</h3>
+        <p>A small device that runs pleeply at home, no computer needed. There is no working unit yet, and prices are planned.</p>
+        <div class="device-img t-night"><img src="/assets/stills/pocket-side-v2.webp" width="1600" height="636" alt="Concept render of pleeply Pocket from the side" loading="lazy" decoding="async"></div>
+
+        <form id="form-device" data-list="device" novalidate>
+          <div class="field">
+            <label for="v-email">Email</label>
+            <input id="v-email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required aria-describedby="v-email-err">
+            <div class="err" id="v-email-err">Check your email address.</div>
+          </div>
+          <div class="field">
+            <label for="v-name">Name <span class="opt">(optional)</span></label>
+            <input id="v-name" name="name" type="text" autocomplete="name" maxlength="80">
+          </div>
+          <div class="field">
+            <span class="lbl" id="v-tier-l">Which one would you buy?</span>
+            <div class="seg" role="radiogroup" aria-labelledby="v-tier-l">
+              <label><input type="radio" name="tier" value="pocket"><span>Pocket · ~$499</span></label>
+              <label><input type="radio" name="tier" value="one"><span>One · ~$299</span></label>
+              <label><input type="radio" name="tier" value="pro"><span>Pro · ~$549</span></label>
+            </div>
+          </div>
+          <div class="field">
+            <label for="v-budget">What would you pay for a device like this?</label>
+            <select id="v-budget" name="budget">
+              <option value="">Choose</option><option value="lt300">Under $300</option><option value="300_499">$300–499</option>
+              <option value="500_699">$500–699</option><option value="700p">$700 or more</option><option value="unsure">Not sure</option>
+            </select>
+          </div>
+          <div class="field">
+            <span class="lbl" id="v-dep-l">Would you put down a fully refundable $49 deposit for one of the first units?</span>
+            <div class="seg" role="radiogroup" aria-labelledby="v-dep-l">
+              <label><input type="radio" name="deposit" value="yes"><span>Yes</span></label>
+              <label><input type="radio" name="deposit" value="maybe"><span>Depends</span></label>
+              <label><input type="radio" name="deposit" value="no"><span>No</span></label>
+            </div>
+          </div>
+          <label class="check"><input type="checkbox" name="call" value="yes"><span>I’m up for a 15-minute call with the founder</span></label>
+          <div class="hp" aria-hidden="true"><label>Company <input type="text" name="company" tabindex="-1" autocomplete="off"></label></div>
+          <button class="pill pill-line pill-lg btn-block" type="submit">Join the device waitlist</button>
+          <p class="small">No payment now. We’ll only email you about pleeply.</p>
+        </form>
+
+        <div class="done" role="status" aria-live="polite">
+          <div class="done-h"><i><svg class="ic"><use href="#i-check"/></svg></i><span>You’re on the device waitlist.</span></div>
+          <p>We’ll write when there’s a working unit to show. Share your link with someone who’d want one.</p>
+          <div class="share"><input type="text" readonly aria-label="Share link" data-share><button class="pill pill-line" type="button" data-copy><span>Copy</span></button></div>
+          <a class="next" href="#early-access">Want the desktop app too? Join early access <svg class="ic"><use href="#i-arrow"/></svg></a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
 </main>
 
 <footer>
   <div class="wrap">
     <div class="foot">
       <div>
-        <h4 data-i="foot.products">Products</h4>
-        <ul><li><a href="#reserve">pleeply Pocket</a></li><li><a href="#reserve">pleeply One</a></li><li><a href="#reserve">pleeply Pro</a></li></ul>
+        <a class="brand" href="#top" aria-label="pleeply"><svg aria-hidden="true"><use href="#mark"/></svg>pleeply</a>
+        <p>Your AI. Your device. Your privacy. A personal AI ecosystem, in development.</p>
       </div>
-      <div>
-        <h4 data-i="foot.learn">Learn</h4>
-        <ul><li><a href="/info/" data-i="foot.guides">Guides</a></li><li><a href="/info/pleeply/" data-i="foot.faq">What is pleeply?</a></li><li><a href="/info/run-ai-at-home/" data-i="foot.hw">Choose your hardware</a></li></ul>
-      </div>
-      <div>
-        <h4 data-i="foot.community">Community</h4>
-        <ul><li><a href="/community" data-i="foot.forum">Forum</a></li><li><a href="/community/signup?next=%2Fcommunity" data-i="foot.join">Join</a></li></ul>
-      </div>
-      <div class="about">
-        <span class="mark">pleeply<i></i></span>
-        <p data-i="foot.about">A speaker with a computer inside. Open models, private memory, no cloud required. In development.</p>
-      </div>
+      <div><h4>Product</h4><ul>
+        <li><a href="#product">pleeply Desktop</a></li><li><a href="#hybrid">Hybrid AI</a></li>
+        <li><a href="#models">Model family</a></li><li><a href="#privacy">Privacy</a></li></ul></div>
+      <div><h4>Learn</h4><ul>
+        <li><a href="/info/">Local AI guides</a></li><li><a href="/community">Community</a></li><li><a href="#updates">Updates</a></li><li><a href="#faq">Questions</a></li></ul></div>
+      <div><h4>Get started</h4><ul>
+        <li><a href="#early-access">Desktop early access</a></li><li><a href="#device">Device waitlist</a></li></ul></div>
     </div>
-    <div class="foot-bar">
-      <h2 data-i="final.h">Your AI should live with you.</h2>
-      <div class="ctas">
-        <button class="btn btn-dark" type="button" data-open="final" data-i="final.cta">Join the waitlist</button>
-        <a class="btn btn-line" href="/community" data-i="com.cta">Visit the community</a>
-      </div>
-    </div>
-    <div class="foot-bottom">
-      <span data-i="footer">© 2026 pleeply. In development.</span>
-      <a href="#top" data-i="foot.top">Back to top ↑</a>
-    </div>
+    <div class="legal"><span>pleeply © 2026</span><span>This page describes products in development. Plans, features and prices can change.</span></div>
   </div>
 </footer>
 
-<dialog id="dlg" aria-labelledby="dlg-title">
-  <div class="dlg">
-    <div class="dlg-head">
-      <div>
-        <h3 id="dlg-title" data-i="f.h">Join the waitlist</h3>
-        <p class="lead" data-i="f.lead">Five quick questions, 30 seconds. No payment.</p>
-      </div>
-      <button class="x" type="button" data-close aria-label="Close">×</button>
-    </div>
-
-    <form id="form" novalidate>
-      <div class="field">
-        <label for="email" data-i="f.email">Email</label>
-        <input id="email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required>
-        <div class="err" id="email-err" data-i="f.err">Check your email address.</div>
-      </div>
-
-      <div class="field">
-        <span class="lbl" data-i="f.tier">Which one would you buy?</span>
-        <div class="seg">
-          <label><input type="radio" name="tier" value="pocket"><span>Pocket · $499</span></label>
-          <label><input type="radio" name="tier" value="one"><span>One · $299</span></label>
-          <label><input type="radio" name="tier" value="pro"><span>Pro · $549</span></label>
-        </div>
-      </div>
-
-      <div class="field">
-        <span class="lbl" data-i="f.local">What do you run local AI on today?</span>
-        <div class="chips">
-          <label class="chip"><input type="checkbox" name="local_ai" value="ollama"><span>Ollama</span></label>
-          <label class="chip"><input type="checkbox" name="local_ai" value="lmstudio"><span>LM Studio</span></label>
-          <label class="chip"><input type="checkbox" name="local_ai" value="own_hw"><span data-i="l.own">My own server / GPU</span></label>
-          <label class="chip"><input type="checkbox" name="local_ai" value="cloud"><span data-i="l.cloud">Only cloud AI (ChatGPT etc.)</span></label>
-          <label class="chip"><input type="checkbox" name="local_ai" value="none"><span data-i="l.none">Nothing yet</span></label>
-        </div>
-      </div>
-
-      <div class="field">
-        <label for="budget" data-i="f.budget">How much would you pay for a device like this?</label>
-        <select id="budget" name="budget">
-          <option value="" data-i="b.pick">Choose a range</option>
-          <option value="lt300" data-i="b.lt300">Under $300</option>
-          <option value="300_499">$300–499</option>
-          <option value="500_699">$500–699</option>
-          <option value="700p" data-i="b.700p">$700 or more</option>
-          <option value="unsure" data-i="b.unsure">Not sure yet</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <span class="lbl" data-i="f.deposit">Would you put down a fully refundable $49 deposit to get one of the first units?</span>
-        <div class="seg">
-          <label><input type="radio" name="deposit" value="yes"><span data-i="d.yes">Yes</span></label>
-          <label><input type="radio" name="deposit" value="maybe"><span data-i="d.maybe">Depends</span></label>
-          <label><input type="radio" name="deposit" value="no"><span data-i="d.no">No</span></label>
-        </div>
-      </div>
-
-      <div class="field">
-        <span class="lbl" data-i="f.call">Up for a 15-minute interview with the founder? We'll email you to pick a time.</span>
-        <div class="seg">
-          <label><input type="radio" name="call" value="yes"><span data-i="call.yes">Yes, happy to</span></label>
-          <label><input type="radio" name="call" value="no"><span data-i="call.no">Not now</span></label>
-        </div>
-      </div>
-
-      <div class="hp" aria-hidden="true"><label>Company <input type="text" name="company" tabindex="-1" autocomplete="off"></label></div>
-
-      <button class="btn btn-main" type="submit" data-i="f.submit">Join the waitlist</button>
-      <p class="small" data-i="f.small">We'll only email you about pleeply.</p>
-    </form>
-
-    <div class="done" role="status">
-      <div class="big">✓</div>
-      <h3 data-i="s.h">You're on the list.</h3>
-      <p data-i="s.p">Know someone who'd want one? Share your link.</p>
-      <div class="share">
-        <input id="share-url" type="text" readonly aria-label="Share link">
-        <button class="btn btn-dark" type="button" id="copy" data-i="s.copy">Copy</button>
-      </div>
-      <a class="btn btn-line" id="share-x" target="_blank" rel="noopener" data-i="s.x">Share on X</a>
-      <a class="btn btn-main" href="/community/signup?next=%2Fcommunity" data-i="s.community">Join the community</a>
-    </div>
-  </div>
-</dialog>
-
-<script type="importmap">
-{ "imports": { "three": "/assets/vendor/three/three.module.min.js", "three/addons/": "/assets/vendor/three/addons/" } }
-</script>
-<script type="module" src="/assets/pocket3d.js"></script>
-<!-- Своя аналитика без cookie: визиты, источники, гайды, модели → /api/track → Neon (site_events).
-     Стоит до app.js, чтобы form_open по ссылке /#join не терялся. -->
+<!-- Своя аналитика без cookie: визиты, источники, клики → /api/track → Neon (site_events). Стоит до app.js. -->
 <script src="/assets/track.js"></script>
 <script src="app.js"></script>
-<!-- Vercel Web Analytics: запасной счётчик визитов, если таблица не ответит. -->
+<!-- Vercel Web Analytics: запасной счётчик визитов. -->
 <script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
