@@ -1,7 +1,7 @@
 // Точка входа окна pleeply.
 import { render } from "./vendor/preact.mjs";
 import { html, S, set, call, tryCall, toast, useStore, refreshState, refreshModels, refreshChats, go } from "./ui.js";
-import { Sidebar, ConsentModal, Onboarding, Toasts } from "./views.js";
+import { Sidebar, ConsentModal, Onboarding, Toasts, Palette, Shortcuts, runAction, IS_MAC } from "./views.js";
 import { ChatView } from "./chat.js";
 import { ModelsView } from "./models.js";
 import { ControlView } from "./control.js";
@@ -13,9 +13,12 @@ function App() {
   if (!S.ready) return html`<div class="hello"><p class="shimmer">Starting pleeply…</p></div>`;
   if (!S.app.settings.onboarded) return html`<${Onboarding} /><${Toasts} />`;
   const View = { chat: ChatView, models: ModelsView, agents: AgentsView, memory: MemoryView, control: ControlView }[S.view] || ChatView;
-  return html`<div class="shell">
-    <${Sidebar} />
+  const side = S.app.settings.ui.sidebar;
+  return html`<div class=${"shell" + (side ? "" : " no-side")}>
+    ${side ? html`<${Sidebar} />` : null}
     <main class="main"><${View} /></main>
+    ${S.palette ? html`<${Palette} />` : null}
+    ${S.shortcuts ? html`<${Shortcuts} />` : null}
     ${S.consent ? html`<${ConsentModal} key=${S.consent.id} />` : null}
     <${Toasts} />
   </div>`;
@@ -87,6 +90,9 @@ window.pleeply.on((ev) => {
     case "activity":
       set({ activityTick: Date.now() });
       break;
+    case "menu":
+      if (S.ready && S.app.settings.onboarded && !S.consent) { set({ palette: false, shortcuts: false }); runAction(ev.action); }
+      break;
     case "data-deleted":
       set({ chat: null, memory: null, agents: null, runs: {} });
       refreshChats(); refreshMemory();
@@ -108,6 +114,40 @@ async function boot() {
 
 render(html`<${App} />`, document.getElementById("app"));
 boot();
+
+// ---------- горячие клавиши (те же, что в меню macOS; на Windows/Linux — с Ctrl) ----------
+const SHORTCUTS = { n: "new-chat", k: "search", o: "attach", b: "sidebar", i: "hw-panel", ",": "go:control", "/": "shortcuts",
+  1: "go:chat", 2: "go:models", 3: "go:agents", 4: "go:memory", 5: "go:control" };
+const SHIFT_SHORTCUTS = { c: "copy-last", e: "export" };
+const isTyping = (el) => el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName));
+
+window.addEventListener("keydown", (e) => {
+  if (!S.ready || !S.app?.settings.onboarded || S.consent) return;
+  const mod = IS_MAC ? e.metaKey && !e.ctrlKey : e.ctrlKey && !e.metaKey;
+  const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+  if (mod && !e.altKey) {
+    const action = e.shiftKey ? SHIFT_SHORTCUTS[key] : SHORTCUTS[key] || SHORTCUTS[e.code?.replace(/^Digit/, "")];
+    if (action) {
+      e.preventDefault();
+      set({ palette: false, shortcuts: false });
+      runAction(action);
+    }
+    return;
+  }
+  if (S.palette || S.shortcuts) return;
+  if (e.key === "Escape") {
+    // Esc останавливает ответ, если открыт чат и ничего другого не перехватило клавишу.
+    if (S.view === "chat" && S.chat?.messages?.some((m) => ["routing", "consent", "streaming"].includes(m.status)) && !document.querySelector(".menu")) {
+      e.preventDefault();
+      runAction("stop");
+    }
+    return;
+  }
+  // Начали печатать в чате вне поля ввода — переносим фокус в поле сообщения.
+  if (S.view === "chat" && !S.editing && e.key.length === 1 && !e.metaKey && !e.ctrlKey && !e.altKey && !isTyping(document.activeElement)) {
+    document.querySelector(".composer textarea")?.focus();
+  }
+});
 
 // Перетаскивание файлов мимо поля ввода не должно открывать их в окне.
 window.addEventListener("dragover", (e) => e.preventDefault());

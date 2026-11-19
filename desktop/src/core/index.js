@@ -519,7 +519,7 @@ export class Core {
     return (await this.#chatList())
       .map((c) => {
         const last = [...c.messages].reverse().find((m) => m.role === "assistant" && m.meta?.where);
-        return { id: c.id, title: c.title, updatedAt: c.updatedAt, where: last?.meta?.where || null, count: c.messages.length };
+        return { id: c.id, title: c.title, updatedAt: c.updatedAt, pinned: !!c.pinned, where: last?.meta?.where || null, count: c.messages.length };
       })
       .sort((a, b) => b.updatedAt - a.updatedAt);
   }
@@ -537,8 +537,8 @@ export class Core {
     return { id: uid("ch_"), title: "New chat", createdAt: now, updatedAt: now, approvals: {}, attachments: [], messages: [] };
   }
 
-  async saveChat(chat) {
-    chat.updatedAt = Date.now();
+  async saveChat(chat, { touch = true } = {}) {
+    if (touch) chat.updatedAt = Date.now();
     if (this.settings.history.keep) {
       this.ephemeralChats.delete(chat.id);
       await this.store.write(`chats/${chat.id}.json`, chat);
@@ -556,8 +556,38 @@ export class Core {
   async renameChat(id, title) {
     const c = await this.getChat(id);
     c.title = truncate(String(title || "").trim() || "Untitled", 80);
-    await this.saveChat(c);
+    await this.saveChat(c, { touch: false });
     return c;
+  }
+
+  async pinChat(id, pinned) {
+    const c = await this.getChat(id);
+    c.pinned = !!pinned;
+    await this.saveChat(c, { touch: false });
+    return c;
+  }
+
+  /** Поиск по названиям и тексту всех чатов на этом компьютере. */
+  async searchChats(query) {
+    const q = String(query || "").trim().toLowerCase().slice(0, 200);
+    const chats = await this.#chatList();
+    if (!q) return chats.sort((a, b) => b.updatedAt - a.updatedAt).slice(0, 12).map((c) => ({ id: c.id, title: c.title, updatedAt: c.updatedAt, snippet: null }));
+    const out = [];
+    for (const c of chats) {
+      let score = c.title.toLowerCase().includes(q) ? 2 : 0;
+      let snippet = null;
+      for (const m of c.messages) {
+        const t = m.text || "";
+        const i = t.toLowerCase().indexOf(q);
+        if (i < 0) continue;
+        const from = Math.max(0, i - 40), to = Math.min(t.length, i + q.length + 70);
+        snippet = (from ? "…" : "") + t.slice(from, to).replace(/\s+/g, " ") + (to < t.length ? "…" : "");
+        score = Math.max(score, 1);
+        break;
+      }
+      if (score) out.push({ id: c.id, title: c.title, updatedAt: c.updatedAt, snippet, score });
+    }
+    return out.sort((a, b) => b.score - a.score || b.updatedAt - a.updatedAt).slice(0, 30);
   }
 
   async deleteChat(id) {
@@ -634,6 +664,24 @@ export class Core {
     if (idx < 1 || userMsg?.role !== "user") throw new UserError("Nothing to answer again.");
     const asst = { id: uid("msg_"), role: "assistant", text: "", thought: "", status: "routing", createdAt: Date.now(), meta: { mode } };
     chat.messages.splice(idx, chat.messages.length - idx, asst);
+    return this.#start({ chat, userMsg, asst, mode, selection });
+  }
+
+  /** Изменить своё сообщение и отправить заново: всё, что было после него, заменяется новым ответом. */
+  async editAndResend({ chatId, messageId, text, mode, selection }) {
+    const body = String(text || "").trim();
+    if (!body) throw new UserError("The message can't be empty.");
+    if (body.length > MAX_MESSAGE_CHARS) throw new UserError("That message is too long. Attach it as a file instead.");
+    if (!["local", "cloud", "auto"].includes(mode)) throw new UserError("Unknown mode");
+    const chat = await this.getChat(chatId);
+    if (this.generating.has(chat.id)) throw new UserError("pleeply is still answering in this chat.");
+    const idx = chat.messages.findIndex((m) => m.id === messageId && m.role === "user");
+    if (idx < 0) throw new UserError("That message no longer exists.");
+    const userMsg = chat.messages[idx];
+    userMsg.text = body;
+    userMsg.editedAt = Date.now();
+    const asst = { id: uid("msg_"), role: "assistant", text: "", thought: "", status: "routing", createdAt: Date.now(), meta: { mode } };
+    chat.messages.splice(idx + 1, chat.messages.length - idx - 1, asst);
     return this.#start({ chat, userMsg, asst, mode, selection });
   }
 

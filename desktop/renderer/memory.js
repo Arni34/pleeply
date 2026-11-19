@@ -1,5 +1,6 @@
 // pleeply Memory: личный контекст на этом компьютере. Видно, можно изменить или удалить всё, что запомнено.
 import { html, S, set, tryCall, toast, useState, useEffect, Icon, Toggle, ago } from "./ui.js";
+import { TopLead } from "./views.js";
 
 export async function refreshMemory() {
   const memory = await tryCall("memory.get");
@@ -39,7 +40,7 @@ export function MemoryView() {
     if (m) { set({ memory: m }); setText(""); }
   };
   return html`<div class="page">
-    <header class="topbar drag"><span class="title">Memory</span></header>
+    <header class="topbar drag"><${TopLead} /><span class="title">Memory</span></header>
     <div class="scroll"><div class="page-body" style=${{ maxWidth: "820px" }}>
       <div class="page-head"><div><h1>pleeply Memory</h1><p>A personal context system that helps AI understand how you work, stored on this computer. See, edit or delete anything it remembers.</p></div></div>
       <div class="list">

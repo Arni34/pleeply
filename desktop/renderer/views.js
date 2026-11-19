@@ -1,7 +1,134 @@
 // Общие части окна: боковое меню, «This computer», выбор модели, окно согласия, первый запуск.
-import { html, S, set, call, tryCall, toast, useState, useEffect, useRef, Icon, Mark, Modal, FitBadge, useDropdown, fmtBytes, fmtNum, cloudLabel, refreshChats, refreshModels, refreshState, go } from "./ui.js";
+import { html, S, set, call, tryCall, toast, useState, useEffect, useRef, Icon, Mark, Modal, FitBadge, useDropdown, fmtBytes, fmtNum, ago, cloudLabel, refreshChats, refreshModels, refreshState, go } from "./ui.js";
+
+// ---------------- действия и горячие клавиши ----------------
+export const IS_MAC = window.pleeply.platform === "darwin";
+/** Подпись сочетания: "mod+shift+k" → «⌘⇧K» на Mac и «Ctrl+Shift+K» на Windows/Linux. */
+export function keys(combo) {
+  const parts = combo.split("+");
+  if (IS_MAC) return parts.map((p) => ({ mod: "⌘", shift: "⇧", alt: "⌥" }[p] || p.toUpperCase())).join("");
+  return parts.map((p) => ({ mod: "Ctrl", shift: "Shift", alt: "Alt" }[p] || p.toUpperCase())).join("+");
+}
+
+export function focusComposer() {
+  setTimeout(() => document.querySelector(".composer textarea")?.focus(), 40);
+}
+
+async function toggleUi(key) {
+  const v = !S.app.settings.ui[key];
+  set({ app: { ...S.app, settings: { ...S.app.settings, ui: { ...S.app.settings.ui, [key]: v } } } });
+  await call("settings.update", { ui: { [key]: v } }).catch(() => {});
+}
+
+export async function openChat(id) {
+  const chat = await tryCall("chats.get", id);
+  if (chat) { set({ chat, view: "chat", editing: null, renameTitle: false }); focusComposer(); }
+}
+
+export async function runAction(action) {
+  switch (action) {
+    case "new-chat": set({ chat: null, view: "chat", editing: null, renameTitle: false }); focusComposer(); break;
+    case "search": set({ palette: true }); break;
+    case "attach": set({ view: "chat" }); setTimeout(() => window.dispatchEvent(new CustomEvent("pleeply:attach")), 40); break;
+    case "export":
+      if (S.chat) tryCall("chats.export", S.chat.id).then((ok) => ok && toast("Exported as Markdown."));
+      else toast("Open a chat to export it.", "err");
+      break;
+    case "sidebar": await toggleUi("sidebar"); break;
+    case "hw-panel": if (S.view !== "chat") set({ view: "chat" }); await toggleUi("hwPanel"); break;
+    case "copy-last": {
+      const m = S.chat && [...S.chat.messages].reverse().find((x) => x.role === "assistant" && x.text);
+      if (m) { call("shell.copy", m.text); toast("Copied the last answer."); } else toast("No answer to copy yet.", "err");
+      break;
+    }
+    case "shortcuts": set({ shortcuts: true }); break;
+    case "stop": if (S.chat) call("chats.stop", S.chat.id).catch(() => {}); break;
+    default: if (action.startsWith("go:")) go(action.slice(3));
+  }
+}
+
+/** Меню в фиксированной позиции: не обрезается прокруткой списка чатов. */
+export function FloatMenu({ x, y, items, onClose }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const down = (e) => { if (ref.current && !ref.current.contains(e.target)) onClose(); };
+    const key = (e) => { if (e.key === "Escape") { e.stopPropagation(); onClose(); } };
+    document.addEventListener("mousedown", down);
+    window.addEventListener("keydown", key, true);
+    return () => { document.removeEventListener("mousedown", down); window.removeEventListener("keydown", key, true); };
+  }, []);
+  const h = items.length * 36 + 16;
+  return html`<div class="menu float" ref=${ref} role="menu" style=${{ left: Math.max(8, Math.min(x - 200, window.innerWidth - 220)) + "px", top: Math.min(y + 4, window.innerHeight - h - 8) + "px" }}>
+    ${items.map((it) => it === "-" ? html`<div class="menu-sep"></div>` : html`<button class="menu-i" role="menuitem" onClick=${(e) => { e.stopPropagation(); onClose(); it.run(); }}><${Icon} name=${it.icon} /><div class="t">${it.label}</div></button>`)}
+  </div>`;
+}
+
+export function chatMenuItems(c) {
+  return [
+    { label: c.pinned ? "Unpin" : "Pin", icon: "i-pin", run: async () => { await tryCall("chats.pin", { id: c.id, pinned: !c.pinned }); refreshChats(); } },
+    { label: "Rename", icon: "i-edit", run: () => set({ renaming: c.id }) },
+    { label: "Export as Markdown", icon: "i-download", run: () => tryCall("chats.export", c.id).then((ok) => ok && toast("Exported as Markdown.")) },
+    "-",
+    { label: "Delete", icon: "i-trash", run: async () => {
+      if (!confirm(`Delete “${c.title}”? It is removed from this computer.`)) return;
+      await tryCall("chats.delete", c.id);
+      if (S.chat?.id === c.id) set({ chat: null });
+      refreshChats();
+    } },
+  ];
+}
 
 // ---------------- боковое меню ----------------
+const DAY = 86_400_000;
+function groupChats(chats) {
+  const d = new Date();
+  const today = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const groups = [["Pinned", []], ["Today", []], ["Yesterday", []], ["Previous 7 days", []], ["Previous 30 days", []], ["Older", []]];
+  const g = Object.fromEntries(groups);
+  for (const c of chats) {
+    if (c.pinned) g.Pinned.push(c);
+    else if (c.updatedAt >= today) g.Today.push(c);
+    else if (c.updatedAt >= today - DAY) g.Yesterday.push(c);
+    else if (c.updatedAt >= today - 7 * DAY) g["Previous 7 days"].push(c);
+    else if (c.updatedAt >= today - 30 * DAY) g["Previous 30 days"].push(c);
+    else g.Older.push(c);
+  }
+  return groups.filter(([, list]) => list.length);
+}
+
+export function RenameInput({ c, cls = "rename" }) {
+  const [title, setTitle] = useState(c.title);
+  const done = useRef(false);
+  const finish = async (save) => {
+    if (done.current) return;
+    done.current = true;
+    set({ renaming: null, renameTitle: false });
+    const t = title.trim();
+    if (save && t && t !== c.title) {
+      const chat = await tryCall("chats.rename", { id: c.id, title: t });
+      if (chat && S.chat?.id === chat.id) set({ chat: { ...S.chat, title: chat.title } });
+      refreshChats();
+    }
+  };
+  return html`<input class=${cls} value=${title} aria-label="Chat name" maxlength="80"
+    ref=${(el) => el && !el.dataset.f && (el.dataset.f = "1", el.focus(), el.select())}
+    onInput=${(e) => setTitle(e.target.value)} onBlur=${() => finish(true)}
+    onKeyDown=${(e) => { e.stopPropagation(); if (e.key === "Enter") finish(true); if (e.key === "Escape") finish(false); }} />`;
+}
+
+function ChatItem({ c }) {
+  const [menu, setMenu] = useState(null);
+  const on = S.chat?.id === c.id && S.view === "chat";
+  if (S.renaming === c.id) return html`<div class="chat-item on"><${RenameInput} c=${c} /></div>`;
+  return html`<div class=${"chat-item" + (on ? " on" : "") + (menu ? " menu-open" : "")} role="button" tabindex="0" title=${c.title}
+    onClick=${() => openChat(c.id)} onDblClick=${() => set({ renaming: c.id })} onKeyDown=${(e) => e.key === "Enter" && openChat(c.id)}>
+    <span class=${"dot" + (c.where === "cloud" ? " cloud" : c.where ? "" : " off")} title=${c.where === "cloud" ? "Last answer came from a cloud model" : c.where ? "Last answer ran on this computer" : ""}></span>
+    <span class="t">${c.title}</span>
+    <button class="x" aria-label="Chat options" onClick=${(e) => { e.stopPropagation(); const r = e.currentTarget.getBoundingClientRect(); setMenu({ x: r.right, y: r.bottom }); }}><${Icon} name="i-more" cls="sm" /></button>
+    ${menu ? html`<${FloatMenu} x=${menu.x} y=${menu.y} items=${chatMenuItems(c)} onClose=${() => setMenu(null)} />` : null}
+  </div>`;
+}
+
 export function Sidebar() {
   const app = S.app;
   const nav = [
@@ -12,41 +139,109 @@ export function Sidebar() {
     ["control", "Control Center", "i-control"],
   ];
   const memCount = S.memory?.suggestions?.length || 0;
-  const newChat = () => { set({ chat: null, view: "chat" }); setTimeout(() => document.querySelector(".composer textarea")?.focus(), 30); };
-  const del = async (e, id) => {
-    e.stopPropagation();
-    if (!confirm("Delete this chat? It is removed from this computer.")) return;
-    await tryCall("chats.delete", id);
-    if (S.chat?.id === id) set({ chat: null });
-    refreshChats();
-  };
-  const open = async (id) => {
-    const chat = await tryCall("chats.get", id);
-    if (chat) set({ chat, view: "chat" });
-  };
   return html`<aside class="side">
-    <div class=${"side-top drag" + (window.pleeply.platform === "darwin" ? "" : " win")}></div>
+    <div class=${"side-top drag" + (IS_MAC ? "" : " win")}>
+      <button class="icon-btn" title=${`Hide sidebar (${keys("mod+b")})`} aria-label="Hide sidebar" onClick=${() => runAction("sidebar")}><${Icon} name="i-sidebar" /></button>
+    </div>
     <div class="side-brand drag"><${Mark} />pleeply</div>
-    <button class="btn btn-line side-new" onClick=${newChat}><${Icon} name="i-plus" />New chat</button>
+    <button class="btn btn-line side-new" onClick=${() => runAction("new-chat")}><${Icon} name="i-plus" />New chat<span class="kbd">${keys("mod+n")}</span></button>
+    <button class="side-search" onClick=${() => runAction("search")}><${Icon} name="i-search" cls="sm" />Search chats<span class="kbd">${keys("mod+k")}</span></button>
     <nav class="nav" aria-label="Sections">
-      ${nav.map(([id, label, icon]) => html`<button class=${"nav-item" + (S.view === id ? " on" : "")} onClick=${() => go(id)}>
+      ${nav.map(([id, label, icon], i) => html`<button class=${"nav-item" + (S.view === id ? " on" : "")} onClick=${() => go(id)} title=${`${label} (${keys("mod+" + (i + 1))})`}>
         <${Icon} name=${icon} />${label}
         ${id === "memory" && memCount ? html`<span class="count" title="New memory suggestions">${memCount}</span>` : null}
         ${id === "agents" && S.pendingApprovals ? html`<span class="count" title="Waiting for your OK">${S.pendingApprovals}</span>` : null}
       </button>`)}
     </nav>
-    <div class="label side-sec">Chats</div>
     <div class="chats">
-      ${S.chats.length ? S.chats.map((c) => html`<button class=${"chat-item" + (S.chat?.id === c.id && S.view === "chat" ? " on" : "")} onClick=${() => open(c.id)} title=${c.title}>
-        <span class=${"dot" + (c.where === "cloud" ? " cloud" : c.where ? "" : " off")} title=${c.where === "cloud" ? "Last answer came from a cloud model" : c.where ? "Last answer ran on this computer" : ""}></span>
-        <span class="t">${c.title}</span>
-        <span class="x" role="button" aria-label="Delete chat" onClick=${(e) => del(e, c.id)}><${Icon} name="i-x" cls="xs" /></span>
-      </button>`) : html`<div class="side-empty">No chats yet.</div>`}
+      ${S.chats.length ? groupChats(S.chats).map(([label, list]) => html`
+        <div class="label side-sec">${label}</div>
+        ${list.map((c) => html`<${ChatItem} c=${c} key=${c.id} />`)}`) : html`<div class="label side-sec">Chats</div><div class="side-empty">No chats yet.</div>`}
     </div>
     <button class="side-foot" onClick=${() => go("control", { ccSection: "privacy" })} title="Change in Control Center">
       <b>CLOUD REQUESTS</b>${cloudLabel(app.settings.cloud.requests)}
     </button>
   </aside>`;
+}
+
+/** Кнопки слева в верхней полосе, когда боковое меню скрыто. */
+export function TopLead() {
+  if (S.app.settings.ui.sidebar) return null;
+  return html`<div class="top-lead">
+    ${IS_MAC ? html`<span class="tl-space"></span>` : null}
+    <button class="icon-btn" title=${`Show sidebar (${keys("mod+b")})`} aria-label="Show sidebar" onClick=${() => runAction("sidebar")}><${Icon} name="i-sidebar" /></button>
+    <button class="icon-btn" title=${`New chat (${keys("mod+n")})`} aria-label="New chat" onClick=${() => runAction("new-chat")}><${Icon} name="i-compose" /></button>
+  </div>`;
+}
+
+// ---------------- поиск ⌘K ----------------
+export function Palette() {
+  const [q, setQ] = useState("");
+  const [res, setRes] = useState([]);
+  const [idx, setIdx] = useState(0);
+  const listRef = useRef(null);
+  const close = () => set({ palette: false });
+  useEffect(() => {
+    let alive = true;
+    const t = setTimeout(async () => {
+      const r = await call("chats.search", q).catch(() => []);
+      if (alive) { setRes(r || []); setIdx(0); }
+    }, 110);
+    return () => { alive = false; clearTimeout(t); };
+  }, [q]);
+  useEffect(() => { listRef.current?.querySelector(".pal-item.on")?.scrollIntoView({ block: "nearest" }); }, [idx]);
+  const ql = q.trim().toLowerCase();
+  const actions = [
+    { label: "New chat", icon: "i-plus", kbd: "mod+n", run: () => runAction("new-chat") },
+    { label: "Attach files", icon: "i-clip", kbd: "mod+o", run: () => runAction("attach") },
+    { label: "Models", icon: "i-models", kbd: "mod+2", run: () => go("models") },
+    { label: "Agents", icon: "i-agents", kbd: "mod+3", run: () => go("agents") },
+    { label: "Memory", icon: "i-memory", kbd: "mod+4", run: () => go("memory") },
+    { label: "Control Center", icon: "i-control", kbd: "mod+5", run: () => go("control") },
+    { label: "Cloud providers", icon: "i-cloud", run: () => go("control", { ccSection: "providers" }) },
+    { label: "Privacy and network activity", icon: "i-lock", run: () => go("control", { ccSection: "privacy" }) },
+    { label: "Keyboard shortcuts", icon: "i-keyboard", kbd: "mod+/", run: () => runAction("shortcuts") },
+  ].filter((a) => !ql || a.label.toLowerCase().includes(ql));
+  const items = [...res.map((r) => ({ kind: "chat", ...r })), ...actions.map((a) => ({ kind: "action", ...a }))];
+  const choose = (it) => { close(); if (it.kind === "chat") openChat(it.id); else it.run(); };
+  const onKey = (e) => {
+    if (e.key === "ArrowDown") { e.preventDefault(); setIdx(Math.min(items.length - 1, idx + 1)); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); setIdx(Math.max(0, idx - 1)); }
+    else if (e.key === "Enter" && items[idx]) { e.preventDefault(); choose(items[idx]); }
+    else if (e.key === "Escape") { e.preventDefault(); close(); }
+  };
+  return html`<div class="overlay top" onMouseDown=${(e) => e.target === e.currentTarget && close()}>
+    <div class="palette" role="dialog" aria-label="Search chats and actions">
+      <div class="pal-in"><${Icon} name="i-search" />
+        <input placeholder="Search chats and actions" value=${q} onInput=${(e) => setQ(e.target.value)} onKeyDown=${onKey} ref=${(el) => el && !el.dataset.f && (el.dataset.f = "1", el.focus())} aria-label="Search" />
+        <span class="kbd">esc</span></div>
+      <div class="pal-list" ref=${listRef}>
+        ${res.length ? html`<div class="menu-h">${ql ? "Chats" : "Recent chats"}</div>` : ql ? html`<div class="menu-note">No chats match “${q.trim()}”. Search looks through titles and messages on this computer.</div>` : null}
+        ${items.map((it, k) => html`
+          ${k === res.length && actions.length ? html`<div class="menu-h">Actions</div>` : null}
+          <button class=${"pal-item" + (k === idx ? " on" : "")} onMouseMove=${() => k !== idx && setIdx(k)} onClick=${() => choose(it)}>
+            <${Icon} name=${it.kind === "chat" ? "i-chat" : it.icon} />
+            <div class="grow"><div class="t ellipsis">${it.kind === "chat" ? it.title : it.label}</div>${it.snippet ? html`<div class="d ellipsis">${it.snippet}</div>` : null}</div>
+            ${it.kind === "chat" ? html`<span class="faint" style=${{ fontSize: "12px" }}>${ago(it.updatedAt)}</span>` : it.kbd ? html`<span class="kbd">${keys(it.kbd)}</span>` : null}
+          </button>`)}
+      </div>
+    </div>
+  </div>`;
+}
+
+export function Shortcuts() {
+  const rows = [
+    ["New chat", keys("mod+n")], ["Search chats and actions", keys("mod+k")], ["Attach files", keys("mod+o")],
+    ["Send message", "Enter"], ["New line", IS_MAC ? "⇧Enter" : "Shift+Enter"], ["Edit your last message", "↑ in an empty message box"],
+    ["Stop answering", "Esc"], ["Copy last answer", keys("mod+shift+c")], ["Export chat as Markdown", keys("mod+shift+e")],
+    ["Hide or show the sidebar", keys("mod+b")], ["Hide or show This computer", keys("mod+i")],
+    ["Chat · Models · Agents · Memory · Control Center", `${keys("mod+1")} … ${keys("mod+5")}`], ["Control Center", keys("mod+,")], ["This list", keys("mod+/")],
+  ];
+  return html`<${Modal} onClose=${() => set({ shortcuts: false })}>
+    <div class="modal-h"><h2>Keyboard shortcuts</h2><p>Start typing anywhere in a chat to jump to the message box.</p></div>
+    <div class="modal-b"><div class="list">${rows.map(([t, k]) => html`<div class="li" style=${{ minHeight: "44px", padding: "9px 16px" }}><span class="grow ink">${t}</span><span class="kbd lg">${k}</span></div>`)}</div></div>
+    <div class="modal-f"><span class="spacer"></span><button class="btn btn-primary" onClick=${() => set({ shortcuts: false })}>Done</button></div>
+  </${Modal}>`;
 }
 
 // ---------------- This computer ----------------

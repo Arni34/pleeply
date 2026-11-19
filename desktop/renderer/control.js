@@ -1,5 +1,6 @@
 // pleeply Control Center: железо, производительность, приватность и настройки моделей в одном месте.
 import { html, S, set, call, tryCall, toast, useState, useEffect, useRef, Icon, Toggle, FitBadge, fmtBytes, fmtNum, when, refreshState, refreshModels, refreshChats } from "./ui.js";
+import { TopLead } from "./views.js";
 
 const SECTIONS = [
   ["computer", "This computer"],
@@ -239,7 +240,7 @@ export function ControlView() {
   const body = { computer: Computer, performance: Performance, privacy: Privacy, modelsettings: ModelSettings, providers: Providers, integrations: Integrations, storage: Storage }[sec];
   const title = SECTIONS.find(([id]) => id === sec)?.[1];
   return html`<div class="page">
-    <header class="topbar drag"><span class="title">Control Center</span></header>
+    <header class="topbar drag"><${TopLead} /><span class="title">Control Center</span></header>
     <div class="scroll"><div class="page-body">
       <div class="page-head"><div><h1>pleeply Control Center</h1><p>Manage hardware, performance, privacy and model settings in one place.</p></div></div>
       <div class="cc-grid">

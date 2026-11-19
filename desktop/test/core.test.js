@@ -294,6 +294,38 @@ test("cloud: switched off means no request and a clear error", async () => {
   await core.dispose();
 });
 
+test("chats: search, pin without reordering, edit and resend", async () => {
+  const core = await makeCore({ cloud: { requests: "chat" } });
+  const consent = core.waitFor((e) => e.type === "consent");
+  let r = await core.send({ chatId: null, text: "Plan a trip to Almaty in May", mode: "cloud", selection: { type: "preset", id: "saturn" } });
+  const c = await consent;
+  let done = core.waitFor((e) => e.type === "chat" && e.done === r.messageId);
+  core.respondConsent({ id: c.id, approved: true, remember: true });
+  await done;
+  const chatId = r.chatId;
+  const found = await core.searchChats("almaty");
+  assert.equal(found[0].id, chatId);
+  assert.equal((await core.searchChats("hi from cloud"))[0].id, chatId, "matches answer text too");
+  assert.deepEqual(await core.searchChats("no such words anywhere"), []);
+  const before = (await core.getChat(chatId)).updatedAt;
+  await core.pinChat(chatId, true);
+  const listed = (await core.listChats()).find((x) => x.id === chatId);
+  assert.equal(listed.pinned, true);
+  assert.equal(listed.updatedAt, before, "pinning doesn't move the chat to Today");
+  await core.renameChat(chatId, "Almaty trip");
+  assert.equal((await core.getChat(chatId)).title, "Almaty trip");
+  const userMsg = (await core.getChat(chatId)).messages[0];
+  done = core.waitFor((e) => e.type === "chat" && e.done);
+  await core.editAndResend({ chatId, messageId: userMsg.id, text: "Plan a trip to Almaty in June", mode: "cloud", selection: { type: "preset", id: "saturn" } });
+  const ev = await done;
+  assert.equal(ev.chat.messages.length, 2);
+  assert.equal(ev.chat.messages[0].text, "Plan a trip to Almaty in June");
+  assert.ok(ev.chat.messages[0].editedAt);
+  assert.equal(ev.chat.messages[1].status, "done");
+  await assert.rejects(core.editAndResend({ chatId, messageId: "msg_nope", text: "x", mode: "cloud" }), /no longer exists/);
+  await core.dispose();
+});
+
 test("cloud: once per chat remembers the approval only for that chat", async () => {
   const core = await makeCore({ cloud: { requests: "chat" } });
   const consent = core.waitFor((e) => e.type === "consent");

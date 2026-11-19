@@ -1,5 +1,6 @@
 // pleeply Agents: агенты для исследований, продуктивности и автоматизации, с проверкой перед каждым важным шагом.
 import { html, S, set, call, tryCall, toast, useState, useEffect, Icon, Markdown, Seg, fmtNum, ago, when, refreshModels, go } from "./ui.js";
+import { TopLead } from "./views.js";
 
 const TOOL_ICON = { list_files: "i-folder", read_file: "i-file", search_files: "i-search", fetch_url: "i-globe", write_note: "i-note", write_file: "i-edit", draft_email: "i-mail", remember: "i-memory", finish: "i-flag" };
 const STATUS = { running: "Running", waiting: "Waiting for you", done: "Done", failed: "Failed", stopped: "Stopped" };
@@ -151,7 +152,7 @@ export function AgentsView() {
   const blank = () => fromTemplate({ name: "New agent", goal: "", tools: ["list_files", "read_file", "write_note"] });
   const run = runs.find((r) => r.id === runId);
   return html`<div class="page">
-    <header class="topbar drag"><span class="title">Agents</span></header>
+    <header class="topbar drag"><${TopLead} /><span class="title">Agents</span></header>
     <div class="scroll"><div class="page-body">
       <div class="page-head"><div class="grow"><h1>pleeply Agents</h1><p>Personal AI agents for research, productivity and automation, with a check-in before any step that matters. They work only in the folder you share.</p></div>
         <button class="btn btn-primary" onClick=${blank}><${Icon} name="i-plus" />New agent</button></div>

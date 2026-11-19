@@ -1,5 +1,6 @@
 // pleeply Models: найти, скачать и управлять локальными и облачными моделями. Каждая проверяется по железу до скачивания.
 import { html, S, set, call, tryCall, toast, useState, useEffect, Icon, FitBadge, fmtBytes, fmtNum, ago, refreshModels, go } from "./ui.js";
+import { TopLead } from "./views.js";
 
 function DownloadCell({ m }) {
   const d = m.downloading;
@@ -154,7 +155,7 @@ export function ModelsView() {
   const models = S.models;
   const tabs = [["catalog", "For this computer"], ["installed", `Installed${models ? ` (${models.local.length})` : ""}`], ["discover", "Discover"], ["cloud", `Cloud${models ? ` (${models.cloud.length})` : ""}`]];
   return html`<div class="page">
-    <header class="topbar drag"><span class="title">Models</span></header>
+    <header class="topbar drag"><${TopLead} /><span class="title">Models</span></header>
     <div class="scroll"><div class="page-body">
       <div class="page-head"><div class="grow"><h1>pleeply Models</h1><p>Discover, download and manage local and cloud models. Each one is checked against your hardware before you download it.</p></div>
         <button class="btn btn-ghost btn-sm" onClick=${() => refreshModels()}><${Icon} name="i-refresh" />Refresh</button></div>

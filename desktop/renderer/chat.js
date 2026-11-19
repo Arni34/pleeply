@@ -1,6 +1,6 @@
 // pleeply Chat: один интерфейс для разных моделей, у каждого ответа видно, где он посчитан.
 import { html, S, set, call, tryCall, toast, useState, useEffect, useRef, Icon, Mark, Markdown, Seg, useDropdown, fmtNum, refreshChats, refreshModels, go } from "./ui.js";
-import { HwPanel, ModelPicker } from "./views.js";
+import { HwPanel, ModelPicker, TopLead, RenameInput, FloatMenu, chatMenuItems, focusComposer } from "./views.js";
 
 const STARTERS = [
   { t: "Rewrite something", d: "Make this calmer and shorter: …", text: "Rewrite this so it sounds calmer and shorter:\n\n" },
@@ -11,7 +11,7 @@ const STARTERS = [
 
 function MetaLine({ m }) {
   const meta = m.meta || {};
-  if (!meta.where || ["consent", "declined", "routing"].includes(m.status)) return null;
+  if (!meta.where || ["consent", "declined", "routing", "streaming"].includes(m.status)) return null;
   const parts = [];
   if (meta.presetName) parts.push(meta.presetName.replace("pleeply ", ""));
   parts.push(meta.servedModel && meta.servedModel !== meta.ref?.split(":").pop() && meta.where === "cloud" ? `${meta.model} → served by ${meta.servedModel}` : meta.model);
@@ -95,6 +95,47 @@ function AssistantMessage({ m, last }) {
   return html`<div class="msg-ai">${body}</div>`;
 }
 
+function UserMessage({ m, canEdit }) {
+  const editing = S.editing === m.id;
+  const [text, setText] = useState(m.text);
+  const ta = useRef(null);
+  useEffect(() => {
+    if (!editing) return;
+    setText(m.text);
+    setTimeout(() => { const el = ta.current; if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }, 20);
+  }, [editing]);
+  useEffect(() => {
+    const el = ta.current;
+    if (el) { el.style.height = "auto"; el.style.height = Math.min(320, el.scrollHeight) + "px"; }
+  }, [text, editing]);
+  const cancel = () => { set({ editing: null }); focusComposer(); };
+  const save = async () => {
+    const body = text.trim();
+    if (!body) return;
+    set({ editing: null });
+    await tryCall("chats.edit", { chatId: S.chat.id, messageId: m.id, text: body, mode: S.mode, selection: S.selection });
+  };
+  const files = m.attachments?.length ? html`<div class="files">${m.attachments.length} file${m.attachments.length > 1 ? "s" : ""} attached</div>` : null;
+  if (editing) return html`<div class="msg-edit">
+    <textarea ref=${ta} value=${text} aria-label="Edit message" onInput=${(e) => setText(e.target.value)}
+      onKeyDown=${(e) => {
+        if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); save(); }
+        if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); cancel(); }
+      }}></textarea>
+    <div class="row"><span class="hint grow">Sending replaces the answers after this message.</span>
+      <button class="btn btn-ghost btn-sm" onClick=${cancel}>Cancel</button>
+      <button class="btn btn-primary btn-sm" disabled=${!text.trim()} onClick=${save}>Send</button></div>
+  </div>`;
+  return html`<div class="msg-user">
+    <div class="msg-me">${m.text}${files}</div>
+    <div class="msg-tools">
+      ${m.editedAt ? html`<span class="faint edited">edited</span>` : null}
+      <button class="icon-btn" title="Copy" onClick=${() => { call("shell.copy", m.text); toast("Copied."); }}><${Icon} name="i-copy" cls="sm" /></button>
+      ${canEdit ? html`<button class="icon-btn" title="Edit and send again (↑ in an empty message box)" onClick=${() => set({ editing: m.id })}><${Icon} name="i-edit" cls="sm" /></button>` : null}
+    </div>
+  </div>`;
+}
+
 function Hello({ onStarter }) {
   const local = S.mode === "local";
   return html`<div class="hello">
@@ -141,9 +182,20 @@ function Composer() {
   }, [text]);
   useEffect(() => {
     const f = (e) => { if (e.detail) { setText(e.detail); ta.current?.focus(); } };
+    const a = () => attach();
     window.addEventListener("pleeply:compose", f);
-    return () => window.removeEventListener("pleeply:compose", f);
-  }, []);
+    window.addEventListener("pleeply:attach", a);
+    return () => { window.removeEventListener("pleeply:compose", f); window.removeEventListener("pleeply:attach", a); };
+  }, [chat?.id]);
+  useEffect(() => { if (!S.editing) ta.current?.focus(); }, [chat?.id]);
+  const editLast = (e) => {
+    if (e.key !== "ArrowUp" || text || busy || e.shiftKey || e.metaKey || e.ctrlKey || e.altKey) return false;
+    const last = [...(chat?.messages || [])].reverse().find((m) => m.role === "user");
+    if (!last) return false;
+    e.preventDefault();
+    set({ editing: last.id });
+    return true;
+  };
   const send = async () => {
     const body = text.trim();
     if (!body || busy) return;
@@ -184,9 +236,9 @@ function Composer() {
       ${chat?.attachments?.length ? html`<div class="chips">${chat.attachments.map((a) => html`<span class="chip" title=${`${a.name} · ${fmtNum(a.chars)} characters${a.pages > 1 ? ` · ${a.pages} pages` : ""}`}><${Icon} name="i-file" /><span class="ellipsis">${a.name}</span><button aria-label="Remove file" onClick=${() => remove(a.id)}><${Icon} name="i-x" cls="xs" /></button></span>`)}</div>` : null}
       <textarea ref=${ta} rows="1" value=${text} placeholder=${placeholder} aria-label="Message"
         onInput=${(e) => setText(e.target.value)}
-        onKeyDown=${(e) => { if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); send(); } }}></textarea>
+        onKeyDown=${(e) => { if (editLast(e)) return; if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); send(); } }}></textarea>
       <div class="bar">
-        <button class="icon-btn" title="Attach files (PDF, text, Markdown, code) — read on this computer" onClick=${attach}><${Icon} name="i-clip" /></button>
+        <button class="icon-btn" title=${`Attach files: PDF, text, Markdown, code. Read on this computer (${window.pleeply.platform === "darwin" ? "⌘O" : "Ctrl+O"})`} onClick=${attach}><${Icon} name="i-clip" /></button>
         <${RouteHint} r=${preview} />
         ${busy ? html`<button class="send" title="Stop" onClick=${() => call("chats.stop", chat.id)}><${Icon} name="i-stop" /></button>`
           : html`<button class="send" title="Send (Enter)" disabled=${!text.trim()} onClick=${send}><${Icon} name="i-send" /></button>`}
@@ -197,32 +249,13 @@ function Composer() {
 }
 
 function ChatMenu() {
-  const dd = useDropdown();
+  const [menu, setMenu] = useState(null);
   const chat = S.chat;
   if (!chat) return null;
-  const rename = async () => {
-    dd.setOpen(false);
-    const title = prompt("Rename chat", chat.title);
-    if (title == null) return;
-    const c = await tryCall("chats.rename", { id: chat.id, title });
-    if (c) { set({ chat: c }); refreshChats(); }
-  };
-  const del = async () => {
-    dd.setOpen(false);
-    if (!confirm("Delete this chat? It is removed from this computer.")) return;
-    await tryCall("chats.delete", chat.id);
-    set({ chat: null });
-    refreshChats();
-  };
-  return html`<div class="picker" ref=${dd.ref}>
-    <button class="icon-btn" title="Chat options" onClick=${() => dd.setOpen(!dd.open)}><${Icon} name="i-more" /></button>
-    ${dd.open ? html`<div class="menu right">
-      <button class="menu-i" onClick=${rename}><${Icon} name="i-edit" /><div class="t">Rename</div></button>
-      <button class="menu-i" onClick=${() => { dd.setOpen(false); tryCall("chats.export", chat.id).then((ok) => ok && toast("Exported as Markdown.")); }}><${Icon} name="i-download" /><div class="t">Export as Markdown</div></button>
-      <div class="menu-sep"></div>
-      <button class="menu-i" onClick=${del}><${Icon} name="i-trash" /><div class="t">Delete chat</div></button>
-    </div>` : null}
-  </div>`;
+  const listed = S.chats.find((c) => c.id === chat.id) || chat;
+  const items = chatMenuItems({ ...listed, title: chat.title }).map((it) => (it !== "-" && it.label === "Rename" ? { ...it, run: () => set({ renameTitle: true }) } : it));
+  return html`<button class="icon-btn" title="Chat options" aria-label="Chat options" onClick=${(e) => { const r = e.currentTarget.getBoundingClientRect(); setMenu({ x: r.right, y: r.bottom }); }}><${Icon} name="i-more" /></button>
+    ${menu ? html`<${FloatMenu} x=${menu.x} y=${menu.y} items=${items} onClose=${() => setMenu(null)} />` : null}`;
 }
 
 export function ChatView() {
@@ -235,11 +268,19 @@ export function ChatView() {
     const el = scroller.current;
     if (el && stick.current) el.scrollTop = el.scrollHeight;
   }, [msgs.length, lastLen, chat?.id]);
-  useEffect(() => { stick.current = true; }, [chat?.id]);
+  const [atBottom, setAtBottom] = useState(true);
+  useEffect(() => { stick.current = true; setAtBottom(true); }, [chat?.id]);
   const onScroll = (e) => {
     const el = e.currentTarget;
-    stick.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+    const near = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+    stick.current = near;
+    if (near !== atBottom) setAtBottom(near);
   };
+  const toBottom = () => {
+    const el = scroller.current;
+    if (el) { stick.current = true; el.scrollTo({ top: el.scrollHeight, behavior: "smooth" }); }
+  };
+  const busy = msgs.some((m) => ["routing", "consent", "streaming"].includes(m.status));
   const setMode = (mode) => {
     let selection = S.selection;
     if (mode !== "auto" && selection.type === "auto") selection = { type: "preset", id: S.app.settings.presets.default };
@@ -261,6 +302,7 @@ export function ChatView() {
   return html`<div class="chat-wrap">
     <div class="page">
       <header class="topbar drag">
+        <${TopLead} />
         <${ModelPicker} />
         <${Seg} label="Where requests run" value=${S.mode} onChange=${setMode} options=${[
           { value: "local", label: "Local", icon: "i-cpu", title: "Run on this computer. Nothing is sent." },
@@ -268,16 +310,21 @@ export function ChatView() {
           { value: "auto", label: "Auto", icon: "i-auto", title: "pleeply recommends the model and mode. Cloud still needs your yes." },
         ]} />
         <span class="spacer"></span>
-        ${chat ? html`<span class="title ellipsis">${chat.title}</span>` : null}
+        ${chat ? (S.renameTitle
+          ? html`<${RenameInput} c=${chat} cls="rename title-input" />`
+          : html`<button class="title ellipsis title-btn" title="Click to rename" onClick=${() => set({ renameTitle: true })}>${chat.title}</button>`) : null}
         <${ChatMenu} />
         <button class=${"icon-btn" + (S.app.settings.ui.hwPanel ? " on" : "")} title="This computer" onClick=${() => call("settings.update", { ui: { hwPanel: !S.app.settings.ui.hwPanel } })}><${Icon} name="i-panel" /></button>
       </header>
-      <div class="scroll" ref=${scroller} onScroll=${onScroll}>
-        ${msgs.length ? html`<div class="msgs">
-          ${msgs.map((m) => m.role === "user"
-            ? html`<div class="msg-me" key=${m.id}>${m.text}${m.attachments?.length ? html`<div class="files">${m.attachments.length} file${m.attachments.length > 1 ? "s" : ""} attached</div>` : null}</div>`
-            : html`<${AssistantMessage} key=${m.id} m=${m} last=${m === lastAi} />`)}
-        </div>` : html`<${Hello} onStarter=${onStarter} />`}
+      <div class="scroll-wrap">
+        <div class="scroll" ref=${scroller} onScroll=${onScroll}>
+          ${msgs.length ? html`<div class="msgs">
+            ${msgs.map((m) => m.role === "user"
+              ? html`<${UserMessage} key=${m.id} m=${m} canEdit=${!busy} />`
+              : html`<${AssistantMessage} key=${m.id} m=${m} last=${m === lastAi} />`)}
+          </div>` : html`<${Hello} onStarter=${onStarter} />`}
+        </div>
+        ${!atBottom && msgs.length ? html`<button class="to-bottom" title="Scroll to the latest message" aria-label="Scroll to the latest message" onClick=${toBottom}><${Icon} name="i-down" /></button>` : null}
       </div>
       <${Composer} />
     </div>

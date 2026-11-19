@@ -1,8 +1,9 @@
 // Главный процесс pleeply Desktop: окно, IPC и системные диалоги. Вся работа с моделями — в src/core.
-import { app, BrowserWindow, ipcMain, dialog, shell, safeStorage, clipboard, Menu } from "electron";
+import { app, BrowserWindow, ipcMain, dialog, shell, safeStorage, clipboard, Menu, screen } from "electron";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { writeFile } from "node:fs/promises";
+import { readFileSync, writeFileSync } from "node:fs";
 import { Core } from "../src/core/index.js";
 import { UserError } from "../src/core/util.js";
 import { SUPPORTED_EXT } from "../src/core/docs.js";
@@ -72,6 +73,9 @@ function api() {
     "chats.get": (id) => core.getChat(id),
     "chats.create": () => core.createChat(),
     "chats.rename": (a) => core.renameChat(a?.id, a?.title),
+    "chats.pin": (a) => core.pinChat(a?.id, a?.pinned),
+    "chats.search": (q) => core.searchChats(q),
+    "chats.edit": (a) => core.editAndResend(a || {}),
     "chats.delete": (id) => core.deleteChat(id),
     "chats.export": async (id) => {
       const chat = await core.getChat(id);
@@ -130,9 +134,81 @@ function api() {
   };
 }
 
+// ---------- окно помнит размер и положение ----------
+const windowFile = () => path.join(app.getPath("userData"), "window.json");
+
+function loadBounds() {
+  try {
+    const s = JSON.parse(readFileSync(windowFile(), "utf8"));
+    const b = s.bounds;
+    if (!b || ![b.x, b.y, b.width, b.height].every(Number.isFinite)) return null;
+    // Окно должно хотя бы частично попадать на один из подключённых экранов.
+    const visible = screen.getAllDisplays().some(({ workArea: w }) => b.x < w.x + w.width - 80 && b.x + b.width > w.x + 80 && b.y < w.y + w.height - 40 && b.y >= w.y - 10);
+    return visible ? { bounds: b, maximized: !!s.maximized } : null;
+  } catch {
+    return null;
+  }
+}
+
+let saveTimer = null;
+function saveBounds() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    if (!win || win.isDestroyed()) return;
+    try { writeFileSync(windowFile(), JSON.stringify({ bounds: win.getNormalBounds(), maximized: win.isMaximized() })); } catch {}
+  }, 400);
+}
+
+// ---------- меню приложения (macOS) ----------
+// Сочетания клавиш обрабатывает окно (так они работают и на Windows/Linux, где меню нет),
+// а меню их показывает и вызывает те же действия по клику.
+function buildMenu() {
+  const act = (action) => () => send({ type: "menu", action });
+  const item = (label, accelerator, action) => ({ label, accelerator, registerAccelerator: false, click: act(action) });
+  return Menu.buildFromTemplate([
+    { label: "pleeply", submenu: [
+      { role: "about" }, { type: "separator" },
+      item("Control Center…", "Cmd+,", "go:control"), { type: "separator" },
+      { role: "services" }, { type: "separator" }, { role: "hide" }, { role: "hideOthers" }, { role: "unhide" }, { type: "separator" }, { role: "quit" },
+    ] },
+    { label: "File", submenu: [
+      item("New Chat", "Cmd+N", "new-chat"),
+      item("Search Chats…", "Cmd+K", "search"),
+      item("Attach Files…", "Cmd+O", "attach"),
+      { type: "separator" },
+      item("Export Chat as Markdown…", "Cmd+Shift+E", "export"),
+      { type: "separator" },
+      { role: "close" },
+    ] },
+    { role: "editMenu" },
+    { label: "View", submenu: [
+      item("Toggle Sidebar", "Cmd+B", "sidebar"),
+      item("Toggle This Computer Panel", "Cmd+I", "hw-panel"),
+      { type: "separator" },
+      item("Copy Last Answer", "Cmd+Shift+C", "copy-last"),
+      { type: "separator" },
+      { role: "resetZoom" }, { role: "zoomIn" }, { role: "zoomOut" }, { type: "separator" }, { role: "togglefullscreen" },
+    ] },
+    { label: "Go", submenu: [
+      item("Chat", "Cmd+1", "go:chat"),
+      item("Models", "Cmd+2", "go:models"),
+      item("Agents", "Cmd+3", "go:agents"),
+      item("Memory", "Cmd+4", "go:memory"),
+      item("Control Center", "Cmd+5", "go:control"),
+    ] },
+    { role: "windowMenu" },
+    { role: "help", submenu: [
+      item("Keyboard Shortcuts", "Cmd+/", "shortcuts"),
+      { label: "pleeply Website", click: () => openExternalSafe("https://pleeply.vercel.app") },
+    ] },
+  ]);
+}
+
 function createWindow() {
+  const saved = loadBounds();
   win = new BrowserWindow({
     width: 1320, height: 860, minWidth: 940, minHeight: 620,
+    ...(saved ? saved.bounds : {}),
     title: "pleeply",
     backgroundColor: "#000000",
     show: false,
@@ -147,7 +223,11 @@ function createWindow() {
       spellcheck: true,
     },
   });
-  win.once("ready-to-show", () => win.show());
+  win.once("ready-to-show", () => {
+    if (saved?.maximized) win.maximize();
+    win.show();
+  });
+  for (const ev of ["resize", "move", "maximize", "unmaximize"]) win.on(ev, saveBounds);
   win.webContents.setWindowOpenHandler(({ url }) => { openExternalSafe(url); return { action: "deny" }; });
   win.webContents.on("will-navigate", (e, url) => {
     if (url !== win.webContents.getURL()) { e.preventDefault(); openExternalSafe(url); }
@@ -175,7 +255,7 @@ app.whenReady().then(async () => {
       return { error: err?.message || String(err), user: err instanceof UserError };
     }
   });
-  if (process.platform !== "darwin") Menu.setApplicationMenu(null);
+  Menu.setApplicationMenu(process.platform === "darwin" ? buildMenu() : null);
   createWindow();
   app.on("activate", () => { if (!BrowserWindow.getAllWindows().length) createWindow(); });
 });

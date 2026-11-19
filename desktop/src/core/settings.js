@@ -22,7 +22,7 @@ export const DEFAULT_SETTINGS = {
   presets: { default: "saturn", models: { saturn: null, nova: null, atlas: null, orbit: null } },
   memory: { enabled: true, learn: "suggest" }, // learn: off | suggest | auto
   history: { keep: true },
-  ui: { hwPanel: true },
+  ui: { hwPanel: true, sidebar: true },
 };
 
 const MODES = ["local", "cloud", "auto"];
@@ -83,5 +83,6 @@ export function sanitizeSettings(s) {
   out.memory.learn = LEARN.includes(m.memory.learn) ? m.memory.learn : d.memory.learn;
   out.history.keep = !!m.history.keep;
   out.ui.hwPanel = !!m.ui.hwPanel;
+  out.ui.sidebar = !!m.ui.sidebar;
   return out;
 }
