@@ -1,0 +1,360 @@
+{
+  "checked": "2026-11-18",
+  "models": [
+    {
+      "id": "qwen2.5-0.5b",
+      "name": "Qwen 2.5",
+      "size": "0.5B",
+      "params": 0.5,
+      "family": "Qwen",
+      "repo": "Qwen/Qwen2.5-0.5B-Instruct-GGUF",
+      "file": "qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "ctx": 32768,
+      "kv": 12,
+      "tools": false,
+      "tags": [
+        "tiny"
+      ],
+      "quant": "Q4_K_M",
+      "parts": 1,
+      "bytes": 491400032,
+      "uri": "hf:Qwen/Qwen2.5-0.5B-Instruct-GGUF/qwen2.5-0.5b-instruct-q4_k_m.gguf"
+    },
+    {
+      "id": "llama3.2-1b",
+      "name": "Llama 3.2",
+      "size": "1B",
+      "params": 1.2,
+      "family": "Llama",
+      "repo": "bartowski/Llama-3.2-1B-Instruct-GGUF",
+      "ctx": 131072,
+      "kv": 32,
+      "tools": false,
+      "tags": [
+        "fast"
+      ],
+      "quant": "Q4_K_M",
+      "file": "Llama-3.2-1B-Instruct-Q4_K_M.gguf",
+      "parts": 1,
+      "bytes": 807694464,
+      "uri": "hf:bartowski/Llama-3.2-1B-Instruct-GGUF/Llama-3.2-1B-Instruct-Q4_K_M.gguf"
+    },
+    {
+      "id": "gemma3-1b",
+      "name": "Gemma 3",
+      "size": "1B",
+      "params": 1,
+      "family": "Gemma",
+      "repo": "bartowski/google_gemma-3-1b-it-GGUF",
+      "ctx": 32768,
+      "kv": 26,
+      "tools": false,
+      "tags": [
+        "fast"
+      ],
+      "quant": "Q4_K_M",
+      "file": "google_gemma-3-1b-it-Q4_K_M.gguf",
+      "parts": 1,
+      "bytes": 806058496,
+      "uri": "hf:bartowski/google_gemma-3-1b-it-GGUF/google_gemma-3-1b-it-Q4_K_M.gguf"
+    },
+    {
+      "id": "qwen3-1.7b",
+      "name": "Qwen 3",
+      "size": "1.7B",
+      "params": 1.7,
+      "family": "Qwen",
+      "repo": "bartowski/Qwen_Qwen3-1.7B-GGUF",
+      "ctx": 32768,
+      "kv": 112,
+      "tools": true,
+      "tags": [
+        "thinking"
+      ],
+      "quant": "Q4_K_M",
+      "file": "Qwen_Qwen3-1.7B-Q4_K_M.gguf",
+      "parts": 1,
+      "bytes": 1282439584,
+      "uri": "hf:bartowski/Qwen_Qwen3-1.7B-GGUF/Qwen_Qwen3-1.7B-Q4_K_M.gguf"
+    },
+    {
+      "id": "llama3.2-3b",
+      "name": "Llama 3.2",
+      "size": "3B",
+      "params": 3.2,
+      "family": "Llama",
+      "repo": "bartowski/Llama-3.2-3B-Instruct-GGUF",
+      "ctx": 131072,
+      "kv": 112,
+      "tools": true,
+      "tags": [],
+      "quant": "Q4_K_M",
+      "file": "Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+      "parts": 1,
+      "bytes": 2019377696,
+      "uri": "hf:bartowski/Llama-3.2-3B-Instruct-GGUF/Llama-3.2-3B-Instruct-Q4_K_M.gguf"
+    },
+    {
+      "id": "qwen2.5-3b",
+      "name": "Qwen 2.5",
+      "size": "3B",
+      "params": 3.1,
+      "family": "Qwen",
+      "repo": "bartowski/Qwen2.5-3B-Instruct-GGUF",
+      "ctx": 32768,
+      "kv": 36,
+      "tools": true,
+      "tags": [
+        "long-context"
+      ],
+      "quant": "Q4_K_M",
+      "file": "Qwen2.5-3B-Instruct-Q4_K_M.gguf",
+      "parts": 1,
+      "bytes": 1929903264,
+      "uri": "hf:bartowski/Qwen2.5-3B-Instruct-GGUF/Qwen2.5-3B-Instruct-Q4_K_M.gguf"
+    },
+    {
+      "id": "phi4-mini",
+      "name": "Phi-4 mini",
+      "size": "3.8B",
+      "params": 3.8,
+      "family": "Phi",
+      "repo": "bartowski/microsoft_Phi-4-mini-instruct-GGUF",
+      "ctx": 131072,
+      "kv": 128,
+      "tools": true,
+      "tags": [
+        "reasoning"
+      ],
+      "quant": "Q4_K_M",
+      "file": "microsoft_Phi-4-mini-instruct-Q4_K_M.gguf",
+      "parts": 1,
+      "bytes": 2491874688,
+      "uri": "hf:bartowski/microsoft_Phi-4-mini-instruct-GGUF/microsoft_Phi-4-mini-instruct-Q4_K_M.gguf"
+    },
+    {
+      "id": "gemma3-4b",
+      "name": "Gemma 3",
+      "size": "4B",
+      "params": 4.3,
+      "family": "Gemma",
+      "repo": "bartowski/google_gemma-3-4b-it-GGUF",
+      "ctx": 131072,
+      "kv": 136,
+      "tools": false,
+      "tags": [
+        "writing"
+      ],
+      "quant": "Q4_K_M",
+      "file": "google_gemma-3-4b-it-Q4_K_M.gguf",
+      "parts": 1,
+      "bytes": 2489758112,
+      "uri": "hf:bartowski/google_gemma-3-4b-it-GGUF/google_gemma-3-4b-it-Q4_K_M.gguf"
+    },
+    {
+      "id": "qwen3-4b",
+      "name": "Qwen 3",
+      "size": "4B",
+      "params": 4,
+      "family": "Qwen",
+      "repo": "bartowski/Qwen_Qwen3-4B-GGUF",
+      "ctx": 32768,
+      "kv": 144,
+      "tools": true,
+      "tags": [
+        "thinking",
+        "agents"
+      ],
+      "quant": "Q4_K_M",
+      "file": "Qwen_Qwen3-4B-Q4_K_M.gguf",
+      "parts": 1,
+      "bytes": 2497280960,
+      "uri": "hf:bartowski/Qwen_Qwen3-4B-GGUF/Qwen_Qwen3-4B-Q4_K_M.gguf"
+    },
+    {
+      "id": "mistral-7b",
+      "name": "Mistral",
+      "size": "7B",
+      "params": 7.2,
+      "family": "Mistral",
+      "repo": "bartowski/Mistral-7B-Instruct-v0.3-GGUF",
+      "ctx": 32768,
+      "kv": 128,
+      "tools": true,
+      "tags": [],
+      "quant": "Q4_K_M",
+      "file": "Mistral-7B-Instruct-v0.3-Q4_K_M.gguf",
+      "parts": 1,
+      "bytes": 4372812000,
+      "uri": "hf:bartowski/Mistral-7B-Instruct-v0.3-GGUF/Mistral-7B-Instruct-v0.3-Q4_K_M.gguf"
+    },
+    {
+      "id": "qwen2.5-7b",
+      "name": "Qwen 2.5",
+      "size": "7B",
+      "params": 7.6,
+      "family": "Qwen",
+      "repo": "bartowski/Qwen2.5-7B-Instruct-GGUF",
+      "ctx": 32768,
+      "kv": 56,
+      "tools": true,
+      "tags": [
+        "long-context",
+        "agents"
+      ],
+      "quant": "Q4_K_M",
+      "file": "Qwen2.5-7B-Instruct-Q4_K_M.gguf",
+      "parts": 1,
+      "bytes": 4683074240,
+      "uri": "hf:bartowski/Qwen2.5-7B-Instruct-GGUF/Qwen2.5-7B-Instruct-Q4_K_M.gguf"
+    },
+    {
+      "id": "llama3.1-8b",
+      "name": "Llama 3.1",
+      "size": "8B",
+      "params": 8,
+      "family": "Llama",
+      "repo": "bartowski/Meta-Llama-3.1-8B-Instruct-GGUF",
+      "ctx": 131072,
+      "kv": 128,
+      "tools": true,
+      "tags": [],
+      "quant": "Q4_K_M",
+      "file": "Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf",
+      "parts": 1,
+      "bytes": 4920739232,
+      "uri": "hf:bartowski/Meta-Llama-3.1-8B-Instruct-GGUF/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf"
+    },
+    {
+      "id": "qwen3-8b",
+      "name": "Qwen 3",
+      "size": "8B",
+      "params": 8.2,
+      "family": "Qwen",
+      "repo": "bartowski/Qwen_Qwen3-8B-GGUF",
+      "ctx": 32768,
+      "kv": 144,
+      "tools": true,
+      "tags": [
+        "thinking",
+        "agents"
+      ],
+      "quant": "Q4_K_M",
+      "file": "Qwen_Qwen3-8B-Q4_K_M.gguf",
+      "parts": 1,
+      "bytes": 5027784224,
+      "uri": "hf:bartowski/Qwen_Qwen3-8B-GGUF/Qwen_Qwen3-8B-Q4_K_M.gguf"
+    },
+    {
+      "id": "gemma3-12b",
+      "name": "Gemma 3",
+      "size": "12B",
+      "params": 12,
+      "family": "Gemma",
+      "repo": "bartowski/google_gemma-3-12b-it-GGUF",
+      "ctx": 131072,
+      "kv": 384,
+      "tools": false,
+      "tags": [
+        "writing"
+      ],
+      "quant": "Q4_K_M",
+      "file": "google_gemma-3-12b-it-Q4_K_M.gguf",
+      "parts": 1,
+      "bytes": 7300575264,
+      "uri": "hf:bartowski/google_gemma-3-12b-it-GGUF/google_gemma-3-12b-it-Q4_K_M.gguf"
+    },
+    {
+      "id": "qwen2.5-14b",
+      "name": "Qwen 2.5",
+      "size": "14B",
+      "params": 14.8,
+      "family": "Qwen",
+      "repo": "bartowski/Qwen2.5-14B-Instruct-GGUF",
+      "ctx": 32768,
+      "kv": 192,
+      "tools": true,
+      "tags": [
+        "long-context"
+      ],
+      "quant": "Q4_K_M",
+      "file": "Qwen2.5-14B-Instruct-Q4_K_M.gguf",
+      "parts": 1,
+      "bytes": 8988110976,
+      "uri": "hf:bartowski/Qwen2.5-14B-Instruct-GGUF/Qwen2.5-14B-Instruct-Q4_K_M.gguf"
+    },
+    {
+      "id": "qwen3-14b",
+      "name": "Qwen 3",
+      "size": "14B",
+      "params": 14.8,
+      "family": "Qwen",
+      "repo": "bartowski/Qwen_Qwen3-14B-GGUF",
+      "ctx": 32768,
+      "kv": 160,
+      "tools": true,
+      "tags": [
+        "thinking",
+        "agents"
+      ],
+      "quant": "Q4_K_M",
+      "file": "Qwen_Qwen3-14B-Q4_K_M.gguf",
+      "parts": 1,
+      "bytes": 9001753632,
+      "uri": "hf:bartowski/Qwen_Qwen3-14B-GGUF/Qwen_Qwen3-14B-Q4_K_M.gguf"
+    },
+    {
+      "id": "mistral-small-24b",
+      "name": "Mistral Small 3.2",
+      "size": "24B",
+      "params": 24,
+      "family": "Mistral",
+      "repo": "bartowski/mistralai_Mistral-Small-3.2-24B-Instruct-2506-GGUF",
+      "ctx": 131072,
+      "kv": 160,
+      "tools": true,
+      "tags": [],
+      "quant": "Q4_K_M",
+      "file": "mistralai_Mistral-Small-3.2-24B-Instruct-2506-Q4_K_M.gguf",
+      "parts": 1,
+      "bytes": 14333915264,
+      "uri": "hf:bartowski/mistralai_Mistral-Small-3.2-24B-Instruct-2506-GGUF/mistralai_Mistral-Small-3.2-24B-Instruct-2506-Q4_K_M.gguf"
+    },
+    {
+      "id": "qwen3-32b",
+      "name": "Qwen 3",
+      "size": "32B",
+      "params": 32.8,
+      "family": "Qwen",
+      "repo": "bartowski/Qwen_Qwen3-32B-GGUF",
+      "ctx": 32768,
+      "kv": 256,
+      "tools": true,
+      "tags": [
+        "thinking"
+      ],
+      "quant": "Q4_K_M",
+      "file": "Qwen_Qwen3-32B-Q4_K_M.gguf",
+      "parts": 1,
+      "bytes": 19762149696,
+      "uri": "hf:bartowski/Qwen_Qwen3-32B-GGUF/Qwen_Qwen3-32B-Q4_K_M.gguf"
+    },
+    {
+      "id": "llama3.1-70b",
+      "name": "Llama 3.1",
+      "size": "70B",
+      "params": 70.6,
+      "family": "Llama",
+      "repo": "bartowski/Meta-Llama-3.1-70B-Instruct-GGUF",
+      "ctx": 131072,
+      "kv": 320,
+      "tools": true,
+      "tags": [],
+      "quant": "Q4_K_M",
+      "file": "Meta-Llama-3.1-70B-Instruct-Q4_K_M.gguf",
+      "parts": 1,
+      "bytes": 42520398400,
+      "uri": "hf:bartowski/Meta-Llama-3.1-70B-Instruct-GGUF/Meta-Llama-3.1-70B-Instruct-Q4_K_M.gguf"
+    }
+  ]
+}

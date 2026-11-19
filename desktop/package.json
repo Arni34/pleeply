@@ -1,0 +1,91 @@
+{
+  "name": "pleeply-desktop",
+  "productName": "pleeply",
+  "version": "0.1.0",
+  "description": "pleeply Desktop: one AI ecosystem on your computer. Local models first, cloud only with your consent.",
+  "author": "pleeply",
+  "license": "UNLICENSED",
+  "private": true,
+  "type": "module",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "PLEEPLY_DEV=1 electron .",
+    "test": "node --test 'test/*.test.js'",
+    "postinstall": "node scripts/vendor.mjs",
+    "vendor": "node scripts/vendor.mjs",
+    "catalog": "node scripts/refresh-catalog.mjs",
+    "pack:mac": "electron-builder --mac --arm64 --dir",
+    "dist:mac": "electron-builder --mac --arm64",
+    "dist:win": "electron-builder --win --x64",
+    "dist:linux": "electron-builder --linux --x64"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "1.10.0",
+    "node-llama-cpp": "3.22.3",
+    "unpdf": "2.2.1"
+  },
+  "devDependencies": {
+    "@fontsource-variable/geist": "5.3.0",
+    "@fontsource-variable/geist-mono": "5.3.0",
+    "dompurify": "3.4.18",
+    "electron": "45.3.4",
+    "electron-builder": "26.18.0",
+    "htm": "3.1.1",
+    "marked": "18.2.1",
+    "preact": "11.2.0"
+  },
+  "build": {
+    "appId": "app.pleeply.desktop",
+    "productName": "pleeply",
+    "copyright": "© 2026 pleeply",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "electron/**",
+      "src/**",
+      "renderer/**",
+      "package.json",
+      "!**/*.map"
+    ],
+    "asarUnpack": [
+      "node_modules/node-llama-cpp/**",
+      "node_modules/@node-llama-cpp/**"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "build/icon.icns",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64"
+          ]
+        }
+      ],
+      "darkModeSupport": true,
+      "identity": null
+    },
+    "dmg": {
+      "title": "pleeply"
+    },
+    "win": {
+      "icon": "build/icon.png",
+      "target": [
+        "nsis"
+      ]
+    },
+    "linux": {
+      "icon": "build/icon.png",
+      "target": [
+        "AppImage"
+      ],
+      "category": "Utility"
+    }
+  }
+}
