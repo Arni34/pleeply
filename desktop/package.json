@@ -16,7 +16,7 @@
     "vendor": "node scripts/vendor.mjs",
     "catalog": "node scripts/refresh-catalog.mjs",
     "pack:mac": "electron-builder --mac --arm64 --dir",
-    "dist:mac": "electron-builder --mac --arm64",
+    "dist:mac": "electron-builder --mac --arm64 -c.directories.output=release",
     "dist:win": "electron-builder --win --x64",
     "dist:linux": "electron-builder --linux --x64"
   },
@@ -69,10 +69,28 @@
         }
       ],
       "darkModeSupport": true,
-      "identity": null
+      "identity": null,
+      "artifactName": "pleeply-${version}-${arch}.${ext}"
     },
     "dmg": {
-      "title": "pleeply"
+      "title": "pleeply",
+      "iconSize": 110,
+      "window": {
+        "width": 540,
+        "height": 380
+      },
+      "contents": [
+        {
+          "x": 140,
+          "y": 180
+        },
+        {
+          "x": 400,
+          "y": 180,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
     },
     "win": {
       "icon": "build/icon.png",

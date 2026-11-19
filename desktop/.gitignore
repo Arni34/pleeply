@@ -3,3 +3,4 @@ dist/
 # создаются npm install (scripts/vendor.mjs)
 renderer/vendor/
 renderer/fonts/
+release/
