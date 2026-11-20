@@ -1,4 +1,4 @@
-// Atlas: чтение файлов, разбиение на фрагменты и выбор самых нужных под вопрос (BM25, без облака и без эмбеддингов).
+// Документы: чтение файлов, разбиение на фрагменты и выбор самых нужных под вопрос (BM25, без облака и без эмбеддингов).
 import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { UserError, truncate } from "./util.js";

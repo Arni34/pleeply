@@ -14,7 +14,19 @@ const server = http.createServer((req, res) => {
   let body = "";
   req.on("data", (c) => (body += c));
   req.on("end", () => {
-    received.push({ url: req.url, body: body ? JSON.parse(body) : null });
+    received.push({ url: req.url, body: body ? JSON.parse(body) : null, device: req.headers["x-pleeply-device"] || null });
+    if (req.url === "/gw/models") {
+      res.writeHead(200, { "content-type": "application/json" });
+      return res.end(JSON.stringify({ data: [
+        { id: "claude", name: "Claude Opus 5.5", vendor: "Anthropic", tier: "paid", via: "OpenRouter", policy: "https://www.anthropic.com/legal/privacy" },
+        { id: "gpt-oss", name: "GPT-OSS 120B", vendor: "OpenAI", tier: "free", via: "Groq" },
+        { id: "limited", name: "Limited", vendor: "DeepSeek", tier: "paid", via: "OpenRouter" },
+      ], limits: { free_per_day: 60, premium_per_day: 25 } }));
+    }
+    if (req.url === "/gw/chat/completions" && JSON.parse(body).model === "limited") {
+      res.writeHead(429, { "content-type": "application/json" });
+      return res.end(JSON.stringify({ error: { message: "You've used today's 25 free premium requests in pleeply Cloud." } }));
+    }
     if (req.url.endsWith("/models")) { res.writeHead(200, { "content-type": "application/json" }); return res.end(JSON.stringify({ data: [{ id: "mock-large" }] })); }
     res.writeHead(200, { "content-type": "text/event-stream" });
     res.write(`data: ${JSON.stringify({ choices: [{ delta: { content: "Hi from cloud" } }] })}\n\n`);
@@ -23,10 +35,11 @@ const server = http.createServer((req, res) => {
 });
 await new Promise((r) => server.listen(0, "127.0.0.1", r));
 process.env.PLEEPLY_TEST_PROVIDER_URL = `http://127.0.0.1:${server.address().port}/v1`;
+process.env.PLEEPLY_CLOUD_URL = `http://127.0.0.1:${server.address().port}/gw`;
 test.after(() => server.close());
 
 const { sanitizeSettings, DEFAULT_SETTINGS } = await import("../src/core/settings.js");
-const { fitModel, fitBuckets, recommendation, memoryBudget } = await import("../src/core/fit.js");
+const { fitModel, fitBuckets, recommendation, memoryBudget, starterPicks } = await import("../src/core/fit.js");
 const { CATALOG } = await import("../src/core/catalog.js");
 const { resolvePresetLocal } = await import("../src/core/presets.js");
 const { classifyTask, decideAuto } = await import("../src/core/router.js");
@@ -49,7 +62,7 @@ const cat = (id) => CATALOG.find((m) => m.id === id);
 
 test("settings: unknown values fall back, local engines stay on loopback", () => {
   const s = sanitizeSettings({ mode: "evil", cloud: { requests: "always" }, models: { ollama: { url: "http://example.com:11434" }, lmstudio: { url: "http://127.0.0.1:1234/" } }, performance: { contextSize: 12345 } });
-  assert.equal(s.mode, "local");
+  assert.equal(s.mode, "auto");
   assert.equal(s.cloud.requests, "ask");
   assert.equal(s.models.ollama.url, DEFAULT_SETTINGS.models.ollama.url);
   assert.equal(s.models.lmstudio.url, "http://127.0.0.1:1234");
@@ -87,6 +100,14 @@ test("fit: Memory for models limit marks bigger models too large", () => {
 });
 
 const local = (id, extra = {}) => ({ ...cat(id), ref: `pleeply:${id}`, where: "local", fit: fitModel(cat(id), M2_16, S), ...extra });
+
+test("starter models: two offline models that fit, chosen by memory", () => {
+  assert.deepEqual(starterPicks(CATALOG, A18_8, S), ["gemma3-4b", "qwen3-1.7b"]);
+  assert.deepEqual(starterPicks(CATALOG, M2_16, S), ["qwen2.5-7b", "gemma3-4b"]);
+  assert.deepEqual(starterPicks(CATALOG, RTX, S), ["qwen2.5-14b", "gemma3-4b"]);
+  const tiny = { ramBytes: 4 * GiB, gpu: { backend: "metal", unified: true, vramBytes: 2.7e9 } };
+  assert.deepEqual(starterPicks(CATALOG, tiny, S), ["gemma3-1b", "qwen2.5-0.5b"]);
+});
 
 test("presets: each setup picks a fitting model", () => {
   const models = [local("llama3.2-1b"), local("qwen2.5-7b"), local("llama3.1-8b"), local("gemma3-4b")];
@@ -239,6 +260,7 @@ async function makeCore(settings = {}) {
   const core = await new Core({
     dataDir: await tmp(),
     cipher: { available: () => false, encrypt: (s) => s, decrypt: (s) => s },
+    autoSetup: false,
     emit: (e) => { events.push(e); for (const w of [...waiters]) if (w.pred(e)) { waiters.splice(waiters.indexOf(w), 1); w.res(e); } },
   }).init();
   const waiters = [];
@@ -255,7 +277,7 @@ test("cloud: nothing reaches the provider until the user approves", async () => 
   const before = received.filter((r) => r.url.endsWith("/chat/completions")).length;
   // 1) отказ
   const consent1 = core.waitFor((e) => e.type === "consent");
-  let r = await core.send({ chatId: null, text: "secret plans", mode: "cloud", selection: { type: "preset", id: "saturn" } });
+  let r = await core.send({ chatId: null, text: "secret plans", mode: "cloud", selection: { type: "model", ref: "cloud:testcloud:mock-large" } });
   let c = await consent1;
   assert.equal(c.disclosure.provider.name, "Test Cloud");
   assert.ok(c.disclosure.items.some((i) => i.text === "secret plans"));
@@ -266,7 +288,7 @@ test("cloud: nothing reaches the provider until the user approves", async () => 
   assert.equal(received.filter((x) => x.url.endsWith("/chat/completions")).length, before, "declined request must not be sent");
   // 2) согласие — уходит ровно то, что было показано
   const consent2 = core.waitFor((e) => e.type === "consent");
-  r = await core.send({ chatId: r.chatId, text: "ok, send this one", mode: "cloud", selection: { type: "preset", id: "saturn" } });
+  r = await core.send({ chatId: r.chatId, text: "ok, send this one", mode: "cloud", selection: { type: "model", ref: "cloud:testcloud:mock-large" } });
   c = await consent2;
   done = core.waitFor((e) => e.type === "chat" && e.done === r.messageId);
   core.respondConsent({ id: c.id, approved: true });
@@ -323,6 +345,39 @@ test("chats: search, pin without reordering, edit and resend", async () => {
   assert.ok(ev.chat.messages[0].editedAt);
   assert.equal(ev.chat.messages[1].status, "done");
   await assert.rejects(core.editAndResend({ chatId, messageId: "msg_nope", text: "x", mode: "cloud" }), /no longer exists/);
+  await core.dispose();
+});
+
+test("pleeply Cloud: built-in models, real recipient in consent, device id, readable limits", async () => {
+  const core = await makeCore();
+  await core.refreshGateway({ force: true });
+  const cloud = await core.cloudModelList();
+  const claude = cloud.find((m) => m.ref === "cloud:pleeply:claude");
+  assert.ok(claude && claude.vendor === "Anthropic");
+  assert.equal(core.defaultCloudModel(cloud.filter((m) => m.provider === "pleeply")).id, "claude");
+  const consent = core.waitFor((e) => e.type === "consent");
+  let r = await core.send({ chatId: null, text: "hello there", mode: "cloud", selection: { type: "model", ref: claude.ref } });
+  const c = await consent;
+  assert.equal(c.disclosure.provider.name, "Anthropic via pleeply Cloud");
+  assert.equal(c.disclosure.relay.via, "OpenRouter");
+  let done = core.waitFor((e) => e.type === "chat" && e.done === r.messageId);
+  core.respondConsent({ id: c.id, approved: true });
+  let ev = await done;
+  assert.equal(ev.chat.messages.at(-1).text, "Hi from cloud");
+  assert.equal(ev.chat.messages.at(-1).meta.providerName, "Anthropic via pleeply Cloud");
+  const sent = received.filter((x) => x.url === "/gw/chat/completions").at(-1);
+  assert.equal(sent.body.model, "claude");
+  assert.equal(sent.device, core.deviceId);
+  // дневной лимит шлюза — понятный текст, а не «ошибка 429»
+  const consent2 = core.waitFor((e) => e.type === "consent");
+  r = await core.send({ chatId: r.chatId, text: "again", mode: "cloud", selection: { type: "model", ref: "cloud:pleeply:limited" } });
+  const c2 = await consent2;
+  done = core.waitFor((e) => e.type === "chat" && e.done === r.messageId);
+  core.respondConsent({ id: c2.id, approved: true });
+  ev = await done;
+  assert.match(ev.chat.messages.at(-1).error, /used today's 25 free premium requests/);
+  await core.updateSettings({ cloud: { pleeplyCloud: false } });
+  assert.equal((await core.cloudModelList()).filter((m) => m.provider === "pleeply").length, 0);
   await core.dispose();
 });
 

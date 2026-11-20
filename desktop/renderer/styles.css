@@ -464,3 +464,24 @@ h1, h2, h3, h4 { margin: 0; color: var(--ink); font-weight: 500; letter-spacing:
 .side-brand svg { width: 32px; height: 32px; }
 .hello .mark { width: 64px; height: 64px; }
 .onb .mark { width: 72px; height: 72px; }
+
+/* ---------- боковая панель в духе привычных чат-приложений ---------- */
+.side-top { justify-content: flex-start; gap: 2px; padding: 0 10px; }
+.side-top.mac { padding-left: 82px; }
+.side-top .icon-btn:disabled { opacity: .35; }
+.side-brand { padding-top: 4px; }
+.nav { gap: 2px; }
+.nav-item { padding: 8px 10px; font-size: 14px; color: var(--text); }
+.nav-item .kbd.hover { opacity: 0; transition: opacity .15s ease; }
+.nav-item:hover .kbd.hover { opacity: 1; }
+.chats { padding-top: 6px; }
+.group { display: flex; flex-direction: column; gap: 1px; margin-top: 10px; }
+.group-h { display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; margin: 0 0 4px; padding: 4px 10px; border-radius: 6px; font-size: 12.5px; font-weight: 500; color: var(--muted); }
+.group-h:hover { color: var(--ink); }
+.group-h .chev { transition: transform .15s ease; }
+.group-h .chev.closed { transform: rotate(-90deg); }
+.chat-item { padding: 8px 10px; font-size: 13.5px; }
+.chat-item .where-ic { color: var(--faint); display: grid; place-items: center; }
+.chat-item:hover .where-ic, .chat-item.menu-open .where-ic { display: none; }
+.chat-item .x { display: none; }
+.chat-item:hover .x, .chat-item.menu-open .x, .chat-item:focus-visible .x { display: grid; opacity: 1; }

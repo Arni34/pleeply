@@ -16,8 +16,10 @@ export const S = {
   ccSection: "computer",
   chats: [],
   chat: null,
-  mode: "local",
-  selection: { type: "preset", id: "saturn" },
+  mode: "auto",
+  selection: { type: "auto" },
+  nav: { stack: [{ view: "chat", chatId: null }], i: 0 },
+  collapsed: {},
   models: null,
   downloads: {},
   consent: null,
@@ -224,6 +226,32 @@ export async function refreshChats() {
   const chats = await tryCall("chats.list");
   if (chats) set({ chats });
 }
+// ---------- история переходов (кнопки ‹ › и ⌘[ ⌘]) ----------
+let restoring = false;
+export function pushNav(entry) {
+  if (restoring) return;
+  const { stack, i } = S.nav;
+  const cur = stack[i];
+  if (cur && cur.view === entry.view && cur.chatId === entry.chatId && cur.ccSection === entry.ccSection) return;
+  const next = [...stack.slice(0, i + 1), entry].slice(-50);
+  S.nav = { stack: next, i: next.length - 1 };
+}
+export async function navMove(delta) {
+  const { stack, i } = S.nav;
+  const j = i + delta;
+  if (j < 0 || j >= stack.length) return;
+  const e = stack[j];
+  restoring = true;
+  try {
+    let chat = null;
+    if (e.view === "chat" && e.chatId) chat = await call("chats.get", e.chatId).catch(() => null);
+    S.nav = { stack, i: j };
+    set({ view: e.view, ccSection: e.ccSection || S.ccSection, ...(e.view === "chat" ? { chat, editing: null, renameTitle: false } : {}) });
+  } finally {
+    restoring = false;
+  }
+}
 export function go(view, extra = {}) {
   set({ view, ...extra });
+  pushNav({ view, chatId: view === "chat" ? S.chat?.id ?? null : null, ccSection: view === "control" ? extra.ccSection || S.ccSection : undefined });
 }

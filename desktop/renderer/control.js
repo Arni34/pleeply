@@ -133,28 +133,19 @@ function ModelSettings() {
   if (!models) return html`<p class="muted">Loading…</p>`;
   const usable = models.local.filter((m) => m.fit.level !== "too-large");
   return html`<div class="list">
-    <${Setting} t="Default setup" d="Used for new messages when you don't pick a model.">
-      <select class="select" style=${{ width: "200px" }} value=${s.presets.default} onChange=${(e) => update({ presets: { default: e.target.value } })}>
-        ${S.app.presets.map((p) => html`<option value=${p.id}>${p.name}</option>`)}
+    <${Setting} t="Model on this computer" d="Used in Local mode and by Auto. Best fit picks a model for each message: a small one for quick questions, a larger one for writing and documents.">
+      <select class="select" style=${{ width: "260px" }} value=${s.models.defaultLocal || ""} onChange=${(e) => update({ models: { defaultLocal: e.target.value || null } })}>
+        <option value="">Best fit for each message</option>
+        ${usable.map((m) => html`<option value=${m.ref}>${m.label}${m.engine !== "pleeply" ? ` · ${m.engine}` : ""}</option>`)}
       </select>
     </${Setting}>
-    ${S.app.presets.map((p) => {
-      const cur = models.presets.find((x) => x.id === p.id);
-      return html`<${Setting} t=${p.name} d=${`${p.role}. ${cur?.local ? `Auto picks ${cur.local.label} here.` : "Needs a local model."}`}>
-        <select class="select" style=${{ width: "240px" }} value=${s.presets.models[p.id] || ""} onChange=${(e) => update({ presets: { models: { [p.id]: e.target.value || null } } })}>
-          <option value="">Auto (best fit)</option>
-          ${usable.map((m) => html`<option value=${m.ref}>${m.label}${m.engine !== "pleeply" ? ` · ${m.engine}` : ""}</option>`)}
-        </select>
-      </${Setting}>`;
-    })}
     <${Setting} t="Default cloud model" d="Used in Cloud mode and suggested by Auto. It still asks before sending.">
-      <select class="select" style=${{ width: "240px" }} value=${s.cloud.defaultModel || ""} disabled=${!models.cloud.length} onChange=${(e) => update({ cloud: { defaultModel: e.target.value || null } })}>
-        <option value="">${models.cloud.length ? "Automatic" : "No provider connected"}</option>
-        ${models.cloud.map((m) => html`<option value=${m.ref}>${m.label} · ${m.providerName}</option>`)}
+      <select class="select" style=${{ width: "260px" }} value=${s.cloud.defaultModel || ""} disabled=${!models.cloud.length} onChange=${(e) => update({ cloud: { defaultModel: e.target.value || null } })}>
+        <option value="">${models.cloud.length ? "Automatic" : "No cloud models"}</option>
+        ${models.cloud.map((m) => html`<option value=${m.ref}>${m.label} · ${m.provider === "pleeply" ? `${m.vendor} via pleeply Cloud` : m.providerName}</option>`)}
       </select>
     </${Setting}>
-  </div>
-  <p class="hint" style=${{ marginTop: "10px" }}>Saturn, Nova, Atlas and Orbit are model setups: a chosen open model plus instructions and settings for a kind of work. They are not foundation models trained from scratch.</p>`;
+  </div>`;
 }
 
 function ProviderRow({ p }) {
@@ -189,8 +180,17 @@ function ProviderRow({ p }) {
 }
 
 function Providers() {
-  return html`<p class="muted" style=${{ marginBottom: "12px" }}>Connect a provider only if you want more computing power. Keys are encrypted with your system's keychain and never shown again. Requests go straight from this computer to the provider.</p>
-    <div class="list">${S.app.providers.filter((p) => p.id !== "testcloud" || S.app.keys.testcloud).map((p) => html`<${ProviderRow} p=${p} key=${p.id} />`)}</div>`;
+  const s = S.app.settings;
+  const n = (S.models?.cloud || []).filter((m) => m.provider === "pleeply").length;
+  const lim = S.app.cloudLimits;
+  useEffect(() => { if (!S.models) refreshModels(); }, []);
+  return html`<div class="list">
+      <${Setting} t="pleeply Cloud" d=${`GPT, Claude, Gemini and DeepSeek without your own key${n ? ` · ${n} models now` : ""}${lim ? ` · ${lim.free_per_day} free and ${lim.premium_per_day} premium requests a day` : ""}. Requests go through pleeply's server to the model's maker; pleeply doesn't keep the text.`}>
+        <${Toggle} label="pleeply Cloud" on=${s.cloud.pleeplyCloud} onChange=${async (v) => { await update({ cloud: { pleeplyCloud: v } }); setTimeout(refreshModels, 1500); }} />
+      </${Setting}>
+    </div>
+    <p class="muted" style=${{ margin: "16px 0 12px" }}>Or connect your own key to use a provider directly. Keys are encrypted with your system's keychain and never shown again. Requests go straight from this computer to the provider.</p>
+    <div class="list">${S.app.providers.filter((p) => !p.builtIn && (p.id !== "testcloud" || S.app.keys.testcloud)).map((p) => html`<${ProviderRow} p=${p} key=${p.id} />`)}</div>`;
 }
 
 function IntegrationRow({ id, name, d }) {

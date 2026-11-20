@@ -1,17 +1,18 @@
 // Ядро pleeply Desktop. Живёт в главном процессе Electron; окно общается с ним через IPC (electron/main.js).
 import path from "node:path";
 import { readdir, stat, rm, mkdir, statfs } from "node:fs/promises";
+import { randomUUID } from "node:crypto";
 import { createModelDownloader } from "node-llama-cpp";
 import { Store } from "./store.js";
 import { DEFAULT_SETTINGS, sanitizeSettings, mergeSettings } from "./settings.js";
 import { detectHardware, graphicsLabel } from "./hardware.js";
-import { fitModel, fitBuckets, recommendation, memoryBudget, FIT_ORDER } from "./fit.js";
+import { fitModel, fitBuckets, recommendation, memoryBudget, starterPicks, FIT_ORDER } from "./fit.js";
 import { CATALOG, CATALOG_CHECKED, catalogById, guessParams } from "./catalog.js";
 import { PRESETS, PRESET_IDS, resolvePresetLocal } from "./presets.js";
-import { decideAuto } from "./router.js";
+import { decideAuto, classifyTask } from "./router.js";
 import { consentState, buildDisclosure } from "./consent.js";
 import { extractText, chunkPages, selectSources, formatSources } from "./docs.js";
-import { PROVIDERS, providerById, parseCloudRef, KeyStore } from "./providers.js";
+import { PROVIDERS, providerById, parseCloudRef, KeyStore, PLEEPLY_CLOUD_URL } from "./providers.js";
 import { Memory } from "./memory.js";
 import { TOOLS, TEMPLATES, runAgent, makeToolbox } from "./agents.js";
 import { LocalEngine } from "./engines/local.js";
@@ -47,7 +48,8 @@ export function historyFor(messages) {
 }
 
 export class Core {
-  constructor({ dataDir, cipher, emit = () => {}, openMail = async () => {}, version = "0.1.0" }) {
+  constructor({ dataDir, cipher, emit = () => {}, openMail = async () => {}, version = "0.1.0", autoSetup = true }) {
+    this.autoSetup = autoSetup; // false — без автозагрузки моделей и запроса к pleeply Cloud (для тестов)
     this.dataDir = dataDir;
     this.cipher = cipher;
     this.emit = emit;
@@ -74,7 +76,61 @@ export class Core {
     this.hardware = null;
     this.engineError = null;
     this.hardwareReady = this.refreshHardware();
+    // Случайный идентификатор установки — только для дневного лимита pleeply Cloud, не связан с личностью.
+    const dev = await this.store.read("device.json", null);
+    this.deviceId = dev?.id || randomUUID();
+    if (!dev?.id) await this.store.write("device.json", { id: this.deviceId });
+    if (this.autoSetup) {
+      this.hardwareReady.then(() => this.ensureStarterModels()).catch(() => {});
+      this.refreshGateway().catch(() => {});
+    }
     return this;
+  }
+
+  /** Первый запуск: сразу скачать две офлайн-модели, которые помещаются в память этого компьютера. */
+  async ensureStarterModels() {
+    if (this.settings.setup.starter) return [];
+    const picks = starterPicks(CATALOG, this.hardware, this.settings);
+    const mine = await this.#pleeplyModels();
+    const todo = picks.filter((id) => !mine.some((m) => m.catalogId === id)).slice(0, Math.max(0, 2 - mine.length));
+    await this.updateSettings({ setup: { starter: true } });
+    if (!todo.length) return [];
+    const bytes = todo.reduce((sum, id) => sum + (catalogById(id)?.bytes || 0), 0);
+    const free = this.hardware.diskFreeBytes;
+    if (free != null && free < bytes + 3 * GB) {
+      this.emit({ type: "toast", kind: "err", text: "Not enough free disk space to download offline models automatically. Pick a smaller one in Models." });
+      return [];
+    }
+    for (const id of todo) await this.downloadModel({ catalogId: id }).catch(() => {});
+    this.emit({ type: "starter", models: todo });
+    return todo;
+  }
+
+  /** Какие облачные модели сейчас есть в pleeply Cloud. О пользователе ничего не отправляется. */
+  async refreshGateway({ force = false } = {}) {
+    if (!this.settings.cloud.pleeplyCloud || this.settings.cloud.requests === "off") return [];
+    const cur = this.cloudModels.pleeply;
+    if (!force && cur?.fetchedAt && Date.now() - Date.parse(cur.fetchedAt) < 6 * 3600_000) return cur.models;
+    const res = await fetch(`${PLEEPLY_CLOUD_URL}/models`, { signal: AbortSignal.timeout(10000), headers: { "user-agent": `pleeply-desktop/${this.version}` } });
+    if (!res.ok) throw new UserError(`pleeply Cloud returned ${res.status}.`);
+    const j = await res.json();
+    const models = (j.data || []).map((m) => ({ id: m.id, label: m.name || m.id, vendor: m.vendor || null, tier: m.tier || "free", via: m.via || null, policy: m.policy || null, ctx: m.context_length || null }));
+    this.cloudModels.pleeply = { models, fetchedAt: new Date().toISOString(), limits: j.limits || null };
+    await this.store.write("cloud-models.json", this.cloudModels);
+    await this.logActivity({ kind: "cloud-list", provider: "pleeply", providerName: "pleeply Cloud", what: "Checked which cloud models are available (nothing about you was sent)" });
+    this._localCache = null;
+    this.emit({ type: "models" });
+    return models;
+  }
+
+  /** Кто получит облачный запрос: провайдер по ключу пользователя или производитель модели через pleeply Cloud. */
+  cloudParty(model) {
+    const p = providerById(model.provider);
+    if (p?.builtIn) {
+      const vendor = model.vendor || "the provider";
+      return { key: `pleeply/${vendor}`, provider: { id: `pleeply/${vendor}`, name: `${vendor} via pleeply Cloud`, policy: model.policy || p.policy }, relay: { via: model.via, vendor } };
+    }
+    return { key: p.id, provider: p, relay: null };
   }
 
   get modelsDir() {
@@ -120,6 +176,7 @@ export class Core {
       tools: Object.fromEntries(Object.entries(TOOLS).map(([k, v]) => [k, { label: v.label, matters: v.matters, help: v.help }])),
       templates: TEMPLATES,
       engineError: this.engineError,
+      cloudLimits: this.cloudModels.pleeply?.limits || null,
       engine: this.local.status(),
       catalogChecked: CATALOG_CHECKED,
       dataDir: this.store.dir,
@@ -142,6 +199,9 @@ export class Core {
       await this.hardwareReady;
     } else if (prev.performance.contextSize !== next.performance.contextSize) {
       await this.local.mutex.run(() => this.local.unload());
+    }
+    if ((next.cloud.pleeplyCloud && !prev.cloud.pleeplyCloud) || (prev.cloud.requests === "off" && next.cloud.requests !== "off")) {
+      this.refreshGateway({ force: true }).catch(() => {});
     }
     if (prev.history.keep && !next.history.keep) {
       for (const f of await this.store.list("chats")) {
@@ -227,13 +287,25 @@ export class Core {
     return this._localCache;
   }
 
+  /** Список pleeply Cloud пуст или устарел — тихо обновить в фоне (не чаще раза в минуту). */
+  #gatewayInBackground() {
+    if (!this.autoSetup || !this.settings.cloud.pleeplyCloud || this.settings.cloud.requests === "off") return;
+    const cur = this.cloudModels.pleeply;
+    const stale = !cur?.models?.length || Date.now() - Date.parse(cur.fetchedAt) > 6 * 3600_000;
+    if (!stale || Date.now() - (this._gwLast || 0) < 60_000) return;
+    this._gwLast = Date.now();
+    this.refreshGateway({ force: true }).catch(() => {});
+  }
+
   async cloudModelList() {
+    this.#gatewayInBackground();
     const status = await this.keys.status();
     const out = [];
     for (const p of PROVIDERS) {
       if (!status[p.id]?.connected) continue;
+      if (p.builtIn && !this.settings.cloud.pleeplyCloud) continue;
       const models = this.cloudModels[p.id]?.models?.length ? this.cloudModels[p.id].models : p.suggested || [];
-      for (const m of models) out.push({ ref: `cloud:${p.id}:${m.id}`, where: "cloud", backend: p.kind, provider: p.id, providerName: p.name, id: m.id, label: m.label || m.id, ctx: m.ctx ?? null });
+      for (const m of models) out.push({ ref: `cloud:${p.id}:${m.id}`, where: "cloud", backend: p.kind, provider: p.id, providerName: p.name, id: m.id, label: m.label || m.id, ctx: m.ctx ?? null, vendor: m.vendor ?? null, tier: m.tier ?? null, via: m.via ?? null, policy: m.policy ?? null });
     }
     return out;
   }
@@ -242,7 +314,8 @@ export class Core {
     if (!cloud.length) return null;
     const pref = this.settings.cloud.defaultModel && cloud.find((m) => m.ref === this.settings.cloud.defaultModel);
     if (pref) return pref;
-    return cloud.find((m) => m.id === "claude-opus-5-5") || cloud[0];
+    const gw = (id) => cloud.find((m) => m.provider === "pleeply" && m.id === id);
+    return cloud.find((m) => m.id === "claude-opus-5-5") || gw("claude") || gw("gpt") || gw("gemini") || gw("gpt-oss") || cloud[0];
   }
 
   async modelsState() {
@@ -427,6 +500,10 @@ export class Core {
     if (model.where !== "cloud") throw new UserError("Unknown model.");
     if (this.settings.cloud.requests === "off") throw new UserError("Cloud is switched off in Control Center → Privacy.");
     const p = providerById(model.provider);
+    if (p?.kind === "gateway") {
+      if (!this.settings.cloud.pleeplyCloud) throw new UserError("pleeply Cloud is turned off in Control Center → Cloud providers.");
+      return openaiChat({ baseUrl: p.baseUrl, who: "pleeply Cloud", providerId: "pleeply", extraHeaders: { "x-pleeply-device": this.deviceId }, model: model.id, system, messages, temperature, maxTokens, signal, onText, onThought });
+    }
     const key = await this.keys.get(model.provider);
     if (!p || !key) throw new UserError(`Connect ${p?.name || "the provider"} in Control Center first.`);
     if (p.kind === "anthropic") return anthropicChat({ key, model: model.id, system, messages, effort, signal, onText, onThought });
@@ -458,22 +535,31 @@ export class Core {
 
   async #resolveRoute({ chat, text, mode, selection }) {
     const { list: local } = await this.localModels();
-    const cloud = await this.cloudModelList();
+    let cloud = await this.cloudModelList();
+    // Облачный ответ, а список pleeply Cloud ещё не загружен (например, не было сети при запуске) — догружаем сейчас.
+    if (mode !== "local" && !cloud.some((m) => m.provider === "pleeply") && this.settings.cloud.pleeplyCloud && this.settings.cloud.requests !== "off") {
+      await this.refreshGateway({ force: true }).catch(() => {});
+      cloud = await this.cloudModelList();
+    }
     const hist = historyFor(chat.messages);
     const attachments = chat.attachments || [];
     const attachmentChars = attachments.reduce((s, a) => s + (a.chars || 0), 0);
     const pinnedPreset = selection?.type === "preset" && PRESETS[selection.id] ? selection.id : null;
     const pickedModel = selection?.type === "model" ? [...local, ...cloud].find((m) => m.ref === selection.ref) : null;
     if (selection?.type === "model" && !pickedModel) throw new UserError("That model isn't available anymore. Pick another one.");
+    const task = pinnedPreset || classifyTask({ text, attachments: attachments.length, historyTurns: hist.length }).preset;
+    const noLocal = () => new UserError(this.downloads.size
+      ? "Your offline models are still downloading. Switch to Auto or Cloud to use a cloud model meanwhile."
+      : "No local model yet. Download one in Models — pleeply checks which ones fit this computer.");
 
     if (mode === "auto") {
-      if (pickedModel) return { preset: null, model: pickedModel, reason: `You picked ${pickedModel.label}.` };
+      if (pickedModel) return { preset: task, model: pickedModel, reason: `You picked ${pickedModel.label}.` };
       const d = decideAuto({
         text, attachmentsCount: attachments.length, attachmentChars,
         historyChars: hist.reduce((s, m) => s + m.content.length, 0), historyTurns: hist.length,
         pinnedPreset, localModels: local, cloudModel: this.defaultCloudModel(cloud), settings: this.settings,
       });
-      if (d.error) throw new UserError(d.error);
+      if (d.error) throw this.downloads.size ? noLocal() : new UserError(d.error);
       return { preset: d.preset, model: d.route.model, reason: d.reason };
     }
     if (mode === "cloud") {
@@ -481,13 +567,12 @@ export class Core {
       if (pickedModel && pickedModel.where !== "cloud") throw new UserError(`${pickedModel.label} runs on this computer. Switch to Local, or pick a cloud model.`);
       const m = pickedModel || this.defaultCloudModel(cloud);
       if (!m) throw new UserError("No cloud provider is connected. Add a key in Control Center → Cloud providers.");
-      return { preset: pinnedPreset || (pickedModel ? null : this.settings.presets.default), model: m };
+      return { preset: task, model: m };
     }
     if (pickedModel && pickedModel.where !== "local") throw new UserError(`${pickedModel.label} is a cloud model. Switch to Cloud or Auto to use it.`);
-    const presetId = pinnedPreset || this.settings.presets.default;
-    const m = pickedModel || resolvePresetLocal(presetId, local, this.settings);
-    if (!m) throw new UserError("No local model yet. Download one in Models — pleeply checks which ones fit this computer.");
-    return { preset: pickedModel ? null : presetId, model: m };
+    const m = pickedModel || resolvePresetLocal(task, local, this.settings);
+    if (!m) throw noLocal();
+    return { preset: task, model: m };
   }
 
   async previewRoute({ chatId, text = "", mode, selection }) {
@@ -721,7 +806,7 @@ export class Core {
     const hasDocs = (chat.attachments || []).length > 0;
     const contextSize = Math.min(model.ctx || 32768, presetId === "atlas" && hasDocs ? Math.max(this.settings.performance.contextSize, 16384) : this.settings.performance.contextSize);
 
-    // Инструкции: настройка + дата + Memory (+ источники для Atlas)
+    // Инструкции: профиль задачи + дата + Memory (+ источники из файлов)
     const sys = [route.preset ? preset.system : "You are a helpful assistant inside the pleeply desktop app. Answer in the language the user writes in.", `Today is ${new Date().toLocaleDateString("en-CA")}.`];
     const memoryAllowed = this.settings.memory.enabled && (where === "local" || this.settings.cloud.shareMemory);
     const mem = memoryAllowed ? await this.memory.forPrompt() : "";
@@ -753,20 +838,22 @@ export class Core {
     }
 
     Object.assign(asst.meta, {
-      where, backend: model.backend, engine: model.engine || null, provider: model.provider || null, providerName: model.providerName || null,
-      model: model.label, ref: model.ref, preset: route.preset, presetName: route.preset ? preset.name : null,
+      where, backend: model.backend, engine: model.engine || null, provider: model.provider || null,
+      providerName: model.where === "cloud" ? this.cloudParty(model).provider.name : null,
+      model: model.label, ref: model.ref, preset: route.preset, presetName: null,
       autoReason: route.reason || null, citations, narrowed, memoryUsed: !!mem,
     });
 
     if (where === "cloud") {
-      const p = providerById(model.provider);
-      const state = consentState(this.settings, chat.approvals, p.id);
+      const party = this.cloudParty(model);
+      const p = party.provider;
+      const state = consentState(this.settings, chat.approvals, party.key);
       if (state === "blocked") throw new UserError("Cloud is switched off in Control Center → Privacy.");
       if (state === "ask") {
         asst.status = "consent";
         await this.saveChat(chat);
         this.emit({ type: "chat", chat });
-        const disclosure = buildDisclosure({ provider: p, model: { id: model.id, label: model.label }, system, messages: history, attachments: hasDocs ? chat.attachments : [], memoryIncluded: !!mem });
+        const disclosure = buildDisclosure({ provider: p, relay: party.relay, model: { id: model.id, label: model.label }, system, messages: history, attachments: hasDocs ? chat.attachments : [], memoryIncluded: !!mem });
         const answer = await this.askConsent(disclosure, signal);
         if (!answer.approved) {
           asst.status = "declined";
@@ -774,14 +861,14 @@ export class Core {
           return;
         }
         if (!answer.includeHistory) history = history.slice(-1);
-        if (answer.remember && this.settings.cloud.requests === "chat") chat.approvals = { ...(chat.approvals || {}), [p.id]: true };
+        if (answer.remember && this.settings.cloud.requests === "chat") chat.approvals = { ...(chat.approvals || {}), [party.key]: true };
         asst.meta.approval = "asked";
       } else {
         asst.meta.approval = "chat";
       }
       const sentChars = system.length + history.reduce((s, m) => s + m.content.length, 0);
       asst.meta.sentChars = sentChars;
-      await this.logActivity({ kind: "cloud", provider: p.id, providerName: p.name, model: model.label, chars: sentChars, chatId: chat.id, chatTitle: chat.title, approval: asst.meta.approval, memory: !!mem, files: hasDocs ? chat.attachments.length : 0 });
+      await this.logActivity({ kind: "cloud", provider: party.key, providerName: p.name, model: model.label, chars: sentChars, chatId: chat.id, chatTitle: chat.title, approval: asst.meta.approval, memory: !!mem, files: hasDocs ? chat.attachments.length : 0 });
     }
 
     asst.status = "streaming";
@@ -886,7 +973,7 @@ export class Core {
     if (agent.mode === "auto" && (!localPick || localPick.fit.level === "slower" || (localPick.params ?? 0) < 3) && this.settings.cloud.requests !== "off" && this.defaultCloudModel(cloud)) {
       return this.defaultCloudModel(cloud);
     }
-    if (!localPick) throw new UserError("No local model yet. Download one in Models (Orbit works best with Qwen or Llama 3B and up).");
+    if (!localPick) throw new UserError("No local model yet. Download one in Models (agents work best with Qwen or Llama 3B and up).");
     return localPick;
   }
 
@@ -895,18 +982,19 @@ export class Core {
     const agent = agents.find((a) => a.id === agentId);
     if (!agent) throw new UserError("Unknown agent");
     const model = await this.#agentModel(agent);
-    const run = { id: uid("run_"), agentId, agentName: agent.name, goal: agent.goal, folder: agent.folder, status: "running", steps: [], startedAt: new Date().toISOString(), where: model.where, model: model.label, providerName: model.providerName || null };
+    const run = { id: uid("run_"), agentId, agentName: agent.name, goal: agent.goal, folder: agent.folder, status: "running", steps: [], startedAt: new Date().toISOString(), where: model.where, model: model.label, providerName: model.where === "cloud" ? this.cloudParty(model).provider.name : null };
     const ctrl = new AbortController();
     const state = { stopped: false, ctrl };
     this.runs.set(run.id, state);
 
     if (model.where === "cloud") {
-      const p = providerById(model.provider);
-      const st = consentState(this.settings, agent.approvals, p.id);
+      const party = this.cloudParty(model);
+      const p = party.provider;
+      const st = consentState(this.settings, agent.approvals, party.key);
       if (st === "blocked") throw new UserError("Cloud is switched off in Control Center → Privacy.");
       if (st === "ask") {
         const disclosure = buildDisclosure({
-          scope: "agent", provider: p, model: { id: model.id, label: model.label },
+          scope: "agent", provider: p, relay: party.relay, model: { id: model.id, label: model.label },
           system: `Agent "${agent.name}" will send its goal and everything it reads to ${p.name} at every step: text of files from ${agent.folder ? `"${path.basename(agent.folder)}"` : "no folder"}${agent.tools.includes("fetch_url") ? " and web pages it opens" : ""}.`,
           messages: [{ role: "user", content: `Goal: ${agent.goal}` }],
         });
@@ -916,7 +1004,7 @@ export class Core {
           return { declined: true };
         }
         if (ans.remember && this.settings.cloud.requests === "chat") {
-          agent.approvals = { ...(agent.approvals || {}), [p.id]: true };
+          agent.approvals = { ...(agent.approvals || {}), [party.key]: true };
           await this.store.write("agents.json", agents);
         }
       }
@@ -930,7 +1018,8 @@ export class Core {
     const generate = async (o) => {
       if (model.where === "cloud") {
         const chars = o.system.length + o.messages.reduce((s, m) => s + m.content.length, 0);
-        await this.logActivity({ kind: "cloud", provider: model.provider, providerName: model.providerName, model: model.label, chars, agent: agent.name, approval: "agent run" });
+        const party = this.cloudParty(model);
+        await this.logActivity({ kind: "cloud", provider: party.key, providerName: party.provider.name, model: model.label, chars, agent: agent.name, approval: "agent run" });
       }
       return this.generateWith(model, { ...o, temperature: 0.2, maxTokens: 1500, contextSize: Math.max(8192, this.settings.performance.contextSize), thinking: false, json: model.backend !== "anthropic", effort: "medium", signal: ctrl.signal });
     };

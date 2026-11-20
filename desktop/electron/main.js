@@ -67,7 +67,7 @@ function api() {
 
     "providers.setKey": (a) => core.setProviderKey(a?.id, a?.key),
     "providers.removeKey": (id) => core.removeProviderKey(id),
-    "providers.refresh": (id) => core.refreshCloudModels(id),
+    "providers.refresh": (id) => (id === "pleeply" ? core.refreshGateway({ force: true }) : core.refreshCloudModels(id)),
 
     "chats.list": () => core.listChats(),
     "chats.get": (id) => core.getChat(id),
@@ -89,7 +89,7 @@ function api() {
     "chats.stop": (id) => core.stop(id),
     "chats.attach": async (chatId) => {
       const r = await dialog.showOpenDialog(win, {
-        title: "Attach files for Atlas",
+        title: "Attach files",
         properties: ["openFile", "multiSelections"],
         filters: [{ name: "Documents", extensions: [...SUPPORTED_EXT].map((e) => e.slice(1)) }, { name: "All files", extensions: ["*"] }],
       });
@@ -190,6 +190,9 @@ function buildMenu() {
       { role: "resetZoom" }, { role: "zoomIn" }, { role: "zoomOut" }, { type: "separator" }, { role: "togglefullscreen" },
     ] },
     { label: "Go", submenu: [
+      item("Back", "Cmd+[", "back"),
+      item("Forward", "Cmd+]", "forward"),
+      { type: "separator" },
       item("Chat", "Cmd+1", "go:chat"),
       item("Models", "Cmd+2", "go:models"),
       item("Agents", "Cmd+3", "go:agents"),

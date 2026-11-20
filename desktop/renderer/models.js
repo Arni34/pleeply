@@ -43,18 +43,17 @@ function Catalog() {
 
 function Installed() {
   const models = S.models;
-  const presetsFor = (ref) => models.presets.filter((p) => p.local?.ref === ref).map((p) => p.name.replace("pleeply ", ""));
   const del = async (m) => {
     if (!confirm(`Delete ${m.label}? This frees ${fmtBytes(m.bytes)}. You can download it again later.`)) return;
     if (await tryCall("models.delete", m.ref)) { toast(`${m.label} deleted.`); refreshModels(); }
   };
-  const use = (m) => { set({ mode: "local", selection: { type: "model", ref: m.ref }, view: "chat" }); call("settings.update", { mode: "local" }); };
+  const use = (m) => { set({ mode: "local", selection: { type: "model", ref: m.ref } }); go("chat"); call("settings.update", { mode: "local" }); };
   return html`
     ${models.local.length ? html`<div class="list">
       ${models.local.map((m) => html`<div class="li">
         <${Icon} name="i-cpu" />
         <div class="grow">
-          <div class="row" style=${{ gap: "8px" }}><span class="name">${m.label}</span><span class="badge solid">${m.engine}</span>${presetsFor(m.ref).map((p) => html`<span class="badge local">${p}</span>`)}</div>
+          <div class="row" style=${{ gap: "8px" }}><span class="name">${m.label}</span><span class="badge solid">${m.engine}</span>${S.app.settings.models.defaultLocal === m.ref ? html`<span class="badge local">Default</span>` : null}</div>
           <div class="sub">${m.bytes ? fmtBytes(m.bytes) : "Size managed by " + m.engine}${m.stats?.tokPerSec ? ` · ${m.stats.tokPerSec} tokens/s measured on this computer` : ""}${S.engine.loaded === m.ref ? " · loaded now" : ""}</div>
         </div>
         <div class="side-r">
@@ -130,11 +129,22 @@ function Discover() {
 function Cloud() {
   const models = S.models;
   const keys = S.app.keys;
-  const connected = S.app.providers.filter((p) => keys[p.id]?.connected);
+  const connected = S.app.providers.filter((p) => keys[p.id]?.connected && !p.builtIn);
+  const gateway = models.cloud.filter((m) => m.provider === "pleeply");
+  const lim = S.app.cloudLimits;
   const setDefault = async (ref) => { await tryCall("settings.update", { cloud: { defaultModel: ref } }); toast("Default cloud model updated."); };
   return html`
-    <div class="banner grey"><${Icon} name="i-cloud" /><div class="grow">Cloud models are an add-on, never a requirement. They run on the provider's servers under their privacy policy, and pleeply asks before every request${S.app.settings.cloud.requests === "chat" ? " (once per chat)" : ""}.</div>
+    <div class="banner grey"><${Icon} name="i-cloud" /><div class="grow">Cloud models are an add-on, never a requirement. They run on their maker's servers under their privacy policy, and pleeply asks before every request${S.app.settings.cloud.requests === "chat" ? " (once per chat)" : ""}.</div>
       <button class="btn btn-line btn-sm" onClick=${() => go("control", { ccSection: "providers" })}>Manage providers</button></div>
+    <div class="sec">
+      <div class="sec-head"><h2>pleeply Cloud</h2><p>Built in, no key needed${lim ? ` · ${lim.free_per_day} free and ${lim.premium_per_day} premium requests a day` : ""}</p><span class="spacer"></span>
+        <button class="btn btn-ghost btn-sm" onClick=${async () => { const r = await tryCall("providers.refresh", "pleeply"); if (r) { toast(`pleeply Cloud has ${r.length} models.`); refreshModels(); } }}><${Icon} name="i-refresh" />Refresh</button></div>
+      ${!S.app.settings.cloud.pleeplyCloud ? html`<div class="card muted">pleeply Cloud is turned off in Control Center → Cloud providers.</div>`
+        : gateway.length ? html`<div class="list">${gateway.map((m) => html`<div class="li">
+          <${Icon} name="i-cloud" /><div class="grow"><div class="name">${m.label}</div><div class="sub">${m.vendor}${m.via ? ` · through ${m.via}` : ""} · ${m.tier === "free" ? "Free" : "Premium"}</div></div>
+          <div class="side-r">${S.app.settings.cloud.defaultModel === m.ref ? html`<span class="badge local">Default</span>` : html`<button class="btn btn-ghost btn-sm" onClick=${() => setDefault(m.ref)}>Make default</button>`}</div>
+        </div>`)}</div>` : html`<div class="card muted">Couldn't reach pleeply Cloud. Check your connection and press Refresh.</div>`}
+    </div>
     ${connected.length ? connected.map((p) => {
       const list = models.cloud.filter((m) => m.provider === p.id);
       return html`<div class="sec">
@@ -145,8 +155,7 @@ function Cloud() {
           <div class="side-r">${S.app.settings.cloud.defaultModel === m.ref ? html`<span class="badge local">Default</span>` : html`<button class="btn btn-ghost btn-sm" onClick=${() => setDefault(m.ref)}>Make default</button>`}</div>
         </div>`)}${list.length > 60 ? html`<div class="li muted">…and ${list.length - 60} more. Use search in the chat model menu.</div>` : null}</div>
       </div>`;
-    }) : html`<div class="card empty" style=${{ marginTop: "14px" }}><h3>No cloud provider connected</h3><p>Local mode works without one. Add your own API key for Anthropic, OpenAI, Google, Groq, OpenRouter or Mistral when you need more power.</p>
-      <button class="btn btn-primary" style=${{ marginTop: "14px" }} onClick=${() => go("control", { ccSection: "providers" })}>Connect a provider</button></div>`}`;
+    }) : html`<p class="hint" style=${{ marginTop: "14px" }}>Have your own key for Anthropic, OpenAI, Google, DeepSeek, Groq, OpenRouter or Mistral? <a onClick=${() => go("control", { ccSection: "providers" })}>Connect it</a> to use those models directly.</p>`}`;
 }
 
 export function ModelsView() {

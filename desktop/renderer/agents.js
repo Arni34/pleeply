@@ -104,7 +104,7 @@ function Editor({ agent, onSaved, onDeleted }) {
         <${Seg} label="Where the agent runs" value=${a.mode} onChange=${(mode) => setA({ ...a, mode, modelRef: null })} options=${[{ value: "local", label: "Local", icon: "i-cpu" }, { value: "cloud", label: "Cloud", icon: "i-cloud" }, { value: "auto", label: "Auto", icon: "i-auto" }]} /></div>
       <div class="field grow"><span class="label">Model</span>
         <select class="select" value=${a.modelRef || ""} onChange=${(e) => setA({ ...a, modelRef: e.target.value || null })}>
-          <option value="">pleeply Orbit · best fit</option>
+          <option value="">Best fit for agents</option>
           ${a.mode !== "cloud" ? local.map((m) => html`<option value=${m.ref}>${m.label} · this computer</option>`) : null}
           ${a.mode !== "local" ? cloud.map((m) => html`<option value=${m.ref}>${m.label} · ${m.providerName}</option>`) : null}
         </select></div>
@@ -172,7 +172,7 @@ export function AgentsView() {
               ${run ? html`<${RunView} run=${run} />` : null}
             </div>` : null}
           ` : html`<div class="card"><h3>What agents can do</h3>
-            <p class="muted" style=${{ marginTop: "6px" }}>Pick a template on the left or create your own. An agent plans its steps with pleeply Orbit, reads only the folder you share, and stops to ask before it writes a file, opens a web page, drafts an email or saves to Memory.</p>
+            <p class="muted" style=${{ marginTop: "6px" }}>Pick a template on the left or create your own. An agent plans its steps, reads only the folder you share, and stops to ask before it writes a file, opens a web page, drafts an email or saves to Memory.</p>
             <div class="templates" style=${{ marginTop: "14px" }}>${S.app.templates.map((t) => html`<button class="tpl" onClick=${() => fromTemplate(t)}><b>${t.name}</b><span>${t.goal.split("\n")[0]}</span></button>`)}</div>
           </div>`}
           <${Notes} />

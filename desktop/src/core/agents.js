@@ -308,7 +308,7 @@ export async function runAgent({ agent, run, generate, requestApproval, toolbox,
       step.status = "failed";
       step.result = `The model didn't produce a valid action.${raw ? ` It replied: ${truncate(raw, 300)}` : ""}`;
       run.status = "failed";
-      run.error = "The model couldn't follow the agent format. Try a larger model or the Orbit setup with a cloud model.";
+      run.error = "The model couldn't follow the agent format. Try a larger local model or a cloud model.";
       break;
     }
     Object.assign(step, { thought: action.thought, tool: action.tool, args: Object.fromEntries(TOOLS[action.tool].args.map((k) => [k, String(action.args[k] ?? "")])), label: TOOLS[action.tool].label });

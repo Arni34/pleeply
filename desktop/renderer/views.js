@@ -1,5 +1,5 @@
 // Общие части окна: боковое меню, «This computer», выбор модели, окно согласия, первый запуск.
-import { html, S, set, call, tryCall, toast, useState, useEffect, useRef, Icon, Mark, Modal, FitBadge, useDropdown, fmtBytes, fmtNum, ago, cloudLabel, refreshChats, refreshModels, refreshState, go } from "./ui.js";
+import { html, S, set, call, tryCall, toast, useState, useEffect, useRef, Icon, Mark, Modal, FitBadge, useDropdown, fmtBytes, fmtNum, ago, cloudLabel, refreshChats, refreshModels, refreshState, go, pushNav, navMove } from "./ui.js";
 
 // ---------------- действия и горячие клавиши ----------------
 export const IS_MAC = window.pleeply.platform === "darwin";
@@ -22,12 +22,14 @@ async function toggleUi(key) {
 
 export async function openChat(id) {
   const chat = await tryCall("chats.get", id);
-  if (chat) { set({ chat, view: "chat", editing: null, renameTitle: false }); focusComposer(); }
+  if (chat) { set({ chat, view: "chat", editing: null, renameTitle: false }); pushNav({ view: "chat", chatId: chat.id }); focusComposer(); }
 }
 
 export async function runAction(action) {
   switch (action) {
-    case "new-chat": set({ chat: null, view: "chat", editing: null, renameTitle: false }); focusComposer(); break;
+    case "new-chat": set({ chat: null, view: "chat", editing: null, renameTitle: false }); pushNav({ view: "chat", chatId: null }); focusComposer(); break;
+    case "back": await navMove(-1); break;
+    case "forward": await navMove(1); break;
     case "search": set({ palette: true }); break;
     case "attach": set({ view: "chat" }); setTimeout(() => window.dispatchEvent(new CustomEvent("pleeply:attach")), 40); break;
     case "export":
@@ -79,23 +81,6 @@ export function chatMenuItems(c) {
 }
 
 // ---------------- боковое меню ----------------
-const DAY = 86_400_000;
-function groupChats(chats) {
-  const d = new Date();
-  const today = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
-  const groups = [["Pinned", []], ["Today", []], ["Yesterday", []], ["Previous 7 days", []], ["Previous 30 days", []], ["Older", []]];
-  const g = Object.fromEntries(groups);
-  for (const c of chats) {
-    if (c.pinned) g.Pinned.push(c);
-    else if (c.updatedAt >= today) g.Today.push(c);
-    else if (c.updatedAt >= today - DAY) g.Yesterday.push(c);
-    else if (c.updatedAt >= today - 7 * DAY) g["Previous 7 days"].push(c);
-    else if (c.updatedAt >= today - 30 * DAY) g["Previous 30 days"].push(c);
-    else g.Older.push(c);
-  }
-  return groups.filter(([, list]) => list.length);
-}
-
 export function RenameInput({ c, cls = "rename" }) {
   const [title, setTitle] = useState(c.title);
   const done = useRef(false);
@@ -122,41 +107,53 @@ function ChatItem({ c }) {
   if (S.renaming === c.id) return html`<div class="chat-item on"><${RenameInput} c=${c} /></div>`;
   return html`<div class=${"chat-item" + (on ? " on" : "") + (menu ? " menu-open" : "")} role="button" tabindex="0" title=${c.title}
     onClick=${() => openChat(c.id)} onDblClick=${() => set({ renaming: c.id })} onKeyDown=${(e) => e.key === "Enter" && openChat(c.id)}>
-    <span class=${"dot" + (c.where === "cloud" ? " cloud" : c.where ? "" : " off")} title=${c.where === "cloud" ? "Last answer came from a cloud model" : c.where ? "Last answer ran on this computer" : ""}></span>
     <span class="t">${c.title}</span>
+    ${c.where === "cloud" ? html`<span class="where-ic" title="The last answer came from a cloud model"><${Icon} name="i-cloud" cls="xs" /></span>` : null}
     <button class="x" aria-label="Chat options" onClick=${(e) => { e.stopPropagation(); const r = e.currentTarget.getBoundingClientRect(); setMenu({ x: r.right, y: r.bottom }); }}><${Icon} name="i-more" cls="sm" /></button>
     ${menu ? html`<${FloatMenu} x=${menu.x} y=${menu.y} items=${chatMenuItems(c)} onClose=${() => setMenu(null)} />` : null}
   </div>`;
 }
 
+function Group({ id, label, children }) {
+  const closed = S.collapsed[id];
+  return html`<div class="group">
+    <button class="group-h" aria-expanded=${!closed} onClick=${() => set({ collapsed: { ...S.collapsed, [id]: !closed } })}>
+      ${label}<${Icon} name="i-down" cls=${"xs chev" + (closed ? " closed" : "")} /></button>
+    ${closed ? null : children}
+  </div>`;
+}
+
 export function Sidebar() {
   const app = S.app;
+  const { stack, i } = S.nav;
   const nav = [
-    ["chat", "Chat", "i-chat"],
-    ["models", "Models", "i-models"],
-    ["agents", "Agents", "i-agents"],
-    ["memory", "Memory", "i-memory"],
-    ["control", "Control Center", "i-control"],
+    ["models", "Models", "i-models", 2],
+    ["agents", "Agents", "i-agents", 3],
+    ["memory", "Memory", "i-memory", 4],
+    ["control", "Control Center", "i-control", 5],
   ];
   const memCount = S.memory?.suggestions?.length || 0;
+  const pinned = S.chats.filter((c) => c.pinned);
+  const recents = S.chats.filter((c) => !c.pinned);
   return html`<aside class="side">
-    <div class=${"side-top drag" + (IS_MAC ? "" : " win")}>
+    <div class=${"side-top drag" + (IS_MAC ? " mac" : "")}>
       <button class="icon-btn" title=${`Hide sidebar (${keys("mod+b")})`} aria-label="Hide sidebar" onClick=${() => runAction("sidebar")}><${Icon} name="i-sidebar" /></button>
+      <button class="icon-btn" title=${`Back (${keys("mod+[")})`} aria-label="Back" disabled=${i <= 0} onClick=${() => runAction("back")}><${Icon} name="i-left" /></button>
+      <button class="icon-btn" title=${`Forward (${keys("mod+]")})`} aria-label="Forward" disabled=${i >= stack.length - 1} onClick=${() => runAction("forward")}><${Icon} name="i-right" /></button>
     </div>
     <div class="side-brand drag"><${Mark} />pleeply</div>
-    <button class="btn btn-line side-new" onClick=${() => runAction("new-chat")}><${Icon} name="i-plus" />New chat<span class="kbd">${keys("mod+n")}</span></button>
-    <button class="side-search" onClick=${() => runAction("search")}><${Icon} name="i-search" cls="sm" />Search chats<span class="kbd">${keys("mod+k")}</span></button>
     <nav class="nav" aria-label="Sections">
-      ${nav.map(([id, label, icon], i) => html`<button class=${"nav-item" + (S.view === id ? " on" : "")} onClick=${() => go(id)} title=${`${label} (${keys("mod+" + (i + 1))})`}>
+      <button class="nav-item" onClick=${() => runAction("new-chat")}><${Icon} name="i-plus" />New chat<span class="kbd hover">${keys("mod+n")}</span></button>
+      <button class="nav-item" onClick=${() => runAction("search")}><${Icon} name="i-search" />Search<span class="kbd hover">${keys("mod+k")}</span></button>
+      ${nav.map(([id, label, icon, n]) => html`<button class=${"nav-item" + (S.view === id ? " on" : "")} onClick=${() => go(id)} title=${`${label} (${keys("mod+" + n)})`}>
         <${Icon} name=${icon} />${label}
         ${id === "memory" && memCount ? html`<span class="count" title="New memory suggestions">${memCount}</span>` : null}
         ${id === "agents" && S.pendingApprovals ? html`<span class="count" title="Waiting for your OK">${S.pendingApprovals}</span>` : null}
       </button>`)}
     </nav>
     <div class="chats">
-      ${S.chats.length ? groupChats(S.chats).map(([label, list]) => html`
-        <div class="label side-sec">${label}</div>
-        ${list.map((c) => html`<${ChatItem} c=${c} key=${c.id} />`)}`) : html`<div class="label side-sec">Chats</div><div class="side-empty">No chats yet.</div>`}
+      ${pinned.length ? html`<${Group} id="pinned" label="Pinned">${pinned.map((c) => html`<${ChatItem} c=${c} key=${c.id} />`)}</${Group}>` : null}
+      <${Group} id="recents" label="Recents">${recents.length ? recents.map((c) => html`<${ChatItem} c=${c} key=${c.id} />`) : html`<div class="side-empty">No chats yet.</div>`}</${Group}>
     </div>
     <button class="side-foot" onClick=${() => go("control", { ccSection: "privacy" })} title="Change in Control Center">
       <b>CLOUD REQUESTS</b>${cloudLabel(app.settings.cloud.requests)}
@@ -232,6 +229,7 @@ export function Palette() {
 export function Shortcuts() {
   const rows = [
     ["New chat", keys("mod+n")], ["Search chats and actions", keys("mod+k")], ["Attach files", keys("mod+o")],
+    ["Back · Forward", `${keys("mod+[")}  ${keys("mod+]")}`],
     ["Send message", "Enter"], ["New line", IS_MAC ? "⇧Enter" : "Shift+Enter"], ["Edit your last message", "↑ in an empty message box"],
     ["Stop answering", "Esc"], ["Copy last answer", keys("mod+shift+c")], ["Export chat as Markdown", keys("mod+shift+e")],
     ["Hide or show the sidebar", keys("mod+b")], ["Hide or show This computer", keys("mod+i")],
@@ -268,28 +266,34 @@ export function HwPanel() {
 }
 
 // ---------------- выбор модели ----------------
-function presetLocalLabel(p) {
-  const m = S.models?.presets?.find((x) => x.id === p.id);
-  return m?.local ? `Runs ${m.local.label} here` : "Needs a local model";
+export function defaultCloud() {
+  const cloud = S.models?.cloud || [];
+  if (!cloud.length) return null;
+  const gw = (id) => cloud.find((m) => m.provider === "pleeply" && m.id === id);
+  return cloud.find((m) => m.ref === S.app.settings.cloud.defaultModel) || cloud.find((m) => m.id === "claude-opus-5-5") || gw("claude") || gw("gpt") || gw("gemini") || gw("gpt-oss") || cloud[0];
+}
+
+function autoDescription() {
+  if (S.mode === "local") return "The best model on this computer for each message.";
+  if (S.mode === "cloud") return `Uses ${defaultCloud()?.label || "your default cloud model"}. Asks before sending.`;
+  return "On this computer when it fits, the cloud when it helps. Cloud still asks first.";
 }
 
 export function selectionLabel() {
   const sel = S.selection;
-  if (sel.type === "auto") return { title: "Auto", sub: "pleeply picks" };
-  if (sel.type === "preset") {
-    const p = S.app.presets.find((x) => x.id === sel.id);
-    return { title: p ? p.short : "Saturn 3.0", sub: S.mode === "cloud" ? defaultCloudLabel() : S.mode === "auto" ? "Auto picks the model" : presetLocalLabel(p || { id: "saturn" }).replace("Runs ", "") };
+  if (sel.type !== "model") {
+    return { title: "Auto", sub: S.mode === "local" ? "this computer" : S.mode === "cloud" ? defaultCloud()?.label || "no cloud model" : "local or cloud" };
   }
   const all = [...(S.models?.local || []), ...(S.models?.cloud || [])];
   const m = all.find((x) => x.ref === sel.ref);
-  return { title: m?.label || "Model", sub: m ? (m.where === "cloud" ? m.providerName : m.engine === "pleeply" ? "This computer" : m.engine) : "" };
+  if (!m) return { title: "Model", sub: "" };
+  return { title: m.label, sub: m.where === "cloud" ? (m.provider === "pleeply" ? m.vendor : m.providerName) : m.engine === "pleeply" ? "this computer" : m.engine };
 }
 
-function defaultCloudLabel() {
-  const cloud = S.models?.cloud || [];
-  if (!cloud.length) return "No cloud provider";
-  const pref = cloud.find((m) => m.ref === S.app.settings.cloud.defaultModel) || cloud.find((m) => m.id === "claude-opus-5-5") || cloud[0];
-  return pref.label;
+function tierText(m) {
+  const lim = S.app.cloudLimits;
+  if (m.tier === "free") return `Free${lim ? ` · ${lim.free_per_day} a day` : ""}`;
+  return `Premium${lim ? ` · ${lim.premium_per_day} a day` : ""}`;
 }
 
 export function ModelPicker() {
@@ -302,48 +306,39 @@ export function ModelPicker() {
   const local = models?.local || [];
   const cloud = models?.cloud || [];
   const ql = q.trim().toLowerCase();
-  const match = (m) => !ql || m.label.toLowerCase().includes(ql) || (m.providerName || "").toLowerCase().includes(ql);
+  const match = (m) => !ql || m.label.toLowerCase().includes(ql) || (m.providerName || "").toLowerCase().includes(ql) || (m.vendor || "").toLowerCase().includes(ql);
   const isOn = (sel) => JSON.stringify(sel) === JSON.stringify(S.selection);
+  const gateway = cloud.filter((m) => m.provider === "pleeply" && match(m));
   const byProvider = {};
-  for (const m of cloud.filter(match)) (byProvider[m.providerName] ||= []).push(m);
+  for (const m of cloud.filter((x) => x.provider !== "pleeply" && match(x))) (byProvider[m.providerName] ||= []).push(m);
+  const downloading = (models?.downloads || []).length;
+  const item = (m, icon, desc, badge) => html`<button class=${"menu-i" + (isOn({ type: "model", ref: m.ref }) ? " on" : "")} disabled=${m.fit?.level === "too-large"} onClick=${() => pick({ type: "model", ref: m.ref })}>
+    <${Icon} name=${icon} /><div class="grow"><div class="t">${m.label}</div><div class="d">${desc}</div></div>${badge || (isOn({ type: "model", ref: m.ref }) ? html`<${Icon} name="i-check" cls="check" />` : null)}
+  </button>`;
   return html`<div class="picker" ref=${dd.ref}>
     <button class="pick" aria-haspopup="listbox" aria-expanded=${dd.open} onClick=${() => { dd.setOpen(!dd.open); if (!dd.open) refreshModels(); }}>
-      ${S.selection.type === "auto" ? html`<${Icon} name="i-auto" cls="sm" />` : html`<span class=${"dot" + (mode === "cloud" || selectedWhere() === "cloud" ? " cloud" : "")}></span>`}
+      ${S.selection.type !== "model" ? html`<${Icon} name="i-auto" cls="sm" />` : html`<${Icon} name=${S.selection.ref.startsWith("cloud:") ? "i-cloud" : "i-cpu"} cls="sm" />`}
       <span class="ellipsis">${lab.title}</span>${lab.sub ? html`<span class="sub ellipsis">${lab.sub}</span>` : null}
       <${Icon} name="i-down" />
     </button>
     ${dd.open ? html`<div class="menu" role="listbox">
       ${local.length + cloud.length > 10 ? html`<div class="menu-search"><input class="input" placeholder="Search models" value=${q} onInput=${(e) => setQ(e.target.value)} autofocus /></div>` : null}
-      ${mode === "auto" ? html`<button class=${"menu-i" + (isOn({ type: "auto" }) ? " on" : "")} onClick=${() => pick({ type: "auto" })}>
-        <${Icon} name="i-auto" /><div class="grow"><div class="t">Auto</div><div class="d">pleeply picks the setup and model for each message. Cloud still asks first.</div></div>
-        ${isOn({ type: "auto" }) ? html`<${Icon} name="i-check" cls="check" />` : null}
-      </button>` : null}
-      <div class="menu-h">Model setups</div>
-      ${S.app.presets.map((p) => html`<button class=${"menu-i" + (isOn({ type: "preset", id: p.id }) ? " on" : "")} onClick=${() => pick({ type: "preset", id: p.id })}>
-        <${Mark} cls="ic" />
-        <div class="grow"><div class="t">${p.name}</div><div class="d">${p.role} · ${mode === "cloud" ? defaultCloudLabel() : mode === "auto" ? "local or cloud, chosen per message" : presetLocalLabel(p)}</div></div>
-        ${isOn({ type: "preset", id: p.id }) ? html`<${Icon} name="i-check" cls="check" />` : null}
-      </button>`)}
-      ${mode !== "cloud" ? html`<div class="menu-sep"></div><div class="menu-h">On this computer</div>
-        ${local.filter(match).length ? local.filter(match).map((m) => html`<button class=${"menu-i" + (isOn({ type: "model", ref: m.ref }) ? " on" : "")} disabled=${m.fit.level === "too-large"} onClick=${() => pick({ type: "model", ref: m.ref })}>
-          <${Icon} name="i-cpu" />
-          <div class="grow"><div class="t">${m.label}</div><div class="d">${m.engine === "pleeply" ? "pleeply" : m.engine}${m.bytes ? " · " + fmtBytes(m.bytes) : ""}${m.stats?.tokPerSec ? ` · ${m.stats.tokPerSec} tok/s measured` : ""}</div></div>
-          <${FitBadge} fit=${m.fit} />
-        </button>`) : html`<div class="menu-note">No local models yet. <a onClick=${() => { dd.setOpen(false); go("models"); }}>Download one</a> — pleeply checks which fit first.</div>`}` : null}
-      ${mode !== "local" ? html`<div class="menu-sep"></div><div class="menu-h">Cloud · asks before sending</div>
-        ${Object.keys(byProvider).length ? Object.entries(byProvider).map(([prov, list]) => list.map((m) => html`<button class=${"menu-i" + (isOn({ type: "model", ref: m.ref }) ? " on" : "")} onClick=${() => pick({ type: "model", ref: m.ref })}>
-          <${Icon} name="i-cloud" /><div class="grow"><div class="t">${m.label}</div><div class="d">${prov}</div></div>
-          ${isOn({ type: "model", ref: m.ref }) ? html`<${Icon} name="i-check" cls="check" />` : null}
-        </button>`)) : html`<div class="menu-note">No cloud provider connected. <a onClick=${() => { dd.setOpen(false); go("control", { ccSection: "providers" }); }}>Connect one</a> with your own API key.</div>`}` : null}
+      <button class=${"menu-i" + (S.selection.type !== "model" ? " on" : "")} onClick=${() => pick({ type: "auto" })}>
+        <${Icon} name="i-auto" /><div class="grow"><div class="t">Auto</div><div class="d">${autoDescription()}</div></div>
+        ${S.selection.type !== "model" ? html`<${Icon} name="i-check" cls="check" />` : null}
+      </button>
+      ${mode !== "cloud" ? html`<div class="menu-sep"></div><div class="menu-h">On this computer · nothing is sent</div>
+        ${local.filter(match).map((m) => item(m, "i-cpu", `${m.engine === "pleeply" ? "pleeply" : m.engine}${m.bytes ? " · " + fmtBytes(m.bytes) : ""}${m.stats?.tokPerSec ? ` · ${m.stats.tokPerSec} tok/s` : ""}`, html`<${FitBadge} fit=${m.fit} />`))}
+        ${!local.length ? html`<div class="menu-note">${downloading ? "Offline models are downloading. They appear here when ready." : html`No local models yet. <a onClick=${() => { dd.setOpen(false); go("models"); }}>Download one</a> — pleeply checks which fit first.`}</div>` : null}` : null}
+      ${mode !== "local" ? html`<div class="menu-sep"></div>
+        ${gateway.length ? html`<div class="menu-h">pleeply Cloud · no key needed · asks before sending</div>
+          ${gateway.map((m) => item(m, "i-cloud", `${m.vendor || ""}${m.vendor ? " · " : ""}${tierText(m)}`))}` : null}
+        ${Object.entries(byProvider).map(([prov, list]) => html`<div class="menu-h">${prov} · your key · asks before sending</div>${list.map((m) => item(m, "i-cloud", prov))}`)}
+        ${!gateway.length && !Object.keys(byProvider).length ? html`<div class="menu-note">${S.app.settings.cloud.requests === "off" ? "Cloud is switched off in Control Center." : "Cloud models appear when you're online."} <a onClick=${() => { dd.setOpen(false); go("control", { ccSection: "providers" }); }}>Cloud providers</a></div>` : null}` : null}
       <div class="menu-sep"></div>
       <button class="menu-i" onClick=${() => { dd.setOpen(false); go("models"); }}><${Icon} name="i-models" /><div class="t">Manage models</div></button>
     </div>` : null}
   </div>`;
-}
-
-function selectedWhere() {
-  if (S.selection.type !== "model") return null;
-  return S.selection.ref.startsWith("cloud:") ? "cloud" : "local";
 }
 
 // ---------------- окно согласия ----------------
@@ -373,15 +368,17 @@ export function ConsentModal() {
     const msg = chat && [...chat.messages].reverse().find((m) => m.role === "assistant");
     await respond(false);
     if (chat && msg) {
-      setTimeout(() => tryCall("chats.regenerate", { chatId: chat.id, messageId: msg.id, mode: "local", selection: S.selection.type === "preset" ? S.selection : { type: "preset", id: S.app.settings.presets.default } }), 300);
-      set({ mode: "local" });
+      setTimeout(() => tryCall("chats.regenerate", { chatId: chat.id, messageId: msg.id, mode: "local", selection: { type: "auto" } }), 300);
+      set({ mode: "local", selection: { type: "auto" } });
     }
   };
   const shown = d.items.filter((i) => withHistory || i.kind !== "message" || i === d.items[d.items.length - 1]);
   return html`<${Modal} onClose=${() => respond(false)}>
     <div class="modal-h">
       <h2>${d.scope === "agent" ? `Let this agent use ${d.provider.name}?` : `Send to ${d.provider.name}?`}</h2>
-      <p>${d.model.label} runs on ${d.provider.name}'s servers. ${d.scope === "agent" ? "Each step of this run" : "This request"} leaves your computer and is processed under their privacy policy. pleeply can't make that private, but it shows you exactly what goes.</p>
+      <p>${d.relay
+        ? `${d.model.label} is made by ${d.relay.vendor}. ${d.scope === "agent" ? "Each step of this run goes" : "This request goes"} from this computer to pleeply's server, which passes it${d.relay.via && d.relay.via !== d.relay.vendor ? ` through ${d.relay.via}` : ""} to ${d.relay.vendor}. pleeply doesn't keep the text; ${d.relay.vendor}'s privacy policy applies.`
+        : `${d.model.label} runs on ${d.provider.name}'s servers. ${d.scope === "agent" ? "Each step of this run" : "This request"} leaves your computer and is processed under their privacy policy. pleeply can't make that private, but it shows you exactly what goes.`}</p>
     </div>
     <div class="modal-b">
       <div class="provider-line"><${Icon} name="i-cloud" /><div class="grow"><b class="ink">${d.provider.name}</b> · ${d.model.label}</div><a onClick=${() => call("shell.open", d.provider.policyUrl)}>Privacy policy ↗</a></div>
@@ -409,21 +406,19 @@ export function Onboarding() {
   const app = S.app;
   const hw = app.hardware;
   const models = S.models;
-  useEffect(() => { refreshModels(); }, []);
+  useEffect(() => {
+    refreshModels();
+    const t = setInterval(refreshModels, 4000);
+    return () => clearInterval(t);
+  }, []);
   const finish = async () => {
     await tryCall("settings.update", { onboarded: true });
     await refreshState();
   };
-  const recIds = app.recommendation.modelIds.slice(0, 3);
-  const recs = (models?.catalog || []).filter((m) => recIds.includes(m.id));
-  const small = (models?.catalog || []).find((m) => m.id === "llama3.2-1b");
-  const options = recs.length ? [...recs, ...(small && !recIds.includes(small.id) ? [small] : [])] : [];
+  const downloads = (models?.downloads || []).map((d) => ({ ...d, ...(S.downloads[d.id] || {}) }));
+  const installed = (models?.local || []).filter((m) => m.backend === "pleeply");
   const others = (models?.local || []).filter((m) => m.backend !== "pleeply");
-  const download = async (m) => {
-    const r = await tryCall("models.download", { catalogId: m.id });
-    if (r) toast(`Downloading ${m.label} in the background.`);
-    refreshModels();
-  };
+  const gateway = (models?.cloud || []).filter((m) => m.provider === "pleeply");
   return html`<div class="onb">
     <div class="drag" style=${{ height: "40px", flex: "none" }}></div>
     <div class="onb-in"><div class="onb-card">
@@ -448,26 +443,30 @@ export function Onboarding() {
         </div>
         <div class="actions"><button class="btn btn-primary btn-lg" onClick=${() => setStep(2)}>Continue<${Icon} name="i-arrow" /></button><button class="btn btn-ghost" onClick=${() => setStep(0)}>Back</button></div>
       ` : html`
-        <div class="onb-step">Step 02 · Choose a model and start</div>
-        <h1>Pick a model that fits.</h1>
-        <p class="lead">Each one runs entirely on this computer. You can add more, connect a cloud model or use Ollama and LM Studio models any time in Models.</p>
-        <div class="list" style=${{ marginTop: "22px" }}>
-          ${options.map((m) => html`<div class="li">
-            <${Icon} name="i-cpu" />
-            <div class="grow"><div class="name">${m.label}</div><div class="sub">${fmtBytes(m.bytes)} download · ${m.fit.reason}</div></div>
-            <div class="side-r"><${FitBadge} fit=${m.fit} />
-              ${m.installed ? html`<span class="badge local">Installed</span>`
-                : m.downloading ? html`<div class="progress"><i style=${{ width: Math.round(((S.downloads[m.downloading.id]?.done ?? m.downloading.done) / (m.downloading.total || 1)) * 100) + "%" }}></i></div>`
-                : html`<button class="btn btn-line btn-sm" onClick=${() => download(m)}><${Icon} name="i-download" />Download</button>`}
-            </div>
-          </div>`)}
-          ${!options.length ? html`<div class="li"><span class="muted">Checking models…</span></div>` : null}
+        <div class="onb-step">Step 02 · Ready to go</div>
+        <h1>Works out of the box.</h1>
+        <p class="lead">Two offline models that fit this computer are downloading now, and cloud models are ready right away. You can start chatting immediately.</p>
+        <div class="label" style=${{ margin: "24px 0 8px" }}>Offline · runs on this computer</div>
+        <div class="list">
+          ${downloads.map((d) => {
+            const pct = d.total ? Math.round((d.done / d.total) * 100) : 0;
+            return html`<div class="li"><${Icon} name="i-cpu" /><div class="grow"><div class="name">${d.label}</div><div class="sub">${fmtBytes(d.done)} of ${fmtBytes(d.total)}</div></div>
+              <div class="side-r"><div class="progress"><i style=${{ width: pct + "%" }}></i></div><span class="mono muted" style=${{ fontSize: "11.5px", width: "34px" }}>${pct}%</span></div></div>`;
+          })}
+          ${installed.map((m) => html`<div class="li"><${Icon} name="i-cpu" /><div class="grow"><div class="name">${m.label}</div><div class="sub">Ready · works without internet</div></div><div class="side-r"><span class="badge local"><${Icon} name="i-check" cls="xs" />Ready</span></div></div>`)}
+          ${others.length ? html`<div class="li"><${Icon} name="i-plug" /><div class="grow"><div class="name">${others.length} model${others.length > 1 ? "s" : ""} from ${[...new Set(others.map((m) => m.engine))].join(" and ")}</div><div class="sub">Already on this computer, they work in pleeply too</div></div></div>` : null}
+          ${!downloads.length && !installed.length && !others.length ? html`<div class="li"><span class="muted">Checking which models fit…</span></div>` : null}
         </div>
-        ${others.length ? html`<p class="hint" style=${{ marginTop: "10px" }}>Also found ${others.length} model${others.length > 1 ? "s" : ""} from ${[...new Set(others.map((m) => m.engine))].join(" and ")} on this computer — they work in pleeply too.</p>` : null}
+        <div class="label" style=${{ margin: "20px 0 8px" }}>Cloud · pleeply Cloud, no key needed</div>
+        <div class="list">
+          ${gateway.length ? gateway.map((m) => html`<div class="li"><${Icon} name="i-cloud" /><div class="grow"><div class="name">${m.label}</div><div class="sub">${m.vendor} · ${tierText(m)}</div></div></div>`)
+            : html`<div class="li"><span class="muted">Cloud models appear here when you're online.</span></div>`}
+        </div>
+        <p class="hint" style=${{ marginTop: "10px" }}>Before anything goes to the cloud, pleeply shows what will be sent and waits for your yes. You can switch the cloud off in Control Center.</p>
         <div class="actions"><button class="btn btn-primary btn-lg" onClick=${finish}>Start chatting<${Icon} name="i-arrow" /></button><button class="btn btn-ghost" onClick=${() => setStep(1)}>Back</button><span class="hint">Downloads continue in the background.</span></div>
       `}
     </div></div>
-    <div class="onb-dots">${[0, 1, 2].map((i) => html`<i class=${i === step ? "on" : ""}></i>`)}</div>
+    <div class="onb-dots">${[0, 1, 2].map((k) => html`<i class=${k === step ? "on" : ""}></i>`)}</div>
   </div>`;
 }
 

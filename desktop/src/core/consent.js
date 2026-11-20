@@ -13,7 +13,7 @@ export function consentState(settings, approvals, providerId) {
 }
 
 /** Что ровно уйдёт провайдеру — показывается в окне согласия до отправки. */
-export function buildDisclosure({ provider, model, system, messages, attachments = [], memoryIncluded = false, scope = "message" }) {
+export function buildDisclosure({ provider, relay = null, model, system, messages, attachments = [], memoryIncluded = false, scope = "message" }) {
   const items = [];
   if (system) items.push({ kind: "system", label: memoryIncluded ? "Instructions, including your Memory" : "Instructions", text: system });
   for (const m of messages) items.push({ kind: "message", label: m.role === "user" ? "You" : "Earlier answer", text: m.content });
@@ -21,6 +21,8 @@ export function buildDisclosure({ provider, model, system, messages, attachments
   return {
     scope,
     provider: { id: provider.id, name: provider.name, policyUrl: provider.policy },
+    // Через шлюз: запрос идёт на сервер pleeply, оттуда к посреднику (OpenRouter/Groq) и производителю модели.
+    relay,
     model: { id: model.id, label: model.label },
     items,
     attachments: attachments.map((a) => ({ name: a.name, chars: a.chars })),

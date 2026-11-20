@@ -1,6 +1,13 @@
 // Облачные провайдеры. Подключаются только вашим ключом; без ключа pleeply работает полностью локально.
 
+// Адрес шлюза pleeply Cloud (для тестов можно подменить переменной окружения).
+export const PLEEPLY_CLOUD_URL = process.env.PLEEPLY_CLOUD_URL || "https://pleeply.vercel.app/api/ai/v1";
+
 export const PROVIDERS = [
+  {
+    id: "pleeply", name: "pleeply Cloud", product: "GPT, Claude, Gemini, DeepSeek", kind: "gateway", baseUrl: PLEEPLY_CLOUD_URL, builtIn: true,
+    policy: "https://pleeply.vercel.app/info/", keyUrl: "https://pleeply.vercel.app", keyHint: "",
+  },
   {
     id: "anthropic", name: "Anthropic", product: "Claude", kind: "anthropic",
     policy: "https://www.anthropic.com/legal/privacy", keyUrl: "https://console.anthropic.com/settings/keys", keyHint: "sk-ant-…",
@@ -14,6 +21,7 @@ export const PROVIDERS = [
   { id: "google", name: "Google", product: "Gemini", kind: "gemini", policy: "https://ai.google.dev/gemini-api/terms", keyUrl: "https://aistudio.google.com/apikey", keyHint: "AIza…" },
   { id: "groq", name: "Groq", product: "Groq", kind: "openai", baseUrl: "https://api.groq.com/openai/v1", policy: "https://groq.com/privacy-policy/", keyUrl: "https://console.groq.com/keys", keyHint: "gsk_…" },
   { id: "openrouter", name: "OpenRouter", product: "OpenRouter", kind: "openai", baseUrl: "https://openrouter.ai/api/v1", policy: "https://openrouter.ai/privacy", keyUrl: "https://openrouter.ai/settings/keys", keyHint: "sk-or-…" },
+  { id: "deepseek", name: "DeepSeek", product: "DeepSeek", kind: "openai", baseUrl: "https://api.deepseek.com/v1", policy: "https://cdn.deepseek.com/policies/en-US/deepseek-privacy-policy.html", keyUrl: "https://platform.deepseek.com/api_keys", keyHint: "sk-…" },
   { id: "mistral", name: "Mistral AI", product: "Mistral", kind: "openai", baseUrl: "https://api.mistral.ai/v1", policy: "https://legal.mistral.ai/terms/privacy-policy", keyUrl: "https://console.mistral.ai/api-keys", keyHint: "…" },
 ];
 
@@ -85,7 +93,8 @@ export class KeyStore {
     const all = await this.#all();
     const out = {};
     for (const p of PROVIDERS) {
-      if (p.id === "testcloud") out[p.id] = { connected: true, last4: "test" };
+      if (p.builtIn) out[p.id] = { connected: true, builtIn: true };
+      else if (p.id === "testcloud") out[p.id] = { connected: true, last4: "test" };
       else if (this.session.has(p.id)) out[p.id] = { connected: true, last4: this.session.get(p.id).slice(-4), sessionOnly: true };
       else if (all[p.id]) out[p.id] = { connected: true, last4: all[p.id].last4, addedAt: all[p.id].addedAt };
       else out[p.id] = { connected: false };

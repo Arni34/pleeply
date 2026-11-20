@@ -34,6 +34,8 @@ async function httpError(res, who) {
     } catch { detail = t; }
   } catch {}
   detail = String(detail).slice(0, 300);
+  // Шлюз pleeply Cloud сам пишет понятную причину (дневной лимит, модель недоступна).
+  if (who === "pleeply Cloud" && detail) return new UserError(detail);
   if (res.status === 401 || res.status === 403) return new UserError(`${who} rejected the API key. Check it in Control Center → Cloud providers.`);
   if (res.status === 404) return new UserError(`${who} doesn't have this model (404). ${detail}`);
   if (res.status === 429) return new UserError(`${who} is rate-limiting requests right now. Try again in a minute. ${detail}`);
@@ -104,7 +106,7 @@ export async function openaiModels({ baseUrl, key, who, timeoutMs = 10000 }) {
   return (j.data || []).map((m) => ({ id: m.id, label: m.name || m.id, ctx: m.context_length || m.context_window || null }));
 }
 
-export async function openaiChat({ baseUrl, key, who, providerId, model, system, messages, temperature, maxTokens, json, signal, onText, onThought }) {
+export async function openaiChat({ baseUrl, key, who, providerId, extraHeaders = {}, model, system, messages, temperature, maxTokens, json, signal, onText, onThought }) {
   const body = {
     model,
     stream: true,
@@ -118,7 +120,7 @@ export async function openaiChat({ baseUrl, key, who, providerId, model, system,
     body.stream_options = { include_usage: true };
   }
   if (json) body.response_format = { type: "json_object" };
-  const headers = { "content-type": "application/json", ...(key ? { authorization: `Bearer ${key}` } : {}) };
+  const headers = { "content-type": "application/json", ...(key ? { authorization: `Bearer ${key}` } : {}), ...extraHeaders };
   if (providerId === "openrouter") headers["X-Title"] = "pleeply";
   const res = await request(`${baseUrl}/chat/completions`, { method: "POST", headers, body: JSON.stringify(body), signal }, who);
   if (!res.ok) throw await httpError(res, who);

@@ -1,29 +1,91 @@
 {
-  "regions": ["fra1"],
+  "regions": [
+    "fra1"
+  ],
   "functions": {
-    "api/community.js": { "maxDuration": 10 },
-    "api/forum.js": { "maxDuration": 120 },
-    "api/waitlist.js": { "maxDuration": 10 },
-    "api/track.js": { "maxDuration": 10 },
-    "api/stats.js": { "maxDuration": 15 },
-    "api/bot.js": { "maxDuration": 300 }
+    "api/community.js": {
+      "maxDuration": 10
+    },
+    "api/forum.js": {
+      "maxDuration": 120
+    },
+    "api/waitlist.js": {
+      "maxDuration": 10
+    },
+    "api/track.js": {
+      "maxDuration": 10
+    },
+    "api/stats.js": {
+      "maxDuration": 15
+    },
+    "api/bot.js": {
+      "maxDuration": 300
+    },
+    "api/ai/v1/chat/completions.js": {
+      "maxDuration": 300
+    },
+    "api/ai/v1/models.js": {
+      "maxDuration": 15
+    }
   },
   "crons": [
-    { "path": "/api/bot", "schedule": "0 6 * * 1" }
+    {
+      "path": "/api/bot",
+      "schedule": "0 6 * * 1"
+    }
   ],
   "rewrites": [
-    { "source": "/stats", "destination": "/api/stats" },
-    { "source": "/community", "destination": "/api/community?view=top" },
-    { "source": "/community/", "destination": "/api/community?view=top" },
-    { "source": "/community/top", "destination": "/api/community?view=top" },
-    { "source": "/community/latest", "destination": "/api/community?view=latest" },
-    { "source": "/community/categories", "destination": "/api/community?view=categories" },
-    { "source": "/community/c/:slug", "destination": "/api/community?view=category&slug=:slug" },
-    { "source": "/community/t/:id/:slug", "destination": "/api/community?view=topic&id=:id" },
-    { "source": "/community/t/:id", "destination": "/api/community?view=topic&id=:id" },
-    { "source": "/community/new", "destination": "/api/community?view=new" },
-    { "source": "/community/login", "destination": "/api/community?view=login" },
-    { "source": "/community/signup", "destination": "/api/community?view=signup" },
-    { "source": "/community/sitemap.xml", "destination": "/api/community?view=sitemap" }
+    {
+      "source": "/stats",
+      "destination": "/api/stats"
+    },
+    {
+      "source": "/community",
+      "destination": "/api/community?view=top"
+    },
+    {
+      "source": "/community/",
+      "destination": "/api/community?view=top"
+    },
+    {
+      "source": "/community/top",
+      "destination": "/api/community?view=top"
+    },
+    {
+      "source": "/community/latest",
+      "destination": "/api/community?view=latest"
+    },
+    {
+      "source": "/community/categories",
+      "destination": "/api/community?view=categories"
+    },
+    {
+      "source": "/community/c/:slug",
+      "destination": "/api/community?view=category&slug=:slug"
+    },
+    {
+      "source": "/community/t/:id/:slug",
+      "destination": "/api/community?view=topic&id=:id"
+    },
+    {
+      "source": "/community/t/:id",
+      "destination": "/api/community?view=topic&id=:id"
+    },
+    {
+      "source": "/community/new",
+      "destination": "/api/community?view=new"
+    },
+    {
+      "source": "/community/login",
+      "destination": "/api/community?view=login"
+    },
+    {
+      "source": "/community/signup",
+      "destination": "/api/community?view=signup"
+    },
+    {
+      "source": "/community/sitemap.xml",
+      "destination": "/api/community?view=sitemap"
+    }
   ]
 }

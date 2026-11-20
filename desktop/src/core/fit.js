@@ -74,6 +74,23 @@ export function fitBuckets(catalog, hw, settings) {
   }).filter(Boolean);
 }
 
+// Две офлайн-модели, которые ставятся сразу после установки: основная под этот компьютер + маленькая быстрая.
+// Gemma 3 и Qwen хорошо понимают русский и казахский; Qwen 3 умеет рассуждать и работать с инструментами агентов.
+const STARTER_PLANS = [
+  ["qwen2.5-14b", "gemma3-4b"],
+  ["qwen2.5-7b", "gemma3-4b"],
+  ["gemma3-4b", "qwen3-1.7b"],
+  ["gemma3-1b", "qwen2.5-0.5b"],
+];
+
+export function starterPicks(catalog, hw, settings) {
+  for (const plan of STARTER_PLANS) {
+    const models = plan.map((id) => catalog.find((m) => m.id === id));
+    if (models.every((m) => m && ["fast", "good"].includes(fitModel(m, hw, settings).level))) return plan;
+  }
+  return ["qwen2.5-0.5b"];
+}
+
 /** «Recommended for you: 7–8B models in Local mode.» */
 export function recommendation(catalog, hw, settings) {
   const classes = [

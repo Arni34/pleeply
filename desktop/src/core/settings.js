@@ -2,9 +2,11 @@
 
 export const DEFAULT_SETTINGS = {
   onboarded: false,
-  mode: "local", // режим по умолчанию в чате: local | cloud | auto
+  mode: "auto", // режим по умолчанию в чате: local | cloud | auto
+  setup: { starter: false }, // стартовые офлайн-модели уже ставились (не скачиваем заново после удаления)
   cloud: {
     requests: "ask", // ask — спрашивать каждый раз, chat — один раз на чат и провайдера, off — облако выключено
+    pleeplyCloud: true, // встроенные облачные модели через шлюз pleeply Cloud
     shareMemory: false, // отправлять ли Memory облачным моделям
     defaultModel: null, // "cloud:anthropic:claude-opus-5-5"
   },
@@ -16,6 +18,7 @@ export const DEFAULT_SETTINGS = {
   },
   models: {
     dir: null, // null — папка models внутри данных pleeply
+    defaultLocal: null, // модель на этом компьютере по умолчанию; null — лучшая подходящая под задачу
     ollama: { enabled: true, url: "http://127.0.0.1:11434" },
     lmstudio: { enabled: true, url: "http://127.0.0.1:1234" },
   },
@@ -57,6 +60,9 @@ export function sanitizeSettings(s) {
   const m = mergeSettings(d, s);
   const out = structuredClone(d);
   out.onboarded = !!m.onboarded;
+  out.setup.starter = !!m.setup?.starter;
+  out.cloud.pleeplyCloud = m.cloud.pleeplyCloud !== false;
+  out.models.defaultLocal = typeof m.models.defaultLocal === "string" && /^(pleeply|ollama|lmstudio):/.test(m.models.defaultLocal) ? m.models.defaultLocal : null;
   out.mode = MODES.includes(m.mode) ? m.mode : d.mode;
   out.cloud.requests = REQUESTS.includes(m.cloud.requests) ? m.cloud.requests : d.cloud.requests;
   out.cloud.shareMemory = !!m.cloud.shareMemory;

@@ -5,7 +5,7 @@ import { HwPanel, ModelPicker, TopLead, RenameInput, FloatMenu, chatMenuItems, f
 const STARTERS = [
   { t: "Rewrite something", d: "Make this calmer and shorter: …", text: "Rewrite this so it sounds calmer and shorter:\n\n" },
   { t: "Plan a trip", d: "Three days in Almaty for two", text: "Plan three days in Almaty for two." },
-  { t: "Summarize a document", d: "Attach a PDF or notes for Atlas", attach: true },
+  { t: "Summarize a document", d: "Attach a PDF or notes", attach: true },
   { t: "Think it through", d: "Pros and cons, step by step", text: "Help me think through this decision step by step: " },
 ];
 
@@ -13,8 +13,8 @@ function MetaLine({ m }) {
   const meta = m.meta || {};
   if (!meta.where || ["consent", "declined", "routing", "streaming"].includes(m.status)) return null;
   const parts = [];
-  if (meta.presetName) parts.push(meta.presetName.replace("pleeply ", ""));
-  parts.push(meta.servedModel && meta.servedModel !== meta.ref?.split(":").pop() && meta.where === "cloud" ? `${meta.model} → served by ${meta.servedModel}` : meta.model);
+  // «Ответила другая модель» — только при запасном варианте Claude по собственному ключу Anthropic.
+  parts.push(meta.backend === "anthropic" && meta.servedModel && !String(meta.ref).endsWith(meta.servedModel) ? `${meta.model} → answered by ${meta.servedModel}` : meta.model);
   if (meta.where === "local" && meta.engine && meta.engine !== "pleeply") parts.push(`via ${meta.engine}`);
   if (meta.tokPerSec) parts.push(`${meta.tokPerSec} tok/s`);
   if (meta.memoryUsed) parts.push("used Memory");
@@ -72,7 +72,7 @@ function AssistantMessage({ m, last }) {
   if (m.status === "routing") body = html`<div class="state"><span class="shimmer">${meta.mode === "auto" ? "Choosing the right setup and model…" : "Getting ready…"}</span></div>`;
   else if (m.status === "consent") body = html`<div class="state"><${Icon} name="i-cloud" cls="sm" />Waiting for your OK to send this to ${meta.providerName}…</div>`;
   else if (m.status === "declined") body = html`<div class="notice">Not sent. Nothing left your computer.
-    <div class="row"><button class="btn btn-line btn-sm" onClick=${() => tryCall("chats.regenerate", { chatId: S.chat.id, messageId: m.id, mode: "local", selection: S.selection.type === "model" ? { type: "preset", id: S.app.settings.presets.default } : S.selection })}><${Icon} name="i-cpu" />Run locally instead</button></div></div>`;
+    <div class="row"><button class="btn btn-line btn-sm" onClick=${() => tryCall("chats.regenerate", { chatId: S.chat.id, messageId: m.id, mode: "local", selection: { type: "auto" } })}><${Icon} name="i-cpu" />Run locally instead</button></div></div>`;
   else if (m.status === "error") body = html`<div class="notice err">${m.error}
     <div class="row">
       ${/local model|Download one/i.test(m.error || "") ? html`<button class="btn btn-line btn-sm" onClick=${() => go("models")}><${Icon} name="i-models" />Open Models</button>` : null}
@@ -141,7 +141,7 @@ function Hello({ onStarter }) {
   return html`<div class="hello">
     <${Mark} cls="mark" />
     <h1>What can I help with?</h1>
-    <p>${local ? "Local mode: everything runs on this computer and nothing is sent." : S.mode === "cloud" ? "Cloud mode: pleeply shows what will be sent and asks before every request." : "Auto mode: pleeply picks the setup and model for each message. Cloud still asks first."}</p>
+    <p>${local ? "Local mode: everything runs on this computer and nothing is sent." : S.mode === "cloud" ? "Cloud mode: GPT, Claude, Gemini and DeepSeek. pleeply shows what will be sent and asks first." : "Auto: pleeply picks a model for each message, on this computer when it fits. Cloud still asks first."}</p>
     <div class="starters">${STARTERS.map((s) => html`<button class="starter" onClick=${() => onStarter(s)}><b>${s.t}</b>${s.d}</button>`)}</div>
   </div>`;
 }
@@ -163,8 +163,9 @@ function RouteHint({ r }) {
   const req = S.app.settings.cloud.requests;
   if (!r) return html`<div class="route"></div>`;
   if (r.error) return html`<div class="route"><${Icon} name="i-info" /><span class="ellipsis">${r.error}</span></div>`;
-  if (r.where === "local") return html`<div class="route local" title=${r.reason || ""}><${Icon} name="i-cpu" /><span class="ellipsis">${S.mode === "auto" ? "Auto → " : ""}${r.presetName ? r.presetName + " · " : ""}${r.label} · runs on this computer, nothing is sent</span></div>`;
-  return html`<div class="route" title=${r.reason || ""}><${Icon} name="i-cloud" /><span class="ellipsis">${S.mode === "auto" ? "Auto → " : ""}${r.label} · ${r.providerName} · ${req === "ask" ? "asks before sending" : "asks once per chat"}</span></div>`;
+  const auto = S.selection.type !== "model" ? "Auto → " : "";
+  if (r.where === "local") return html`<div class="route local" title=${r.reason || ""}><${Icon} name="i-cpu" /><span class="ellipsis">${auto}${r.label} · runs on this computer, nothing is sent</span></div>`;
+  return html`<div class="route" title=${r.reason || ""}><${Icon} name="i-cloud" /><span class="ellipsis">${auto}${r.label} · ${r.providerName} · ${req === "ask" ? "asks before sending" : "asks once per chat"}</span></div>`;
 }
 
 function Composer() {
@@ -230,7 +231,7 @@ function Composer() {
     const c = await tryCall("chats.removeAttachment", { chatId: chat.id, docId });
     if (c) set({ chat: c });
   };
-  const placeholder = S.selection.type === "model" ? `Message ${preview?.label || "the model"}…` : preview?.label ? `Message ${preview.presetName ? preview.presetName : ""}${preview.presetName ? " · " : ""}${preview.label}…` : "Message pleeply…";
+  const placeholder = preview?.label ? `Message ${preview.label}…` : "Message pleeply…";
   return html`<div class="composer-wrap">
     <div class=${"composer" + (drop ? " drop" : "")} onDragOver=${(e) => { e.preventDefault(); setDrop(true); }} onDragLeave=${() => setDrop(false)} onDrop=${onDrop}>
       ${chat?.attachments?.length ? html`<div class="chips">${chat.attachments.map((a) => html`<span class="chip" title=${`${a.name} · ${fmtNum(a.chars)} characters${a.pages > 1 ? ` · ${a.pages} pages` : ""}`}><${Icon} name="i-file" /><span class="ellipsis">${a.name}</span><button aria-label="Remove file" onClick=${() => remove(a.id)}><${Icon} name="i-x" cls="xs" /></button></span>`)}</div>` : null}
@@ -283,9 +284,7 @@ export function ChatView() {
   const busy = msgs.some((m) => ["routing", "consent", "streaming"].includes(m.status));
   const setMode = (mode) => {
     let selection = S.selection;
-    if (mode !== "auto" && selection.type === "auto") selection = { type: "preset", id: S.app.settings.presets.default };
-    if (selection.type === "model" && ((mode === "local" && selection.ref.startsWith("cloud:")) || (mode === "cloud" && !selection.ref.startsWith("cloud:")))) selection = { type: "preset", id: S.app.settings.presets.default };
-    if (mode === "auto" && selection.type === "preset" && selection.id === S.app.settings.presets.default) selection = { type: "auto" };
+    if (selection.type === "model" && ((mode === "local" && selection.ref.startsWith("cloud:")) || (mode === "cloud" && !selection.ref.startsWith("cloud:")))) selection = { type: "auto" };
     if (mode === "cloud" && S.app.settings.cloud.requests === "off") toast("Cloud is switched off in Control Center → Privacy.", "err", { label: "Open", run: () => go("control", { ccSection: "privacy" }) });
     set({ mode, selection });
     call("settings.update", { mode }).catch(() => {});
@@ -293,7 +292,7 @@ export function ChatView() {
   const onStarter = async (s) => {
     if (s.attach) {
       const r = await tryCall("chats.attach", chat?.id || null);
-      if (r) { for (const e of r.errors) toast(e, "err"); set({ chat: r.chat, selection: S.mode === "auto" ? S.selection : { type: "preset", id: "atlas" } }); refreshChats(); window.dispatchEvent(new CustomEvent("pleeply:compose", { detail: "Summarize the key points and tell me where each one comes from." })); }
+      if (r) { for (const e of r.errors) toast(e, "err"); set({ chat: r.chat }); refreshChats(); window.dispatchEvent(new CustomEvent("pleeply:compose", { detail: "Summarize the key points and tell me where each one comes from." })); }
       return;
     }
     window.dispatchEvent(new CustomEvent("pleeply:compose", { detail: s.text }));

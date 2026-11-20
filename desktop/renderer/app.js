@@ -36,7 +36,13 @@ function countApprovals() {
 window.pleeply.on((ev) => {
   switch (ev.type) {
     case "chat":
-      if (S.chat?.id === ev.chat.id || (!S.chat && S.view === "chat" && ev.chat.messages.length <= 2)) set({ chat: ev.chat });
+      if (S.chat?.id === ev.chat.id) set({ chat: ev.chat });
+      else if (!S.chat && S.view === "chat" && ev.chat.messages.length <= 2) {
+        // Новый чат получил id — запоминаем его в истории переходов.
+        const cur = S.nav.stack[S.nav.i];
+        if (cur?.view === "chat" && !cur.chatId) cur.chatId = ev.chat.id;
+        set({ chat: ev.chat });
+      }
       refreshChatsSoon();
       break;
     case "delta": {
@@ -90,6 +96,12 @@ window.pleeply.on((ev) => {
     case "activity":
       set({ activityTick: Date.now() });
       break;
+    case "toast":
+      toast(ev.text, ev.kind || "info");
+      break;
+    case "starter":
+      refreshModelsSoon();
+      break;
     case "menu":
       if (S.ready && S.app.settings.onboarded && !S.consent) { set({ palette: false, shortcuts: false }); runAction(ev.action); }
       break;
@@ -103,8 +115,7 @@ window.pleeply.on((ev) => {
 async function boot() {
   try {
     const app = await refreshState();
-    const sel = app.settings.mode === "auto" ? { type: "auto" } : { type: "preset", id: app.settings.presets.default };
-    set({ mode: app.settings.mode, selection: sel });
+    set({ mode: app.settings.mode, selection: { type: "auto" } });
     await Promise.all([refreshChats(), refreshModels(), refreshMemory()]);
     set({ ready: true });
   } catch (e) {
@@ -116,7 +127,7 @@ render(html`<${App} />`, document.getElementById("app"));
 boot();
 
 // ---------- горячие клавиши (те же, что в меню macOS; на Windows/Linux — с Ctrl) ----------
-const SHORTCUTS = { n: "new-chat", k: "search", o: "attach", b: "sidebar", i: "hw-panel", ",": "go:control", "/": "shortcuts",
+const SHORTCUTS = { n: "new-chat", k: "search", o: "attach", b: "sidebar", i: "hw-panel", ",": "go:control", "/": "shortcuts", "[": "back", "]": "forward",
   1: "go:chat", 2: "go:models", 3: "go:agents", 4: "go:memory", 5: "go:control" };
 const SHIFT_SHORTCUTS = { c: "copy-last", e: "export" };
 const isTyping = (el) => el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName));
