@@ -55,6 +55,31 @@ This is the desktop app described on [pleeply.vercel.app](https://pleeply.vercel
 | `AI_FREE_PER_DAY`, `AI_PAID_PER_DAY`, `AI_PAID_GLOBAL_PER_DAY` | лимиты: 60 бесплатных и 25 премиум-запросов в сутки на установку, 300 премиум на всех |
 | `AI_MODEL_GPT`, `AI_MODEL_CLAUDE`, `AI_MODEL_GEMINI`, `AI_MODEL_DEEPSEEK` | зафиксировать конкретную модель OpenRouter вместо самой свежей |
 
+### pleeply Free и браузерная версия
+
+Модели `auto` («pleeply Free») и `auto-fast` — маршрутизатор бесплатных моделей по образцу [FreeLLMAPI](https://github.com/tashfeenahmed/freellmapi) (MIT): 97 моделей 15 провайдеров из его каталога (`api/_lib/free-catalog.json`, лицензия рядом), по рейтингу «ума» или скорости. При 429, ошибке или таймауте до первого байта запрос уходит к следующей модели; паузы и дневные счётчики по каждой модели — таблица `ai_free_state` в Neon. Код — `api/_lib/free.js`. Ими же отвечает браузерная версия **pleeply.vercel.app/chat** (и строка «Ask anything» на главной): в браузере ничего не считается, всё идёт через сервер.
+
+Провайдер включается своим ключом в Vercel (Kilo и LLM7 работают и без ключа):
+
+| Переменная | Провайдер |
+|---|---|
+| `GROQ_API_KEY` | Groq |
+| `CEREBRAS_API_KEY` | Cerebras |
+| `GEMINI_API_KEY` | Google AI Studio |
+| `MISTRAL_API_KEY` | Mistral |
+| `OPENROUTER_API_KEY` | OpenRouter (бесплатные модели `:free`) |
+| `NVIDIA_API_KEY` | NVIDIA NIM |
+| `COHERE_API_KEY` | Cohere |
+| `CLOUDFLARE_AI_KEY` | Cloudflare Workers AI, формат `account_id:token` |
+| `ZHIPU_API_KEY` (+ `ZHIPU_API_BASE` для ключа z.ai) | Zhipu |
+| `OLLAMA_API_KEY` | Ollama Cloud |
+| `POLLINATIONS_API_KEY` | Pollinations |
+| `HF_TOKEN` | Hugging Face |
+| `OPENCODE_API_KEY` | OpenCode Zen |
+| `KILO_API_KEY`, `LLM7_API_KEY` | необязательны, поднимают лимиты |
+
+Обновить каталог: склонировать FreeLLMAPI, прогнать его миграции на `node:sqlite` и выгрузить таблицу `models` (только `enabled`) в формат `free-catalog.json`.
+
 Перед каждым облачным запросом окно согласия показывает, что запрос идёт через сервер pleeply к производителю модели. Шлюз не хранит текст — только счётчики запросов за день (таблица `ai_usage` в Neon). Своё облако можно отключить в Control Center → Cloud providers, свои ключи по-прежнему работают напрямую.
 
 ## Аккаунт и pleeply Pro

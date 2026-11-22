@@ -236,8 +236,9 @@ const CONFIG = {
     rv.forEach((n) => n.classList.add('in'));
   }
 
-  // ---- строка «спроси» на первом экране. Продукта ещё нет, поэтому отправка честно говорит об этом
-  // и ведёт к форме раннего доступа. Набранный текст никуда не отправляется и не сохраняется.
+  // ---- строка «спроси» на первом экране: вопрос уходит в браузерную версию (/chat) и считается на pleeply Cloud.
+  // Текст передаётся через sessionStorage этой вкладки (не в адресе — чтобы не попасть в логи и Referer).
+  // Режим Local в браузере невозможен: с ним ничего не отправляется, а подсказка ведёт к pleeply для Mac.
   const ask = document.getElementById('ask');
   if (ask) {
     const input = ask.querySelector('textarea');
@@ -248,19 +249,26 @@ const CONFIG = {
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); if (input.value.trim()) ask.requestSubmit(); }
     });
+    const hero = document.querySelector('.hero');
+    const mode = () => ask.querySelector('[data-mini][aria-pressed="true"]')?.dataset.mini || 'auto';
     ask.querySelectorAll('[data-mini]').forEach((b) => b.addEventListener('click', () => {
       ask.querySelectorAll('[data-mini]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      if (b.dataset.mini !== 'local') hero.classList.remove('asked');
     }));
     ask.addEventListener('submit', (e) => {
       e.preventDefault();
-      if (!input.value.trim()) return;
+      const text = input.value.trim();
+      if (!text) return;
+      if (mode() === 'local') {
+        track('cta_click', 'prompt_local');
+        hero.classList.add('asked');
+        return;
+      }
       track('cta_click', 'prompt');
-      document.querySelector('.hero').classList.add('asked');
-      setTimeout(() => {
-        document.getElementById('early-access').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
-        const name = document.getElementById('d-name');
-        if (name) name.focus({ preventScroll: true });
-      }, 1400);
+      let handed = false;
+      try { sessionStorage.setItem('pleeply.web.pending', JSON.stringify({ text, at: Date.now() })); handed = true; } catch {}
+      // без sessionStorage — во фрагменте адреса: он не уходит на сервер и в Referer
+      location.href = handed ? '/chat' : `/chat#q=${encodeURIComponent(text)}`;
     });
   }
 

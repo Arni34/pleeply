@@ -10,6 +10,7 @@ import crypto from 'node:crypto';
 import Anthropic from '@anthropic-ai/sdk';
 import { sql, clientKey, json } from './forum.js';
 import { PLANS, effectivePlan } from './account.js';
+import { relayFree, availableProviders } from './free.js';
 
 const OPENROUTER = 'https://openrouter.ai/api/v1';
 const GROQ = 'https://api.groq.com/openai/v1';
@@ -30,9 +31,10 @@ const VENDOR_POLICY = {
   Anthropic: 'https://www.anthropic.com/legal/privacy',
   Google: 'https://policies.google.com/privacy',
   DeepSeek: 'https://cdn.deepseek.com/policies/en-US/deepseek-privacy-policy.html',
+  'Free AI providers': 'https://pleeply.vercel.app/chat#providers',
 };
 
-const UPSTREAM_NAME = { groq: 'Groq', openrouter: 'OpenRouter', anthropic: 'Anthropic', gemini: 'Google', deepseek: 'DeepSeek' };
+const UPSTREAM_NAME = { groq: 'Groq', openrouter: 'OpenRouter', anthropic: 'Anthropic', gemini: 'Google', deepseek: 'DeepSeek', free: 'pleeply Free router' };
 
 // ---------- какие модели доступны ----------
 
@@ -92,6 +94,11 @@ export async function catalog() {
       const ds = ids.find((id) => /deepseek/i.test(id) && clean(id));
       if (ds && !list.some((x) => x.vendor === 'DeepSeek')) list.push({ id: 'deepseek-free', name: ds.replace(/^.*\//, '').replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()), vendor: 'DeepSeek', tier: 'free', via: 'groq', upstream: ds, context: null });
     } catch {}
+  }
+  // pleeply Free: цепочка бесплатных моделей разных провайдеров с переключением при лимитах (см. free.js)
+  if (availableProviders().length) {
+    list.push({ id: 'auto', name: 'pleeply Free', vendor: 'Free AI providers', tier: 'free', via: 'free', strategy: 'smart', context: 128_000 });
+    list.push({ id: 'auto-fast', name: 'pleeply Free · Fast', vendor: 'Free AI providers', tier: 'free', via: 'free', strategy: 'fast', context: 128_000 });
   }
   for (const m of list) { m.upstreamName = UPSTREAM_NAME[m.via]; m.policy = VENDOR_POLICY[m.vendor]; }
   cache = { at: Date.now(), list };
@@ -217,6 +224,7 @@ export async function relay(entry, request, res) {
   res.on('close', () => { if (!res.writableEnded) ctrl.abort(); });
   try {
     if (entry.via === 'anthropic') return await streamAnthropic(entry, request, res, ctrl.signal);
+    if (entry.via === 'free') return await relayFree(entry, request, res, ctrl.signal);
     return await streamOpenAI(entry, request, res, ctrl.signal);
   } catch (e) {
     if (ctrl.signal.aborted) return;

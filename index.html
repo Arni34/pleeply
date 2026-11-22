@@ -115,6 +115,7 @@
   .ask-msg b { color: var(--ink); font-weight: 500; }
   .asked .ask-msg { display: block; }
   .ask-note { max-width: 768px; margin: 12px auto 0; font-size: 13px; color: var(--muted); }
+  .ask-note a { color: var(--muted); }
   .chips-row { max-width: 860px; margin: 22px auto 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
 
   /* ---------- разделы и карточки ---------- */
@@ -464,6 +465,7 @@
       <a href="#privacy">Privacy</a>
       <a href="/info/">Guides</a>
       <a href="/community">Community</a>
+      <a href="/chat">Try in browser</a>
     </nav>
     <div class="nav-r">
       <a class="pill pill-dark" href="#early-access" data-cta="nav">Get early access</a>
@@ -480,18 +482,18 @@
     <p class="sub">One AI ecosystem on your computer. Run models locally, connect to the cloud when you choose.</p>
     <form class="ask" id="ask" novalidate>
       <label class="sr" for="ask-input">Ask pleeply</label>
-      <textarea id="ask-input" rows="2" placeholder="Ask anything. It runs on your computer."></textarea>
+      <textarea id="ask-input" rows="2" placeholder="Ask anything."></textarea>
       <div class="ask-row">
         <div class="mini" role="group" aria-label="Where it runs">
-          <button type="button" data-mini="local" aria-pressed="true">Local</button>
+          <button type="button" data-mini="local" aria-pressed="false">Local</button>
           <button type="button" data-mini="cloud" aria-pressed="false">Cloud</button>
-          <button type="button" data-mini="auto" aria-pressed="false">Auto</button>
+          <button type="button" data-mini="auto" aria-pressed="true">Auto</button>
         </div>
         <button class="send" type="submit" aria-label="Send" disabled><svg class="ic"><use href="#i-send"/></svg></button>
       </div>
     </form>
-    <div class="ask-msg" role="status" aria-live="polite"><b>pleeply can’t answer yet.</b> The desktop app is in development. Join early access below and we’ll invite you to try it on your own computer.</div>
-    <p class="ask-note">Preview of pleeply Desktop, which is in development. What you type here isn’t sent or stored.</p>
+    <div class="ask-msg" role="status" aria-live="polite"><b>Local runs on your own computer.</b> That’s pleeply for Mac, in early access below. In the browser, switch to Cloud or Auto and pleeply answers on pleeply Cloud.</div>
+    <p class="ask-note">In the browser, pleeply answers on pleeply Cloud with free AI models. Nothing runs on your device. <a href="/chat#providers">Providers &amp; privacy</a></p>
     <div class="chips-row">
       <a class="pill pill-line" href="#product">Learn about pleeply Desktop</a>
       <a class="pill pill-line" href="#hybrid">Hybrid AI</a>

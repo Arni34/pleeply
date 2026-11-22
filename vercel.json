@@ -22,10 +22,12 @@
       "maxDuration": 300
     },
     "api/ai/v1/chat/completions.js": {
-      "maxDuration": 300
+      "maxDuration": 300,
+      "includeFiles": "api/_lib/free-catalog.json"
     },
     "api/ai/v1/models.js": {
-      "maxDuration": 15
+      "maxDuration": 15,
+      "includeFiles": "api/_lib/free-catalog.json"
     },
     "api/account.js": {
       "maxDuration": 20
@@ -41,6 +43,10 @@
     {
       "source": "/pro",
       "destination": "/pro.html"
+    },
+    {
+      "source": "/chat",
+      "destination": "/chat.html"
     },
     {
       "source": "/api/paddle/webhook",
@@ -77,6 +83,10 @@
     {
       "source": "/api/auth/desktop",
       "destination": "/api/account?op=start"
+    },
+    {
+      "source": "/api/auth/web",
+      "destination": "/api/account?op=webstart"
     },
     {
       "source": "/stats",

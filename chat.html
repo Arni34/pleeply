@@ -1,0 +1,680 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>pleeply — chat in your browser</title>
+<meta name="description" content="Chat with pleeply in your browser. Answers run on pleeply Cloud through free AI models — nothing to install.">
+<link rel="canonical" href="https://pleeply.vercel.app/chat">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#000000">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #000; --soft: #171717; --soft-2: #262626; --panel: #0d0d0d;
+    --ink: #fff; --text: #d4d4d4; --muted: #9b9b9b; --dim: #6b6b6b;
+    --line: rgba(255,255,255,.1); --line-2: rgba(255,255,255,.16); --line-3: rgba(255,255,255,.28);
+    --g: #3e9b5a; --g-2: #5cbf7a; --g-3: #6fcf8c; --g-4: #a8e2b9; --err: #f08a7e;
+    --side: 272px;
+    --sans: "Geist", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+    --mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.6 var(--sans); -webkit-font-smoothing: antialiased; overflow: hidden; }
+  a { color: var(--g-3); }
+  button { font: inherit; color: inherit; }
+  [hidden] { display: none !important; }
+  svg.ic { width: 18px; height: 18px; flex: none; }
+  .app { display: grid; grid-template-columns: var(--side) 1fr; height: 100dvh; }
+  .app.collapsed { grid-template-columns: 0 1fr; }
+  .app.collapsed .side { visibility: hidden; }
+
+  /* ---------- боковая панель ---------- */
+  .side { background: var(--panel); border-right: 1px solid var(--line); display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+  .side-top { display: flex; align-items: center; justify-content: space-between; padding: 14px 12px 10px 16px; }
+  .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); text-decoration: none; font-weight: 600; font-size: 17px; letter-spacing: -.02em; }
+  .brand svg { width: 24px; height: 24px; }
+  .ic-btn { display: inline-grid; place-items: center; width: 34px; height: 34px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); cursor: pointer; }
+  .ic-btn:hover { background: var(--soft); color: var(--ink); }
+  .side-act { display: flex; align-items: center; gap: 10px; margin: 2px 10px; padding: 8px 10px; border: 0; border-radius: 8px; background: transparent; color: var(--text); cursor: pointer; text-align: left; font-size: 14px; }
+  .side-act:hover { background: var(--soft); color: var(--ink); }
+  .side-act.primary svg { color: var(--g-3); }
+  .side-label { margin: 18px 20px 6px; font-size: 12px; color: var(--dim); }
+  .chats { list-style: none; margin: 0; padding: 0 10px; overflow-y: auto; flex: 1; }
+  .chats li { position: relative; }
+  .chats a { display: block; padding: 7px 34px 7px 10px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chats a:hover { background: var(--soft); }
+  .chats li.on a { background: var(--soft-2); color: var(--ink); }
+  .chats .del { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 26px; height: 26px; opacity: 0; }
+  .chats li:hover .del, .chats li.on .del { opacity: 1; }
+  .side-empty { padding: 6px 10px; color: var(--dim); font-size: 13px; }
+  .side-foot { border-top: 1px solid var(--line); padding: 10px; }
+
+  /* аккаунт */
+  .acct { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 10px; }
+  .acct.btn { width: 100%; border: 0; background: transparent; cursor: pointer; text-align: left; }
+  .acct.btn:hover { background: var(--soft); }
+  .avatar { width: 32px; height: 32px; flex: none; border-radius: 50%; display: grid; place-items: center; background: var(--g); color: #fff; font-weight: 600; font-size: 14px; }
+  .acct .who { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+  .acct .name { color: var(--ink); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .acct .plan { color: var(--dim); font-size: 12px; }
+  .btn-google { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 9px 12px; border: 1px solid var(--line-2); border-radius: 999px; background: #fff; color: #1f1f1f; font-weight: 500; font-size: 14px; text-decoration: none; }
+  .btn-google:hover { background: #f2f2f2; }
+  .guest-note { margin: 8px 4px 2px; font-size: 12px; color: var(--dim); text-align: center; }
+  .menu { position: fixed; z-index: 30; min-width: 240px; padding: 6px; background: #121212; border: 1px solid var(--line-2); border-radius: 12px; box-shadow: 0 18px 50px rgba(0,0,0,.6); }
+  .menu .head { padding: 8px 10px 10px; border-bottom: 1px solid var(--line); margin-bottom: 6px; font-size: 13px; color: var(--muted); word-break: break-all; }
+  .menu .head b { display: block; color: var(--ink); font-weight: 500; font-size: 14px; word-break: normal; }
+  .menu button { display: flex; width: 100%; align-items: center; gap: 10px; padding: 8px 10px; border: 0; border-radius: 8px; background: transparent; color: var(--text); text-align: left; cursor: pointer; font-size: 14px; }
+  .menu button:hover { background: var(--soft); color: var(--ink); }
+  .usage { padding: 4px 10px 8px; font-size: 12px; color: var(--muted); }
+  .bar { height: 4px; margin: 6px 0 2px; border-radius: 4px; background: var(--soft-2); overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--g-2); }
+
+  /* ---------- основная колонка ---------- */
+  .main { position: relative; display: flex; flex-direction: column; min-width: 0; height: 100dvh; }
+  .top { display: flex; align-items: center; gap: 8px; padding: 10px 14px; min-height: 56px; }
+  .top .open-side { display: none; }
+  .app.collapsed .top .open-side { display: inline-grid; }
+  .picker { position: relative; }
+  .picker > button { display: inline-flex; align-items: center; gap: 6px; padding: 7px 10px; border: 0; border-radius: 8px; background: transparent; color: var(--ink); font-weight: 500; cursor: pointer; font-size: 15px; }
+  .picker > button:hover { background: var(--soft); }
+  .models { position: absolute; top: 42px; left: 0; z-index: 20; width: min(360px, 90vw); padding: 6px; background: #121212; border: 1px solid var(--line-2); border-radius: 12px; box-shadow: 0 18px 50px rgba(0,0,0,.6); }
+  .models button { display: block; width: 100%; padding: 9px 10px; border: 0; border-radius: 8px; background: transparent; text-align: left; cursor: pointer; }
+  .models button:hover, .models button.on { background: var(--soft); }
+  .models b { display: block; color: var(--ink); font-weight: 500; font-size: 14px; }
+  .models small { color: var(--muted); font-size: 12px; }
+  .models .tag { float: right; margin-top: 2px; font-size: 11px; color: var(--g-3); }
+  .models .tag.paid { color: #e0b46c; }
+  .top .spacer { flex: 1; }
+  .top-link { color: var(--muted); font-size: 13px; text-decoration: none; padding: 6px 10px; border-radius: 8px; }
+  .top-link:hover { color: var(--ink); background: var(--soft); }
+
+  .scroll { flex: 1; overflow-y: auto; }
+  .thread { width: min(760px, 100%); margin: 0 auto; padding: 8px 20px 24px; }
+  .msg { margin: 22px 0; }
+  .msg.user { display: flex; justify-content: flex-end; }
+  .msg.user .bubble { max-width: 85%; padding: 10px 14px; border-radius: 16px; background: var(--soft-2); color: var(--ink); white-space: pre-wrap; word-wrap: break-word; }
+  .msg.ai .body { color: var(--text); word-wrap: break-word; }
+  .body > :first-child { margin-top: 0; } .body > :last-child { margin-bottom: 0; }
+  .body h1, .body h2, .body h3 { color: var(--ink); font-weight: 600; letter-spacing: -.01em; line-height: 1.3; margin: 1.2em 0 .5em; }
+  .body h1 { font-size: 22px; } .body h2 { font-size: 19px; } .body h3 { font-size: 16px; }
+  .body p { margin: .7em 0; } .body ul, .body ol { padding-left: 1.4em; } .body li { margin: .25em 0; }
+  .body strong { color: var(--ink); }
+  .body code { font: 13.5px var(--mono); background: var(--soft); padding: 1px 5px; border-radius: 5px; }
+  .body pre { position: relative; margin: .9em 0; padding: 14px 16px; background: #0f0f0f; border: 1px solid var(--line); border-radius: 10px; overflow-x: auto; }
+  .body pre code { background: none; padding: 0; font-size: 13px; line-height: 1.55; }
+  .body pre .copy { position: absolute; top: 6px; right: 6px; padding: 3px 8px; border: 1px solid var(--line-2); border-radius: 6px; background: #1a1a1a; color: var(--muted); font-size: 12px; cursor: pointer; opacity: 0; }
+  .body pre:hover .copy { opacity: 1; }
+  .body blockquote { margin: .8em 0; padding-left: 14px; border-left: 3px solid var(--line-3); color: var(--muted); }
+  .body table { border-collapse: collapse; margin: .8em 0; display: block; overflow-x: auto; }
+  .body th, .body td { border: 1px solid var(--line-2); padding: 6px 10px; text-align: left; }
+  .body hr { border: 0; border-top: 1px solid var(--line); }
+  details.think { margin: 0 0 10px; color: var(--muted); font-size: 13.5px; }
+  details.think summary { cursor: pointer; color: var(--dim); list-style: none; }
+  details.think summary::-webkit-details-marker { display: none; }
+  details.think div { margin-top: 6px; padding-left: 12px; border-left: 2px solid var(--line-2); white-space: pre-wrap; max-height: 320px; overflow-y: auto; }
+  .meta { display: flex; align-items: center; gap: 4px; margin-top: 8px; min-height: 28px; color: var(--dim); font-size: 12px; }
+  .meta .ic-btn { width: 28px; height: 28px; }
+  .meta .ic-btn svg { width: 15px; height: 15px; }
+  .route { margin-left: 6px; }
+  .err { padding: 10px 14px; border: 1px solid rgba(240,138,126,.35); border-radius: 10px; background: rgba(240,138,126,.07); color: var(--err); }
+  .cursor::after { content: ""; display: inline-block; width: 8px; height: 8px; margin-left: 4px; border-radius: 50%; background: var(--g-3); animation: pulse 1s infinite ease-in-out; vertical-align: middle; }
+  @keyframes pulse { 50% { opacity: .25; transform: scale(.8); } }
+
+  .empty { flex: 1; display: grid; place-items: center; padding: 20px; overflow-y: auto; }
+  .empty .in { width: min(720px, 100%); text-align: center; }
+  .empty svg.mark { width: 54px; height: 54px; margin-bottom: 14px; }
+  .empty h1 { margin: 0 0 8px; color: var(--ink); font-weight: 500; font-size: clamp(26px, 4vw, 34px); letter-spacing: -.03em; }
+  .empty p.lead { margin: 0 auto 26px; max-width: 520px; color: var(--muted); }
+  .empty .composer-wrap { padding: 0; text-align: left; }
+  .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 18px; }
+  .chips button { padding: 7px 12px; border: 1px solid var(--line-2); border-radius: 999px; background: transparent; color: var(--text); cursor: pointer; font-size: 13.5px; }
+  .chips button:hover { border-color: var(--line-3); color: var(--ink); }
+
+  .composer-wrap { width: min(760px, 100%); margin: 0 auto; padding: 0 20px calc(10px + env(safe-area-inset-bottom)); }
+  .composer { display: flex; align-items: flex-end; gap: 8px; padding: 10px 10px 10px 16px; border: 1px solid var(--line-2); border-radius: 18px; background: var(--soft); transition: border-color .15s; }
+  .composer:focus-within { border-color: var(--line-3); }
+  .composer textarea { flex: 1; min-height: 26px; max-height: 240px; resize: none; border: 0; outline: 0; background: transparent; color: var(--ink); font: 15.5px/1.55 var(--sans); padding: 4px 0; }
+  .composer textarea::placeholder { color: var(--dim); }
+  .send { width: 36px; height: 36px; flex: none; border: 0; border-radius: 50%; background: var(--ink); color: #000; display: grid; place-items: center; cursor: pointer; }
+  .send:disabled { background: var(--soft-2); color: var(--dim); cursor: default; }
+  .fine { margin: 8px 0 0; text-align: center; font-size: 12px; color: var(--dim); }
+  .fine a { color: var(--muted); }
+
+  dialog { width: min(560px, calc(100vw - 32px)); max-height: 85vh; padding: 0; border: 1px solid var(--line-2); border-radius: 16px; background: #0f0f0f; color: var(--text); }
+  dialog::backdrop { background: rgba(0,0,0,.65); }
+  dialog .in { padding: 24px; overflow-y: auto; max-height: 85vh; }
+  dialog h2 { margin: 0 0 10px; color: var(--ink); font-weight: 500; font-size: 22px; letter-spacing: -.02em; }
+  dialog h3 { margin: 20px 0 8px; color: var(--ink); font-weight: 500; font-size: 15px; }
+  dialog p, dialog li { font-size: 14px; }
+  dialog ul { padding-left: 18px; }
+  dialog .close { position: absolute; top: 12px; right: 12px; }
+  .prov { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 !important; list-style: none; }
+  .prov li a { display: inline-block; padding: 4px 10px; border: 1px solid var(--line-2); border-radius: 999px; color: var(--text); text-decoration: none; font-size: 13px; }
+  .prov li a:hover { border-color: var(--line-3); color: var(--ink); }
+
+  .toast { position: fixed; left: 50%; bottom: 110px; transform: translateX(-50%); z-index: 40; padding: 10px 16px; border-radius: 10px; background: #1d1d1d; border: 1px solid var(--line-2); color: var(--ink); font-size: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
+  .toast.err { color: var(--err); }
+  .scrim { display: none; }
+
+  @media (max-width: 800px) {
+    .app, .app.collapsed { grid-template-columns: 1fr; }
+    .side { position: fixed; inset: 0 auto 0 0; width: min(300px, 86vw); z-index: 25; transform: translateX(-100%); transition: transform .2s ease; visibility: visible !important; }
+    .app.mobile-open .side { transform: none; }
+    .app.mobile-open .scrim { display: block; position: fixed; inset: 0; z-index: 24; background: rgba(0,0,0,.55); }
+    .top .open-side { display: inline-grid !important; }
+    .side-top .collapse { display: none; }
+    .thread { padding: 4px 16px 20px; }
+    .composer-wrap { padding: 0 12px calc(8px + env(safe-area-inset-bottom)); }
+    .empty { padding: 16px; }
+    .top-link { display: none; }
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="mark" viewBox="-60 -60 120 120"><g transform="rotate(-18)"><path d="M -50 0 A 50 13 0 0 1 50 0" fill="none" stroke="#3E9B5A" stroke-width="5" stroke-linecap="round"/></g><circle r="30" fill="#3E9B5A"/><g transform="rotate(-18)"><path d="M -50 0 A 50 13 0 0 0 50 0" fill="none" stroke="#3E9B5A" stroke-width="5" stroke-linecap="round"/></g></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-side" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9.5 4.5v15" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V6M6 11.5 12 5.5l6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="11" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M15.5 8.5V6a1.5 1.5 0 0 0-1.5-1.5H6A1.5 1.5 0 0 0 4.5 6v8A1.5 1.5 0 0 0 6 15.5h2.5" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-retry" viewBox="0 0 24 24"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3M19.5 4.5v4h-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3.5 5 6v5.5c0 4.3 3 7.6 7 9 4-1.4 7-4.7 7-9V6l-7-2.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+  <symbol id="i-g" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></symbol>
+</svg>
+
+<div class="app" id="app">
+  <aside class="side" aria-label="Chats">
+    <div class="side-top">
+      <a class="brand" href="/" aria-label="pleeply home"><svg aria-hidden="true"><use href="#mark"/></svg>pleeply</a>
+      <button class="ic-btn collapse" id="collapse" type="button" aria-label="Hide sidebar" title="Hide sidebar"><svg class="ic"><use href="#i-side"/></svg></button>
+    </div>
+    <button class="side-act primary" id="new-chat" type="button"><svg class="ic"><use href="#i-plus"/></svg>New chat</button>
+    <button class="side-act" id="open-privacy" type="button"><svg class="ic"><use href="#i-shield"/></svg>Providers &amp; privacy</button>
+    <div class="side-label">Recents</div>
+    <ul class="chats" id="chats"></ul>
+    <div class="side-foot" id="account"></div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <main class="main" id="main">
+    <header class="top">
+      <button class="ic-btn open-side" id="open-side" type="button" aria-label="Show sidebar" title="Show sidebar"><svg class="ic"><use href="#i-side"/></svg></button>
+      <div class="picker">
+        <button type="button" id="model-btn" aria-haspopup="listbox" aria-expanded="false"><span id="model-name">pleeply Free</span><svg class="ic" style="width:15px;height:15px"><use href="#i-down"/></svg></button>
+        <div class="models" id="models" role="listbox" hidden></div>
+      </div>
+      <div class="spacer"></div>
+      <a class="top-link" href="/#early-access">Get pleeply for Mac</a>
+    </header>
+
+    <div class="empty" id="empty">
+      <div class="in">
+        <svg class="mark" aria-hidden="true"><use href="#mark"/></svg>
+        <h1 id="hello">What can I help with?</h1>
+        <p class="lead">pleeply in your browser. Nothing to install — every answer is computed on pleeply Cloud, not on your device.</p>
+        <div id="composer-home"></div>
+        <div class="chips" id="chips">
+          <button type="button">Plan a 3-day trip to Almaty</button>
+          <button type="button">Explain how a transformer model works</button>
+          <button type="button">Write a polite email asking for a deadline extension</button>
+          <button type="button">Ideas for a weekend side project</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll" id="scroll" hidden><div class="thread" id="thread"></div></div>
+
+    <div class="composer-wrap" id="composer-wrap">
+      <form class="composer" id="composer" autocomplete="off">
+        <textarea id="input" rows="1" placeholder="Message pleeply" aria-label="Message pleeply"></textarea>
+        <button class="send" id="send" type="submit" aria-label="Send" disabled><svg class="ic"><use href="#i-up"/></svg></button>
+      </form>
+      <p class="fine">Answers come from free AI models via pleeply Cloud and can be wrong. <a href="#providers" id="fine-privacy">Providers &amp; privacy</a></p>
+    </div>
+  </main>
+</div>
+
+<dialog id="privacy">
+  <button class="ic-btn close" type="button" data-close aria-label="Close"><svg class="ic"><use href="#i-x"/></svg></button>
+  <div class="in">
+    <h2>Providers &amp; privacy</h2>
+    <p>In the browser, pleeply runs entirely on <b>pleeply Cloud</b>. Your device only shows the conversation; the work happens on our servers and the AI providers below.</p>
+    <h3>Where your messages go</h3>
+    <p><b>pleeply Free</b> picks the best free model available right now and moves to the next one when a provider is busy, the way <a href="https://github.com/tashfeenahmed/freellmapi" target="_blank" rel="noopener">FreeLLMAPI</a> does. Each message is processed by one of these providers, under its own privacy policy:</p>
+    <ul class="prov" id="prov-list"><li>Loading…</li></ul>
+    <p id="prov-note" style="color:var(--dim);font-size:13px"></p>
+    <h3>What we keep</h3>
+    <ul>
+      <li>Your chats are saved only in this browser. Clearing site data deletes them.</li>
+      <li>pleeply Cloud doesn't store or log what you write. It keeps only daily request counts for the limits.</li>
+      <li>Free providers may use what you send to improve their models. Don't share passwords, health or financial details.</li>
+    </ul>
+    <h3>Want it fully private?</h3>
+    <p><a href="/#early-access">pleeply for Mac</a> runs models on your own computer, offline.</p>
+  </div>
+</dialog>
+
+<script type="module">
+import { marked } from '/assets/vendor/chat/marked.mjs';
+import DOMPurify from '/assets/vendor/chat/purify.mjs';
+
+const $ = (s, el = document) => el.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const icon = (id) => `<svg class="ic"><use href="#${id}"/></svg>`;
+
+// ---------- хранение (только в этом браузере) ----------
+const mem = {};
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return k in mem ? mem[k] : d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { mem[k] = v; } },
+};
+const DEVICE = (() => {
+  let id = store.get('pleeply.web.device', null);
+  if (!/^[a-f0-9-]{16,64}$/i.test(id || '')) { id = crypto.randomUUID(); store.set('pleeply.web.device', id); }
+  return id;
+})();
+
+const SYSTEM = 'You are pleeply, a friendly and capable AI assistant. Answer in the language the user writes in. Be clear and concise, and use Markdown (lists, tables, code blocks) when it helps.';
+const KEEP_CHARS = 48_000;
+
+const S = {
+  chats: (() => { const v = store.get('pleeply.web.chats', []); return Array.isArray(v) ? v : []; })(),
+  current: null,
+  models: [{ id: 'auto', name: 'pleeply Free', tier: 'free' }],
+  model: store.get('pleeply.web.model', 'auto'),
+  account: null,
+  limits: null,
+  plans: null,
+  free: null,
+  busy: null,
+};
+// Ответы, оборванные закрытием вкладки, не должны вечно «печататься»
+for (const c of S.chats) for (const m of c.messages || []) if (m.streaming) { m.streaming = false; if (!m.content) m.error = 'Interrupted.'; }
+const save = () => store.set('pleeply.web.chats', S.chats.slice(0, 200));
+const chat = () => S.chats.find((c) => c.id === S.current) || null;
+
+// ---------- markdown ----------
+marked.setOptions({ gfm: true, breaks: true });
+DOMPurify.addHook('afterSanitizeAttributes', (n) => { if (n.tagName === 'A') { n.setAttribute('target', '_blank'); n.setAttribute('rel', 'noopener noreferrer'); } });
+const md = (text) => DOMPurify.sanitize(marked.parse(text || ''), { FORBID_TAGS: ['style', 'img', 'iframe', 'form', 'input', 'svg'] });
+
+// ---------- модели ----------
+const modelInfo = (id) => S.models.find((m) => m.id === id) || S.models[0];
+function describe(m) {
+  if (m.id === 'auto') return 'Smartest free model available right now';
+  if (m.id === 'auto-fast') return 'Fastest free model available right now';
+  return [m.vendor, m.via && `via ${m.via}`].filter(Boolean).join(' ');
+}
+function renderPicker() {
+  const cur = modelInfo(S.model);
+  if (cur.id !== S.model) S.model = cur.id;
+  $('#model-name').textContent = cur.name;
+  $('#models').innerHTML = S.models.map((m) => `<button type="button" role="option" data-id="${esc(m.id)}" class="${m.id === S.model ? 'on' : ''}" aria-selected="${m.id === S.model}">
+    <span class="tag ${m.tier === 'paid' ? 'paid' : ''}">${m.tier === 'paid' ? 'Premium' : 'Free'}</span><b>${esc(m.name)}</b><small>${esc(describe(m))}</small></button>`).join('');
+}
+async function loadModels() {
+  try {
+    const j = await fetch('/api/ai/v1/models').then((r) => r.json());
+    const order = (m) => (m.id === 'auto' ? 0 : m.id === 'auto-fast' ? 1 : m.tier === 'free' ? 2 : 3);
+    const list = (j.data || []).map((m) => ({ id: m.id, name: m.name || m.id, vendor: m.vendor, via: m.via, tier: m.tier })).sort((a, b) => order(a) - order(b));
+    if (list.length) S.models = list;
+    S.limits = j.limits; S.plans = j.plans; S.free = j.free;
+  } catch {}
+  renderPicker();
+  renderProviders();
+  renderAccount();
+}
+$('#model-btn').onclick = (e) => {
+  e.stopPropagation();
+  const box = $('#models');
+  box.hidden = !box.hidden;
+  $('#model-btn').setAttribute('aria-expanded', String(!box.hidden));
+};
+$('#models').onclick = (e) => {
+  const b = e.target.closest('button[data-id]');
+  if (!b) return;
+  S.model = b.dataset.id;
+  store.set('pleeply.web.model', S.model);
+  $('#models').hidden = true;
+  renderPicker();
+  input.focus();
+};
+
+// ---------- провайдеры ----------
+function renderProviders() {
+  const f = S.free;
+  $('#prov-list').innerHTML = f?.providers?.length
+    ? f.providers.map((p) => `<li><a href="${esc(p.policy)}" target="_blank" rel="noopener">${esc(p.name)}</a></li>`).join('')
+    : '<li>No free providers are connected right now.</li>';
+  $('#prov-note').textContent = f ? `${f.models} free models are in rotation now. Model list from ${f.source}.` : '';
+}
+const privacy = $('#privacy');
+for (const el of [$('#open-privacy'), $('#fine-privacy')]) el.onclick = (e) => { e.preventDefault(); closeMobile(); privacy.showModal(); };
+privacy.addEventListener('click', (e) => { if (e.target === privacy || e.target.closest('[data-close]')) privacy.close(); });
+if (location.hash === '#providers') queueMicrotask(() => privacy.showModal());
+
+// ---------- аккаунт ----------
+async function loadAccount() {
+  try {
+    const r = await fetch('/api/account/me', { cache: 'no-store' });
+    S.account = r.ok ? await r.json() : null;
+  } catch { S.account = null; }
+  renderAccount();
+}
+function renderAccount() {
+  const box = $('#account');
+  const a = S.account?.account;
+  if (!a) {
+    const lim = S.plans?.free;
+    box.innerHTML = `<a class="btn-google" href="/api/auth/web"><svg width="18" height="18"><use href="#i-g"/></svg>Sign in with Google</a>
+      <p class="guest-note">${S.limits ? `Without an account: ${S.limits.free_per_day} messages a day.` : ''}${lim ? ` Signed in: ${lim.free}.` : ''}</p>`;
+    return;
+  }
+  const initial = (a.name || a.email || '?').trim().charAt(0).toUpperCase();
+  box.innerHTML = `<button class="acct btn" id="acct-btn" type="button" aria-haspopup="menu"><span class="avatar">${esc(initial)}</span>
+    <span class="who"><span class="name">${esc(a.name || a.email)}</span><span class="plan">${a.plan === 'pro' ? 'pleeply Pro' : 'Free plan'}</span></span></button>`;
+  $('#acct-btn').onclick = (e) => { e.stopPropagation(); openAccountMenu(e.currentTarget); };
+}
+function openAccountMenu(anchor) {
+  closeMenus();
+  const { account: a, usage = {}, upgrade, price } = S.account;
+  const lim = a.limits || {};
+  const used = Number(usage.free || 0), cap = Number(lim.free || 0);
+  const m = document.createElement('div');
+  m.className = 'menu';
+  m.setAttribute('role', 'menu');
+  m.innerHTML = `<div class="head"><b>${esc(a.name || a.email)}</b>${esc(a.email)}</div>
+    ${cap ? `<div class="usage">Today: ${used} of ${cap} free messages<div class="bar"><i style="width:${Math.min(100, (used / cap) * 100)}%"></i></div></div>` : ''}
+    ${a.plan !== 'pro' && upgrade ? `<button type="button" data-act="upgrade">Upgrade to Pro${price ? ` · ${esc(price)}` : ''}</button>` : ''}
+    ${a.plan === 'pro' && a.billing ? '<button type="button" data-act="manage">Manage subscription</button>' : ''}
+    <button type="button" data-act="signout">Sign out</button>`;
+  document.body.append(m);
+  const r = anchor.getBoundingClientRect();
+  m.style.left = `${Math.max(8, r.left)}px`;
+  m.style.bottom = `${window.innerHeight - r.top + 6}px`;
+  m.onclick = async (e) => {
+    const act = e.target.closest('[data-act]')?.dataset.act;
+    if (!act) return;
+    closeMenus();
+    if (act === 'signout') {
+      await fetch('/api/account/signout', { method: 'POST' }).catch(() => {});
+      S.account = null; renderAccount(); toast('Signed out.');
+      return;
+    }
+    const r2 = await fetch(act === 'upgrade' ? '/api/account/checkout' : '/api/account/portal', { method: 'POST' }).catch(() => null);
+    const j = r2 ? await r2.json().catch(() => ({})) : {};
+    if (r2?.ok && j.url) location.href = j.url; else toast(j.error || "Couldn't reach pleeply. Try again.", true);
+  };
+}
+function closeMenus() { document.querySelectorAll('.menu').forEach((m) => m.remove()); $('#models').hidden = true; $('#model-btn').setAttribute('aria-expanded', 'false'); }
+document.addEventListener('click', (e) => { if (!e.target.closest('.menu, .picker')) closeMenus(); });
+
+// ---------- список чатов ----------
+function renderChats() {
+  const ul = $('#chats');
+  if (!S.chats.length) { ul.innerHTML = '<li class="side-empty">Your chats will appear here.</li>'; return; }
+  ul.innerHTML = S.chats.map((c) => `<li class="${c.id === S.current ? 'on' : ''}"><a href="#" data-id="${esc(c.id)}">${esc(c.title || 'New chat')}</a>
+    <button class="ic-btn del" type="button" data-del="${esc(c.id)}" aria-label="Delete chat" title="Delete">${icon('i-x')}</button></li>`).join('');
+}
+$('#chats').onclick = (e) => {
+  const del = e.target.closest('[data-del]');
+  if (del) {
+    if (S.current === del.dataset.del && S.busy) S.busy.abort();
+    S.chats = S.chats.filter((c) => c.id !== del.dataset.del);
+    if (S.current === del.dataset.del) S.current = null;
+    save(); renderChats(); renderThread();
+    return;
+  }
+  const a = e.target.closest('a[data-id]');
+  if (!a) return;
+  e.preventDefault();
+  if (S.busy) S.busy.abort();
+  S.current = a.dataset.id;
+  closeMobile(); renderChats(); renderThread(); toBottom(true);
+};
+$('#new-chat').onclick = () => { if (S.busy) S.busy.abort(); S.current = null; closeMobile(); renderChats(); renderThread(); input.focus(); };
+
+// ---------- сообщения ----------
+function msgHtml(m, i, last) {
+  if (m.role === 'user') return `<div class="msg user"><div class="bubble">${esc(m.content)}</div></div>`;
+  const thinking = m.streaming && !m.content;
+  const think = m.reasoning ? `<details class="think"${thinking ? ' open' : ''}><summary>${thinking ? 'Thinking…' : 'Thought process'}</summary><div>${esc(m.reasoning)}</div></details>` : '';
+  const body = m.error ? `<div class="err">${esc(m.error)}</div>` : `<div class="body${m.streaming ? ' cursor' : ''}">${md(m.content)}</div>`;
+  const meta = m.streaming ? '' : `<div class="meta">
+      ${m.content ? `<button class="ic-btn" type="button" data-copy="${i}" title="Copy" aria-label="Copy">${icon('i-copy')}</button>` : ''}
+      ${last ? `<button class="ic-btn" type="button" data-retry title="Try again" aria-label="Try again">${icon('i-retry')}</button>` : ''}
+      ${m.route ? `<span class="route">${esc(m.route)}</span>` : ''}</div>`;
+  return `<div class="msg ai" data-i="${i}">${think}${body}${meta}</div>`;
+}
+function decorateCode(root) {
+  root.querySelectorAll('pre').forEach((pre) => {
+    if (pre.querySelector('.copy')) return;
+    const b = document.createElement('button');
+    b.className = 'copy'; b.type = 'button'; b.textContent = 'Copy';
+    b.onclick = () => { navigator.clipboard?.writeText(pre.querySelector('code')?.innerText || pre.innerText); b.textContent = 'Copied'; setTimeout(() => (b.textContent = 'Copy'), 1200); };
+    pre.append(b);
+  });
+}
+function renderThread() {
+  const c = chat();
+  const has = Boolean(c?.messages?.length);
+  $('#empty').hidden = has;
+  $('#scroll').hidden = !has;
+  // одно поле ввода: на пустом экране — по центру, в диалоге — внизу
+  const wrap = $('#composer-wrap');
+  if (has && wrap.parentElement !== $('#main')) $('#main').append(wrap);
+  if (!has && wrap.parentElement !== $('#composer-home')) $('#composer-home').append(wrap);
+  const t = $('#thread');
+  t.innerHTML = has ? c.messages.map((m, i) => msgHtml(m, i, i === c.messages.length - 1 && m.role === 'assistant')).join('') : '';
+  decorateCode(t);
+  document.title = c?.title ? `${c.title} — pleeply` : 'pleeply — chat in your browser';
+}
+function updateLast() {
+  const c = chat();
+  if (!c) return;
+  const i = c.messages.length - 1;
+  const el = $(`#thread .msg.ai[data-i="${i}"]`);
+  if (!el) return renderThread();
+  const open = el.querySelector('details.think')?.open;
+  el.outerHTML = msgHtml(c.messages[i], i, true);
+  const d = $(`#thread .msg.ai[data-i="${i}"] details.think`);
+  if (d && open && !c.messages[i].streaming) d.open = true;
+  decorateCode($('#thread'));
+}
+$('#thread').onclick = (e) => {
+  const cp = e.target.closest('[data-copy]');
+  if (cp) { navigator.clipboard?.writeText(chat().messages[Number(cp.dataset.copy)].content); toast('Copied.'); return; }
+  if (e.target.closest('[data-retry]')) retry();
+};
+
+let stick = true;
+$('#scroll').addEventListener('scroll', (e) => { const s = e.target; stick = s.scrollHeight - s.scrollTop - s.clientHeight < 80; });
+const toBottom = (force) => { const s = $('#scroll'); if (force || stick) s.scrollTop = s.scrollHeight; };
+
+// ---------- отправка ----------
+function buildHistory(messages) {
+  const out = [];
+  let chars = 0;
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const m = messages[i];
+    if (m.error || m.streaming || !m.content) continue;
+    chars += m.content.length;
+    if (chars > KEEP_CHARS && out.length) break;
+    out.unshift({ role: m.role, content: m.content });
+  }
+  return [{ role: 'system', content: SYSTEM }, ...out];
+}
+
+async function ask(c) {
+  const reply = { role: 'assistant', content: '', reasoning: '', streaming: true };
+  const prior = c.messages.slice();
+  c.messages.push(reply);
+  renderThread(); toBottom(true);
+  const ctrl = new AbortController();
+  S.busy = ctrl; setBusy(true);
+  let frame = 0;
+  const paint = () => { if (!frame && S.current === c.id) frame = requestAnimationFrame(() => { frame = 0; updateLast(); toBottom(); }); };
+  try {
+    const r = await fetch('/api/ai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Pleeply-Device': DEVICE },
+      body: JSON.stringify({ model: S.model, stream: true, messages: buildHistory(prior) }),
+      signal: ctrl.signal,
+    });
+    if (!r.ok) {
+      const j = await r.json().catch(() => ({}));
+      throw new Error(j.error?.message || `pleeply Cloud returned ${r.status}.`);
+    }
+    const route = r.headers.get('x-pleeply-route');
+    reply.route = `Answered by ${route ? decodeURIComponent(route) : modelInfo(S.model).name}`;
+    const reader = r.body.getReader();
+    const dec = new TextDecoder();
+    let buf = '';
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      let nl;
+      while ((nl = buf.indexOf('\n')) >= 0) {
+        const line = buf.slice(0, nl).trim();
+        buf = buf.slice(nl + 1);
+        if (!line.startsWith('data:')) continue;
+        const data = line.slice(5).trim();
+        if (data === '[DONE]') continue;
+        let j; try { j = JSON.parse(data); } catch { continue; }
+        if (j.error) throw new Error(j.error.message || 'The model stopped with an error.');
+        const d = j.choices?.[0]?.delta || {};
+        if (d.content) reply.content += d.content;
+        const th = d.reasoning ?? d.reasoning_content;
+        if (typeof th === 'string') reply.reasoning += th;
+        paint();
+      }
+    }
+    if (!reply.content) throw new Error('The model returned an empty answer. Try again.');
+  } catch (e) {
+    if (ctrl.signal.aborted) { if (!reply.content) reply.error = 'Stopped.'; }
+    else if (!reply.content) reply.error = e.message || "Couldn't reach pleeply Cloud. Check your connection.";
+    else reply.content += `\n\n_${e.message || 'Connection lost.'}_`;
+  } finally {
+    cancelAnimationFrame(frame);
+    reply.streaming = false;
+    if (!reply.reasoning) delete reply.reasoning;
+    c.updated = Date.now();
+    S.busy = null; setBusy(false);
+    save();
+    if (S.current === c.id) { updateLast(); toBottom(); }
+    if (S.account) loadAccount();
+  }
+}
+
+function send(text) {
+  text = text.trim();
+  if (!text || S.busy) return;
+  let c = chat();
+  if (!c) {
+    c = { id: crypto.randomUUID(), title: text.replace(/\s+/g, ' ').slice(0, 60), created: Date.now(), updated: Date.now(), messages: [] };
+    S.chats.unshift(c);
+    S.current = c.id;
+  } else {
+    S.chats = [c, ...S.chats.filter((x) => x !== c)];
+  }
+  c.messages.push({ role: 'user', content: text });
+  save(); renderChats();
+  input.value = ''; grow(); syncSend();
+  ask(c);
+}
+function retry() {
+  const c = chat();
+  if (!c || S.busy) return;
+  if (c.messages.at(-1)?.role === 'assistant') c.messages.pop();
+  if (c.messages.at(-1)?.role !== 'user') return;
+  ask(c);
+}
+
+// ---------- поле ввода ----------
+const input = $('#input');
+function grow() { input.style.height = 'auto'; input.style.height = `${Math.min(input.scrollHeight, 240)}px`; }
+function syncSend() { if (!S.busy) $('#send').disabled = !input.value.trim(); }
+function setBusy(on) {
+  const b = $('#send');
+  b.disabled = false;
+  b.innerHTML = icon(on ? 'i-stop' : 'i-up');
+  b.setAttribute('aria-label', on ? 'Stop' : 'Send');
+  if (!on) syncSend();
+}
+input.addEventListener('input', () => { grow(); syncSend(); });
+input.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); send(input.value); }
+});
+$('#composer').addEventListener('submit', (e) => { e.preventDefault(); if (S.busy) S.busy.abort(); else send(input.value); });
+$('#chips').onclick = (e) => { const b = e.target.closest('button'); if (b) send(b.textContent); };
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') { if (S.busy) S.busy.abort(); closeMenus(); }
+  if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'o') { e.preventDefault(); $('#new-chat').click(); }
+});
+
+// ---------- боковая панель ----------
+const app = $('#app');
+const mobile = () => matchMedia('(max-width: 800px)').matches;
+function closeMobile() { app.classList.remove('mobile-open'); }
+$('#collapse').onclick = () => { app.classList.add('collapsed'); store.set('pleeply.web.collapsed', true); };
+$('#open-side').onclick = () => {
+  if (mobile()) app.classList.add('mobile-open');
+  else { app.classList.remove('collapsed'); store.set('pleeply.web.collapsed', false); }
+};
+$('#scrim').onclick = closeMobile;
+if (store.get('pleeply.web.collapsed', false)) app.classList.add('collapsed');
+
+// ---------- уведомления ----------
+let toastTimer;
+function toast(text, err = false) {
+  document.querySelector('.toast')?.remove();
+  const t = document.createElement('div');
+  t.className = `toast${err ? ' err' : ''}`;
+  t.setAttribute('role', 'status');
+  t.textContent = text;
+  document.body.append(t);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.remove(), 3200);
+}
+const signin = new URLSearchParams(location.search).get('signin');
+if (signin) {
+  toast(signin === 'cancelled' ? 'Sign-in cancelled.' : "Google sign-in didn't finish. Try again.", signin !== 'cancelled');
+  window.history.replaceState(null, '', '/chat');
+}
+
+// ---------- старт ----------
+renderChats();
+renderThread();
+renderPicker();
+loadModels();
+loadAccount();
+input.focus();
+
+// Вопрос, набранный в строке на главной странице: читаем один раз и сразу отправляем новым чатом
+(() => {
+  let text = null;
+  try {
+    const p = JSON.parse(sessionStorage.getItem('pleeply.web.pending') || 'null');
+    sessionStorage.removeItem('pleeply.web.pending');
+    if (p && typeof p.text === 'string' && Date.now() - Number(p.at) < 120_000) text = p.text;
+  } catch {}
+  const h = /^#q=(.+)$/.exec(location.hash);
+  if (h) {
+    try { text ??= decodeURIComponent(h[1]); } catch {}
+    window.history.replaceState(null, '', '/chat');
+  }
+  if (text) send(text.slice(0, 20_000));
+})();
+</script>
+</body>
+</html>

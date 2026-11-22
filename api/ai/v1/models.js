@@ -3,6 +3,7 @@
 import { catalog } from '../../_lib/ai.js';
 import { json } from '../../_lib/forum.js';
 import { PLANS, PRO_PRICE_TEXT } from '../../_lib/account.js';
+import { freeSummary } from '../../_lib/free.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') return json(res, 405, { error: { message: 'Method not allowed.' } });
@@ -13,5 +14,6 @@ export default async function handler(req, res) {
     limits: { free_per_day: PLANS.guest.free, premium_per_day: PLANS.guest.paid },
     plans: PLANS,
     price: PRO_PRICE_TEXT,
+    free: await freeSummary(),
   });
 }

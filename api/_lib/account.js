@@ -96,12 +96,35 @@ export function publicAccount(a) {
   return { email: a.email, name: a.name, plan, planUntil: a.plan_until, planStatus: a.plan_status, billing: !!a.paddle_customer_id, limits: PLANS[plan] };
 }
 
-/** Аккаунт по заголовку Authorization: Bearer <токен сессии приложения>. */
-export async function accountFromRequest(req) {
+// Браузерная версия (/chat) держит тот же токен сессии в cookie: HttpOnly, Secure, SameSite=Lax, только этот сайт.
+export const SESSION_COOKIE = '__Host-pleeply_session';
+export const OAUTH_COOKIE = '__Host-pleeply_oauth';
+
+export function readCookie(req, name) {
+  for (const part of String(req.headers.cookie || '').split(';')) {
+    const i = part.indexOf('=');
+    if (i > 0 && part.slice(0, i).trim() === name) return decodeURIComponent(part.slice(i + 1).trim());
+  }
+  return null;
+}
+
+export const cookieHeader = (name, value, maxAge) =>
+  `${name}=${encodeURIComponent(value)}; Path=/; Max-Age=${maxAge}; HttpOnly; Secure; SameSite=Lax`;
+
+/** Токен сессии: из заголовка Authorization (приложение) или из cookie (браузер). */
+export function sessionToken(req) {
   const m = /^Bearer ([A-Za-z0-9_-]{30,100})$/.exec(String(req.headers.authorization || ''));
-  if (!m) return null;
+  if (m) return m[1];
+  const c = readCookie(req, SESSION_COOKIE);
+  return c && /^[A-Za-z0-9_-]{30,100}$/.test(c) ? c : null;
+}
+
+/** Аккаунт по токену сессии приложения или браузера. */
+export async function accountFromRequest(req) {
+  const t = sessionToken(req);
+  if (!t) return null;
   await ensureAccounts();
-  const [row] = await sql`select a.*, s.id as session_id, s.last_used from app_sessions s join accounts a on a.id = s.account_id where s.token_hash = ${sha256hex(m[1])}`;
+  const [row] = await sql`select a.*, s.id as session_id, s.last_used from app_sessions s join accounts a on a.id = s.account_id where s.token_hash = ${sha256hex(t)}`;
   if (!row) return null;
   if (!row.last_used || Date.now() - new Date(row.last_used).getTime() > 3_600_000) {
     await sql`update app_sessions set last_used = now() where id = ${row.session_id}`;
