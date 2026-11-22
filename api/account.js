@@ -11,7 +11,7 @@
 import { sql, json, esc, clientKey, allow, SITE } from './_lib/forum.js';
 import {
   ensureAccounts, GOOGLE_REDIRECT, PLANS, PRO_PRICE_TEXT, randomToken, sha256hex, pkceOk, decodeJwtPayload, googleClaimsError,
-  effectivePlan, publicAccount, accountFromRequest, verifyPaddleSignature, planFromSubscription, paddleReady, paddle, paddleCustomer,
+  effectivePlan, publicAccount, accountFromRequest, verifyPaddleSignature, applySubscription, paddleReady, paddle, paddleCustomer,
 } from './_lib/account.js';
 
 function page(res, status, title, html) {
@@ -118,6 +118,7 @@ async function checkout(req, res) {
     collection_mode: 'automatic',
   });
   if (!r.ok || !r.data?.id) return json(res, 502, { error: 'Paddle could not start the checkout. Try again.' });
+  await sql`insert into paddle_checkouts (txn_id, account_id) values (${r.data.id}, ${acc.id}) on conflict do nothing`;
   return json(res, 200, { url: r.data.checkout?.url || `${SITE}/pro?_ptxn=${r.data.id}` });
 }
 
@@ -138,20 +139,17 @@ async function webhook(req, res) {
   if (!verifyPaddleSignature(raw, req.headers['paddle-signature'], process.env.PADDLE_WEBHOOK_SECRET)) return json(res, 401, { error: 'Bad signature.' });
   const ev = JSON.parse(raw);
   await ensureAccounts();
-  const [fresh] = await sql`insert into paddle_events (event_id) values (${String(ev.event_id)}) on conflict do nothing returning event_id`;
-  if (!fresh) return json(res, 200, { ok: true, duplicate: true });
-  if (String(ev.event_type).startsWith('subscription.') && ev.data?.id) {
-    const sub = ev.data;
-    const p = planFromSubscription(sub);
-    const accountId = Number(sub.custom_data?.account_id) || null;
-    if (accountId) {
-      await sql`update accounts set plan = ${p.plan}, plan_until = ${p.plan_until}, plan_status = ${p.plan_status}, paddle_subscription_id = ${sub.id},
-        paddle_customer_id = coalesce(paddle_customer_id, ${sub.customer_id || null}) where id = ${accountId}`;
-    } else {
-      await sql`update accounts set plan = ${p.plan}, plan_until = ${p.plan_until}, plan_status = ${p.plan_status}, paddle_subscription_id = ${sub.id}
-        where paddle_subscription_id = ${sub.id} or (paddle_customer_id is not null and paddle_customer_id = ${sub.customer_id || ''})`;
-    }
-  }
+  const eventId = String(ev.event_id || '');
+  const [seen] = await sql`select 1 as x from paddle_events where event_id = ${eventId}`;
+  if (seen) return json(res, 200, { ok: true, duplicate: true });
+  const type = String(ev.event_type || '');
+  const d = ev.data || {};
+  // Аккаунт и состояние подписки определяет applySubscription по своим данным, тело события — только подсказка, что смотреть.
+  // subscription.created несёт transaction_id, transaction.completed — subscription_id: привязка сработает при любом порядке.
+  if (type.startsWith('subscription.')) await applySubscription(d.id, d.transaction_id);
+  else if (type === 'transaction.completed' || type === 'transaction.paid') await applySubscription(d.subscription_id, d.id);
+  // Событие отмечаем обработанным только после успеха: при ошибке Paddle повторит его
+  await sql`insert into paddle_events (event_id) values (${eventId}) on conflict do nothing`;
   return json(res, 200, { ok: true });
 }
 

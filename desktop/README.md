@@ -72,7 +72,7 @@ This is the desktop app described on [pleeply.vercel.app](https://pleeply.vercel
 Что нужно включить в Vercel:
 
 1. **Google:** Google Cloud Console → APIs & Services → OAuth consent screen (External, имя pleeply) → Credentials → Create OAuth client ID → Web application → Authorized redirect URI `https://pleeply.vercel.app/api/auth/google/callback`. Client ID и secret → `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`.
-2. **Paddle (сначала sandbox):** продукт «pleeply Pro» с ценой $19.99/месяц → `PADDLE_PRICE_PRO` (`pri_…`); Developer tools → API key → `PADDLE_API_KEY`, client-side token → `PADDLE_CLIENT_TOKEN`; Notifications → адрес `https://pleeply.vercel.app/api/paddle/webhook`, события `subscription.*` → секрет → `PADDLE_WEBHOOK_SECRET`; Checkout → Default payment link `https://pleeply.vercel.app/pro`; `PADDLE_ENV=sandbox`, после проверки — `production`.
+2. **Paddle (сначала sandbox):** продукт «pleeply Pro» с ценой $19.99/месяц → `PADDLE_PRICE_PRO` (`pri_…`); Developer tools → API key → `PADDLE_API_KEY`, client-side token → `PADDLE_CLIENT_TOKEN`; Notifications → адрес `https://pleeply.vercel.app/api/paddle/webhook`, события `subscription.*` и `transaction.completed` → секрет → `PADDLE_WEBHOOK_SECRET`; Checkout → Default payment link `https://pleeply.vercel.app/pro`; `PADDLE_ENV=sandbox`, после проверки — `production`.
 
 Пока переменных нет, вход показывает «Sign-in is not set up yet», а кнопка Upgrade — «Payments are being set up»; приложение и pleeply Cloud без входа работают как раньше.
 

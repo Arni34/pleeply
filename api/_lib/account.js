@@ -48,6 +48,11 @@ export const ensureAccounts = () => (ready ??= (async () => {
     created_at timestamptz not null default now(),
     last_used timestamptz)`);
   await sql.query(`create table if not exists paddle_events (event_id text primary key, received_at timestamptz not null default now())`);
+  // Транзакции оплаты, которые создал наш сервер: только по ним новая подписка привязывается к аккаунту
+  await sql.query(`create table if not exists paddle_checkouts (
+    txn_id text primary key,
+    account_id bigint not null references accounts(id) on delete cascade,
+    created_at timestamptz not null default now())`);
 })());
 
 export const sha256hex = (s) => crypto.createHash('sha256').update(String(s)).digest('hex');
@@ -145,6 +150,27 @@ export async function paddle(path, method = 'GET', body) {
   });
   const j = await r.json().catch(() => ({}));
   return { ok: r.ok, status: r.status, data: j.data, error: j.error };
+}
+
+/**
+ * Записать в аккаунт текущее состояние подписки. Чья подписка, решают только данные нашего сервера: уже привязанный
+ * paddle_subscription_id или транзакция из paddle_checkouts (её создал checkout для этого аккаунта). custom_data не
+ * доверяем: его может вписать кто угодно, открыв оплату Paddle.js. Состояние берём у Paddle API, а не из тела события,
+ * поэтому события, пришедшие не по порядку, не откатывают тариф. Возвращает false, если подписка не наша.
+ */
+export async function applySubscription(subId, txnId) {
+  if (!/^sub_[a-z0-9]+$/i.test(String(subId || ''))) return false;
+  let [acc] = await sql`select id from accounts where paddle_subscription_id = ${subId}`;
+  if (!acc && /^txn_[a-z0-9]+$/i.test(String(txnId || ''))) {
+    [acc] = await sql`select account_id as id from paddle_checkouts where txn_id = ${txnId}`;
+  }
+  if (!acc) return false;
+  const r = await paddle(`/subscriptions/${subId}`);
+  if (!r.ok || r.data?.id !== subId) throw new Error('Paddle subscription lookup failed');
+  const p = planFromSubscription(r.data);
+  await sql`update accounts set plan = ${p.plan}, plan_until = ${p.plan_until}, plan_status = ${p.plan_status}, paddle_subscription_id = ${subId},
+    paddle_customer_id = coalesce(paddle_customer_id, ${r.data.customer_id || null}) where id = ${acc.id}`;
+  return true;
 }
 
 /** Покупатель Paddle для аккаунта: существующий или новый (по почте). */
