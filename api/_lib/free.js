@@ -125,12 +125,17 @@ async function count(target) {
     on conflict (target) do update set used = case when ai_free_state.day = current_date then ai_free_state.used + 1 else 1 end, day = current_date`.catch(() => {});
 }
 
-/** Сколько ждать после ошибки провайдера, в секундах. */
+/**
+ * Сколько ждать после ошибки провайдера, в секундах. Пауза общая для всех пользователей, поэтому ставим её только
+ * за проблемы на стороне провайдера. 400/403/413/422 может вызвать сам запрос (длина, содержание, модерация) —
+ * иначе пара испорченных запросов выключила бы модели для всех; такие ошибки дают 0, без паузы.
+ */
 export function cooldownFor(status, retryAfter) {
   const ra = Number(retryAfter);
   if (status === 429) return Math.min(Math.max(Number.isFinite(ra) && ra > 0 ? ra : 60, 20), 3600);
-  if (status === 401 || status === 403) return 3600; // ключ не принят — не дёргаем час
-  if (status === 404 || status === 400 || status === 422) return 6 * 3600; // модель убрали или не принимает такой запрос
+  if (status === 401) return 3600; // ключ не принят — не дёргаем час
+  if (status === 404) return 6 * 3600; // модель убрали
+  if (status >= 400 && status < 500) return 0;
   return 45; // 5xx, таймаут, обрыв сети
 }
 
@@ -154,12 +159,17 @@ const routeLabel = (m) => `${FREE_PROVIDERS[m.provider].name} · ${m.name}`;
 
 /** Ответ от первой модели цепочки, которая согласилась; поток SSE передаётся как есть. */
 export async function relayFree(entry, request, res, signal) {
+  if (!request.messages.some((m) => m.role === 'user' && m.content.trim())) {
+    return json(res, 400, { error: { message: 'Write a message first.' } });
+  }
   const [list, state] = await Promise.all([liveChain(entry.strategy), loadState().catch(() => new Map())]);
   if (!list.length) return json(res, 503, { error: { message: 'pleeply Free has no free models available right now.' } });
   let tries = candidates(list, state, request);
   if (!tries.length) tries = list.slice(0, 2); // всё на паузе — пробуем лучшие, вдруг уже отпустило
   const need = tokensOf(request.messages);
   let lastStatus = 0;
+  let refused = 0; // отказы, которые мог вызвать сам запрос
+  const REFUSED = { error: { message: "The free models couldn't process this message. Try rephrasing or shortening it." } };
   for (const m of tries.slice(0, MAX_ATTEMPTS)) {
     if (signal.aborted) return;
     const ep = endpoint(m.provider);
@@ -177,7 +187,8 @@ export async function relayFree(entry, request, res, signal) {
       clearTimeout(timer);
       signal.removeEventListener('abort', onAbort);
       if (signal.aborted) return;
-      await cool(m.target, cooldownFor(0), 'network');
+      // долгий ответ на огромный запрос — не вина провайдера, общую паузу не ставим
+      if (need < 8000) await cool(m.target, cooldownFor(0), 'network');
       continue;
     }
     clearTimeout(timer);
@@ -185,7 +196,9 @@ export async function relayFree(entry, request, res, signal) {
       lastStatus = up.status;
       await up.body?.cancel().catch(() => {});
       signal.removeEventListener('abort', onAbort);
-      await cool(m.target, cooldownFor(up.ok ? 502 : up.status, up.headers.get('retry-after')), `http ${up.status}`);
+      const secs = cooldownFor(up.ok ? 502 : up.status, up.headers.get('retry-after'));
+      if (secs) await cool(m.target, secs, `http ${up.status}`);
+      else if (++refused >= 2) return json(res, 400, REFUSED); // две модели подряд отказали — дело в запросе
       continue;
     }
     res.writeHead(200, {
