@@ -57,6 +57,25 @@ This is the desktop app described on [pleeply.vercel.app](https://pleeply.vercel
 
 Перед каждым облачным запросом окно согласия показывает, что запрос идёт через сервер pleeply к производителю модели. Шлюз не хранит текст — только счётчики запросов за день (таблица `ai_usage` в Neon). Своё облако можно отключить в Control Center → Cloud providers, свои ключи по-прежнему работают напрямую.
 
+## Аккаунт и pleeply Pro
+
+Вход через Google: приложение открывает браузер на `pleeply.vercel.app/api/auth/desktop`, сайт после входа возвращает одноразовый код на `http://127.0.0.1:<порт>/callback`, приложение меняет его на токен с проверкой PKCE. Токен хранится в системной связке ключей. Код сервера — `api/account.js` и `api/_lib/account.js`, страница оплаты — `pro.html`.
+
+| Тариф | Бесплатные облачные модели в сутки | Премиум (Claude, GPT, Gemini, DeepSeek) |
+|---|---|---|
+| Без входа | 60 на установку | 10 |
+| Вход через Google | 100 | 25 |
+| Pro, $19.99 в месяц | 1000 | 150 |
+
+Числа меняются переменными `AI_GUEST_FREE/PAID`, `AI_ACCOUNT_FREE/PAID`, `AI_PRO_FREE/PAID`, цена на странице — `PRO_PRICE_TEXT`.
+
+Что нужно включить в Vercel:
+
+1. **Google:** Google Cloud Console → APIs & Services → OAuth consent screen (External, имя pleeply) → Credentials → Create OAuth client ID → Web application → Authorized redirect URI `https://pleeply.vercel.app/api/auth/google/callback`. Client ID и secret → `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`.
+2. **Paddle (сначала sandbox):** продукт «pleeply Pro» с ценой $19.99/месяц → `PADDLE_PRICE_PRO` (`pri_…`); Developer tools → API key → `PADDLE_API_KEY`, client-side token → `PADDLE_CLIENT_TOKEN`; Notifications → адрес `https://pleeply.vercel.app/api/paddle/webhook`, события `subscription.*` → секрет → `PADDLE_WEBHOOK_SECRET`; Checkout → Default payment link `https://pleeply.vercel.app/pro`; `PADDLE_ENV=sandbox`, после проверки — `production`.
+
+Пока переменных нет, вход показывает «Sign-in is not set up yet», а кнопка Upgrade — «Payments are being set up»; приложение и pleeply Cloud без входа работают как раньше.
+
 ## Запуск
 
 ```bash
@@ -72,7 +91,7 @@ npm start
 npm test
 ```
 
-22 теста ядра: расчёт совместимости (пример с сайта — Apple M2 16 GB → 7–8B), выбор двух стартовых моделей, профили задач, Auto, согласие на облако (отклонённый запрос не уходит, одобренный — ровно то, что показано), pleeply Cloud (настоящий получатель в согласии, дневной лимит), документы, песочница агента и защита от записи по ссылкам и запросов в локальную сеть, поиск, закрепление и правка сообщений, шифрование ключей, Memory.
+23 теста ядра: вход через Google с PKCE (на поддельном сайте), расчёт совместимости (пример с сайта — Apple M2 16 GB → 7–8B), выбор двух стартовых моделей, профили задач, Auto, согласие на облако (отклонённый запрос не уходит, одобренный — ровно то, что показано), pleeply Cloud (настоящий получатель в согласии, дневной лимит), документы, песочница агента и защита от записи по ссылкам и запросов в локальную сеть, поиск, закрепление и правка сообщений, шифрование ключей, Memory.
 
 ## Сборка
 

@@ -397,3 +397,55 @@ test("cloud: once per chat remembers the approval only for that chat", async () 
   assert.equal(ev.chat.messages.at(-1).meta.approval, "chat");
   await core.dispose();
 });
+
+test("account: Google sign-in in the browser with PKCE, encrypted token, plan refresh, sign out", async () => {
+  const { Account } = await import("../src/core/account.js");
+  const crypto = await import("node:crypto");
+  const pending = new Map();
+  let issued = null;
+  const site = http.createServer(async (req, res) => {
+    const u = new URL(req.url, "http://x");
+    let body = "";
+    for await (const c of req) body += c;
+    if (u.pathname === "/api/auth/desktop") {
+      const code = "c".repeat(40);
+      pending.set(code, u.searchParams.get("challenge"));
+      res.writeHead(302, { location: `http://127.0.0.1:${u.searchParams.get("port")}/callback?code=${code}&state=${u.searchParams.get("state")}` });
+      return res.end();
+    }
+    if (u.pathname === "/api/auth/token") {
+      const b = JSON.parse(body);
+      const ch = pending.get(b.code);
+      if (!ch || crypto.createHash("sha256").update(b.verifier).digest("base64url") !== ch) { res.writeHead(400, { "content-type": "application/json" }); return res.end('{"error":"bad"}'); }
+      issued = "t".repeat(43);
+      res.writeHead(200, { "content-type": "application/json" });
+      return res.end(JSON.stringify({ token: issued, account: { email: "dana@example.com", name: "Dana", plan: "free", limits: { free: 100, paid: 25 } } }));
+    }
+    const auth = issued && req.headers.authorization === `Bearer ${issued}`;
+    if (u.pathname === "/api/account/me") {
+      res.writeHead(auth ? 200 : 401, { "content-type": "application/json" });
+      return res.end(JSON.stringify(auth ? { account: { email: "dana@example.com", plan: "pro", limits: { free: 1000, paid: 150 } }, usage: { paid: 3 }, price: "$19.99 / month", upgrade: true } : { error: "Signed out." }));
+    }
+    if (u.pathname === "/api/account/signout") { issued = null; res.writeHead(200, { "content-type": "application/json" }); return res.end("{}"); }
+    res.writeHead(404);
+    res.end();
+  });
+  await new Promise((r) => site.listen(0, "127.0.0.1", r));
+  const store = await new Store(await tmp()).init();
+  const cipher = { available: () => true, encrypt: (s) => Buffer.from(s).toString("base64").split("").reverse().join(""), decrypt: (b) => Buffer.from(b.split("").reverse().join(""), "base64").toString() };
+  // «Браузер»: открывает адрес и проходит редирект сайта на локальный адрес приложения.
+  const acct = await new Account({ store, cipher, baseUrl: `http://127.0.0.1:${site.address().port}`, openUrl: (url) => fetch(url).catch(() => {}) }).init();
+  assert.equal(acct.status().signedIn, false);
+  await acct.signIn();
+  for (let i = 0; i < 100 && acct.status().account?.plan !== "pro"; i++) await new Promise((r) => setTimeout(r, 30));
+  const st = acct.status();
+  assert.equal(st.signedIn, true);
+  assert.equal(st.account.plan, "pro");
+  assert.equal(st.usage.paid, 3);
+  assert.ok(!JSON.stringify(await store.read("account.json", {})).includes("t".repeat(43)), "token is stored encrypted");
+  assert.deepEqual(await acct.authHeader(), { authorization: `Bearer ${"t".repeat(43)}` });
+  await acct.signOut();
+  assert.equal(acct.status().signedIn, false);
+  assert.deepEqual(await acct.authHeader(), {});
+  site.close();
+});

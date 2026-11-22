@@ -9,6 +9,7 @@
 import crypto from 'node:crypto';
 import Anthropic from '@anthropic-ai/sdk';
 import { sql, clientKey, json } from './forum.js';
+import { PLANS, effectivePlan } from './account.js';
 
 const OPENROUTER = 'https://openrouter.ai/api/v1';
 const GROQ = 'https://api.groq.com/openai/v1';
@@ -17,9 +18,8 @@ const DEEPSEEK = 'https://api.deepseek.com/v1';
 
 // Лимиты на устройство в сутки; на одну сеть (IP) — в IP_FACTOR раз больше; общий потолок платных запросов в сутки.
 export const LIMITS = {
-  free: Number(process.env.AI_FREE_PER_DAY || 60),
-  paid: Number(process.env.AI_PAID_PER_DAY || 25),
   ipFactor: 4,
+  proGlobal: Number(process.env.AI_PRO_GLOBAL_PER_DAY || 5000),
   paidGlobal: Number(process.env.AI_PAID_GLOBAL_PER_DAY || 300),
   maxTokens: 8192,
   maxChars: 300_000,
@@ -111,16 +111,32 @@ async function bump(key, tier) {
   return row.n;
 }
 
-/** Считает запрос и решает, можно ли. Возвращает null или текст отказа. */
-export async function checkLimits(req, deviceId, tier) {
+/**
+ * Считает запрос и решает, можно ли. Возвращает null или текст отказа.
+ * Без входа лимит на установку (и на сеть), с аккаунтом — на аккаунт по тарифу: free или Pro.
+ */
+export async function checkLimits(req, deviceId, tier, account = null) {
   await ensureUsage();
-  const dev = 'd:' + crypto.createHash('sha256').update(`pleeply-ai:${deviceId}`).digest('hex').slice(0, 24);
-  const ip = 'i:' + clientKey(req);
-  const perDay = LIMITS[tier];
-  const [d, i] = await Promise.all([bump(dev, tier), bump(ip, tier)]);
-  if (d > perDay) return `You've used today's ${perDay} free ${tier === 'paid' ? 'premium ' : ''}requests in pleeply Cloud. They reset at midnight UTC. Local models keep working, or add your own API key in Control Center.`;
-  if (i > perDay * LIMITS.ipFactor) return 'Too many pleeply Cloud requests from this network today. Try again tomorrow or use a local model.';
-  if (tier === 'paid' && (await bump('g:all', tier)) > LIMITS.paidGlobal) return 'pleeply Cloud has reached its daily limit for premium models. Try a free model or a local one.';
+  const plan = account ? effectivePlan(account) : 'guest';
+  const perDay = PLANS[plan][tier];
+  const kind = tier === 'paid' ? 'premium ' : '';
+  if (account) {
+    const n = await bump('a:' + account.id, tier);
+    if (n > perDay) {
+      return plan === 'pro'
+        ? `You've used today's ${perDay} ${kind}requests on pleeply Pro. They reset at midnight UTC.`
+        : `You've used today's ${perDay} ${kind}requests. pleeply Pro gives ${PLANS.pro[tier]} a day — upgrade in Control Center → Account.`;
+    }
+  } else {
+    const dev = 'd:' + crypto.createHash('sha256').update(`pleeply-ai:${deviceId}`).digest('hex').slice(0, 24);
+    const [d, i] = await Promise.all([bump(dev, tier), bump('i:' + clientKey(req), tier)]);
+    if (d > perDay) return `You've used today's ${perDay} ${kind}requests without an account. Sign in with Google for ${PLANS.free[tier]} a day, or use a local model.`;
+    if (i > perDay * LIMITS.ipFactor) return 'Too many pleeply Cloud requests from this network today. Sign in with Google or use a local model.';
+  }
+  if (tier === 'paid') {
+    const pro = plan === 'pro';
+    if ((await bump(pro ? 'g:pro' : 'g:all', tier)) > (pro ? LIMITS.proGlobal : LIMITS.paidGlobal)) return 'pleeply Cloud has reached its daily limit for premium models. Try a free model or a local one.';
+  }
   return null;
 }
 

@@ -485,3 +485,15 @@ h1, h2, h3, h4 { margin: 0; color: var(--ink); font-weight: 500; letter-spacing:
 .chat-item:hover .where-ic, .chat-item.menu-open .where-ic { display: none; }
 .chat-item .x { display: none; }
 .chat-item:hover .x, .chat-item.menu-open .x, .chat-item:focus-visible .x { display: grid; opacity: 1; }
+
+/* ---------- аккаунт ---------- */
+.acct-row { display: flex; align-items: center; gap: 10px; margin: 0 12px 12px; padding: 8px 10px; border-radius: 10px; width: calc(100% - 24px); text-align: left; font-size: 13.5px; color: var(--ink); }
+.acct-row:hover { background: rgba(255,255,255,.05); }
+.avatar { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--g); color: #fff; font-size: 12.5px; font-weight: 600; flex: none; }
+.avatar.lg { width: 40px; height: 40px; font-size: 17px; }
+.g-logo { width: 17px; height: 17px; }
+.btn-google { background: #fff; color: #1f1f1f; height: 38px; padding: 0 16px; gap: 10px; }
+.btn-google:hover:not(:disabled) { background: #f1f1f1; }
+.usage { display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
+.progress.wide { width: 100%; }
+.side-foot { margin-bottom: 6px; }

@@ -14,6 +14,7 @@ import { consentState, buildDisclosure } from "./consent.js";
 import { extractText, chunkPages, selectSources, formatSources } from "./docs.js";
 import { PROVIDERS, providerById, parseCloudRef, KeyStore, PLEEPLY_CLOUD_URL } from "./providers.js";
 import { Memory } from "./memory.js";
+import { Account } from "./account.js";
 import { TOOLS, TEMPLATES, runAgent, makeToolbox } from "./agents.js";
 import { LocalEngine } from "./engines/local.js";
 import { ollamaList, ollamaChat, openaiModels, openaiChat, geminiModels, geminiChat } from "./engines/remote.js";
@@ -48,7 +49,9 @@ export function historyFor(messages) {
 }
 
 export class Core {
-  constructor({ dataDir, cipher, emit = () => {}, openMail = async () => {}, version = "0.1.0", autoSetup = true }) {
+  constructor({ dataDir, cipher, emit = () => {}, openMail = async () => {}, openUrl = () => {}, focusApp = () => {}, version = "0.1.0", autoSetup = true }) {
+    this.openUrl = openUrl;
+    this.focusApp = focusApp;
     this.autoSetup = autoSetup; // false — без автозагрузки моделей и запроса к pleeply Cloud (для тестов)
     this.dataDir = dataDir;
     this.cipher = cipher;
@@ -69,6 +72,7 @@ export class Core {
     this.settings = sanitizeSettings(await this.store.read("settings.json", DEFAULT_SETTINGS));
     this.keys = new KeyStore(this.store, this.cipher);
     this.memory = new Memory(this.store);
+    this.account = await new Account({ store: this.store, cipher: this.cipher, emit: (e) => this.emit(e), openUrl: (u) => this.openUrl(u), focusApp: () => this.focusApp() }).init();
     this.local = new LocalEngine({ getSettings: () => this.settings, onStatus: (s) => this.emit({ type: "engine", ...s }) });
     this.cloudModels = await this.store.read("cloud-models.json", {});
     this.stats = await this.store.read("stats.json", {});
@@ -81,6 +85,7 @@ export class Core {
     this.deviceId = dev?.id || randomUUID();
     if (!dev?.id) await this.store.write("device.json", { id: this.deviceId });
     if (this.autoSetup) {
+      if (this.account.status().signedIn) this.account.refresh().catch(() => {});
       this.hardwareReady.then(() => this.ensureStarterModels()).catch(() => {});
       this.refreshGateway().catch(() => {});
     }
@@ -115,7 +120,7 @@ export class Core {
     if (!res.ok) throw new UserError(`pleeply Cloud returned ${res.status}.`);
     const j = await res.json();
     const models = (j.data || []).map((m) => ({ id: m.id, label: m.name || m.id, vendor: m.vendor || null, tier: m.tier || "free", via: m.via || null, policy: m.policy || null, ctx: m.context_length || null }));
-    this.cloudModels.pleeply = { models, fetchedAt: new Date().toISOString(), limits: j.limits || null };
+    this.cloudModels.pleeply = { models, fetchedAt: new Date().toISOString(), limits: j.limits || null, plans: j.plans || null, price: j.price || null };
     await this.store.write("cloud-models.json", this.cloudModels);
     await this.logActivity({ kind: "cloud-list", provider: "pleeply", providerName: "pleeply Cloud", what: "Checked which cloud models are available (nothing about you was sent)" });
     this._localCache = null;
@@ -177,6 +182,8 @@ export class Core {
       templates: TEMPLATES,
       engineError: this.engineError,
       cloudLimits: this.cloudModels.pleeply?.limits || null,
+      cloudPlans: this.cloudModels.pleeply?.plans || null,
+      account: this.account.status(),
       engine: this.local.status(),
       catalogChecked: CATALOG_CHECKED,
       dataDir: this.store.dir,
@@ -502,7 +509,7 @@ export class Core {
     const p = providerById(model.provider);
     if (p?.kind === "gateway") {
       if (!this.settings.cloud.pleeplyCloud) throw new UserError("pleeply Cloud is turned off in Control Center → Cloud providers.");
-      return openaiChat({ baseUrl: p.baseUrl, who: "pleeply Cloud", providerId: "pleeply", extraHeaders: { "x-pleeply-device": this.deviceId }, model: model.id, system, messages, temperature, maxTokens, signal, onText, onThought });
+      return openaiChat({ baseUrl: p.baseUrl, who: "pleeply Cloud", providerId: "pleeply", extraHeaders: { "x-pleeply-device": this.deviceId, ...(await this.account.authHeader()) }, model: model.id, system, messages, temperature, maxTokens, signal, onText, onThought });
     }
     const key = await this.keys.get(model.provider);
     if (!p || !key) throw new UserError(`Connect ${p?.name || "the provider"} in Control Center first.`);

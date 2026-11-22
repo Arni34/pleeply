@@ -3,6 +3,7 @@
 // Тело запроса не сохраняется и не логируется.
 import { catalog, checkLimits, validate, relay, LIMITS } from '../../../_lib/ai.js';
 import { json } from '../../../_lib/forum.js';
+import { accountFromRequest } from '../../../_lib/account.js';
 
 export default async function handler(req, res) {
   try {
@@ -13,7 +14,8 @@ export default async function handler(req, res) {
     if (v.error) return json(res, 400, { error: { message: v.error } });
     const entry = (await catalog()).find((m) => m.id === v.value.model);
     if (!entry) return json(res, 404, { error: { message: 'This model is not available in pleeply Cloud right now.' } });
-    const denied = await checkLimits(req, device, entry.tier);
+    const account = await accountFromRequest(req).catch(() => null);
+    const denied = await checkLimits(req, device, entry.tier, account);
     if (denied) return json(res, 429, { error: { message: denied } });
     await relay(entry, v.value, res);
   } catch {

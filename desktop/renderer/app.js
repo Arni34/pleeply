@@ -96,6 +96,9 @@ window.pleeply.on((ev) => {
     case "activity":
       set({ activityTick: Date.now() });
       break;
+    case "account":
+      refreshState();
+      break;
     case "toast":
       toast(ev.text, ev.kind || "info");
       break;

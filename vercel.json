@@ -26,6 +26,9 @@
     },
     "api/ai/v1/models.js": {
       "maxDuration": 15
+    },
+    "api/account.js": {
+      "maxDuration": 20
     }
   },
   "crons": [
@@ -35,6 +38,46 @@
     }
   ],
   "rewrites": [
+    {
+      "source": "/pro",
+      "destination": "/pro.html"
+    },
+    {
+      "source": "/api/paddle/webhook",
+      "destination": "/api/account?op=webhook"
+    },
+    {
+      "source": "/api/account/config",
+      "destination": "/api/account?op=config"
+    },
+    {
+      "source": "/api/account/portal",
+      "destination": "/api/account?op=portal"
+    },
+    {
+      "source": "/api/account/checkout",
+      "destination": "/api/account?op=checkout"
+    },
+    {
+      "source": "/api/account/signout",
+      "destination": "/api/account?op=signout"
+    },
+    {
+      "source": "/api/account/me",
+      "destination": "/api/account?op=me"
+    },
+    {
+      "source": "/api/auth/token",
+      "destination": "/api/account?op=token"
+    },
+    {
+      "source": "/api/auth/google/callback",
+      "destination": "/api/account?op=callback"
+    },
+    {
+      "source": "/api/auth/desktop",
+      "destination": "/api/account?op=start"
+    },
     {
       "source": "/stats",
       "destination": "/api/stats"

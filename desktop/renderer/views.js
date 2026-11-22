@@ -1,5 +1,5 @@
 // Общие части окна: боковое меню, «This computer», выбор модели, окно согласия, первый запуск.
-import { html, S, set, call, tryCall, toast, useState, useEffect, useRef, Icon, Mark, Modal, FitBadge, useDropdown, fmtBytes, fmtNum, ago, cloudLabel, refreshChats, refreshModels, refreshState, go, pushNav, navMove } from "./ui.js";
+import { html, S, set, call, tryCall, toast, useState, useEffect, useRef, Icon, Mark, Modal, FitBadge, useDropdown, fmtBytes, fmtNum, ago, cloudLabel, refreshChats, refreshModels, refreshState, go, pushNav, navMove, GoogleG } from "./ui.js";
 
 // ---------------- действия и горячие клавиши ----------------
 export const IS_MAC = window.pleeply.platform === "darwin";
@@ -158,7 +158,23 @@ export function Sidebar() {
     <button class="side-foot" onClick=${() => go("control", { ccSection: "privacy" })} title="Change in Control Center">
       <b>CLOUD REQUESTS</b>${cloudLabel(app.settings.cloud.requests)}
     </button>
+    <${AccountRow} />
   </aside>`;
+}
+
+function AccountRow() {
+  const a = S.app.account || {};
+  if (!a.signedIn) {
+    return html`<button class="acct-row" onClick=${() => (a.signingIn ? go("control", { ccSection: "account" }) : tryCall("account.signIn"))} title="Sign in for higher pleeply Cloud limits">
+      <${GoogleG} /><span class="grow">${a.signingIn ? "Finish in your browser…" : "Sign in with Google"}</span></button>`;
+  }
+  const acc = a.account || {};
+  const name = acc.name || acc.email || "Account";
+  return html`<button class="acct-row" onClick=${() => go("control", { ccSection: "account" })} title=${acc.email || ""}>
+    <span class="avatar">${name.trim()[0]?.toUpperCase() || "P"}</span>
+    <span class="grow ellipsis">${name}</span>
+    <span class=${"badge" + (acc.plan === "pro" ? " good" : "")}>${acc.plan === "pro" ? "Pro" : "Free"}</span>
+  </button>`;
 }
 
 /** Кнопки слева в верхней полосе, когда боковое меню скрыто. */
@@ -291,9 +307,11 @@ export function selectionLabel() {
 }
 
 function tierText(m) {
-  const lim = S.app.cloudLimits;
-  if (m.tier === "free") return `Free${lim ? ` · ${lim.free_per_day} a day` : ""}`;
-  return `Premium${lim ? ` · ${lim.premium_per_day} a day` : ""}`;
+  const acc = S.app.account;
+  const plans = S.app.cloudPlans;
+  const lim = acc?.signedIn && acc.account?.limits ? acc.account.limits : plans?.guest || (S.app.cloudLimits && { free: S.app.cloudLimits.free_per_day, paid: S.app.cloudLimits.premium_per_day });
+  if (m.tier === "free") return `Free${lim ? ` · ${lim.free} a day` : ""}`;
+  return `Premium${lim ? ` · ${lim.paid} a day` : ""}`;
 }
 
 export function ModelPicker() {

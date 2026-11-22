@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>pleeply Pro</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg">
+<style>
+  :root { --bg:#000; --ink:#fff; --text:#d4d4d4; --muted:#9b9b9b; --g3:#6fcf8c; }
+  body { margin:0; min-height:100vh; display:grid; place-items:center; background:var(--bg); color:var(--text); font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  main { width:min(520px,100%); padding:40px 24px; }
+  h1 { color:var(--ink); font-weight:500; font-size:34px; letter-spacing:-.03em; margin:0 0 8px; }
+  .price { color:var(--ink); font-size:20px; margin:18px 0 6px; }
+  ul { padding-left:20px; margin:12px 0 22px; }
+  li { margin:6px 0; }
+  .note { color:var(--muted); font-size:14px; }
+  .ok { padding:14px 16px; border-radius:12px; background:rgba(62,155,90,.16); color:#a8e2b9; }
+  a { color:var(--g3); }
+</style>
+</head>
+<body>
+<main>
+  <h1>pleeply Pro</h1>
+  <p>More cloud requests in pleeply Desktop, through pleeply Cloud. Local models are always free and unlimited.</p>
+  <div class="price" id="price">$19.99 / month</div>
+  <ul id="limits"><li>1000 requests a day to free cloud models</li><li>150 requests a day to premium models: Claude, GPT, Gemini, DeepSeek</li></ul>
+  <p id="status" class="note">To upgrade, open pleeply Desktop → Control Center → Account → Upgrade to Pro. Payment is handled by Paddle, our reseller.</p>
+</main>
+<script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+<script>
+  (async () => {
+    const status = document.getElementById('status');
+    try {
+      const c = await fetch('/api/account/config').then((r) => r.json());
+      if (c.price) document.getElementById('price').textContent = c.price;
+      if (c.plans?.pro) document.getElementById('limits').innerHTML =
+        `<li>${Number(c.plans.pro.free)} requests a day to free cloud models</li><li>${Number(c.plans.pro.paid)} requests a day to premium models: Claude, GPT, Gemini, DeepSeek</li>`;
+      const txn = new URLSearchParams(location.search).get('_ptxn');
+      if (!txn) return;
+      if (!c.clientToken || !window.Paddle) { status.textContent = 'Payments are being set up. Please try again later.'; return; }
+      if (c.environment === 'sandbox') Paddle.Environment.set('sandbox');
+      Paddle.Initialize({
+        token: c.clientToken,
+        eventCallback: (e) => {
+          if (e.name === 'checkout.completed') {
+            status.className = 'ok';
+            status.textContent = "You're on pleeply Pro. Return to pleeply Desktop — it updates within a minute.";
+          }
+        },
+      });
+      status.textContent = 'Opening secure checkout…';
+    } catch {
+      status.textContent = "Couldn't load the checkout. Refresh the page or try again from pleeply Desktop.";
+    }
+  })();
+</script>
+</body>
+</html>

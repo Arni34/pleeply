@@ -1,8 +1,9 @@
 // pleeply Control Center: железо, производительность, приватность и настройки моделей в одном месте.
-import { html, S, set, call, tryCall, toast, useState, useEffect, useRef, Icon, Toggle, FitBadge, fmtBytes, fmtNum, when, refreshState, refreshModels, refreshChats } from "./ui.js";
+import { html, S, set, call, tryCall, toast, useState, useEffect, useRef, Icon, Toggle, FitBadge, GoogleG, fmtBytes, fmtNum, when, refreshState, refreshModels, refreshChats } from "./ui.js";
 import { TopLead } from "./views.js";
 
 const SECTIONS = [
+  ["account", "Account"],
   ["computer", "This computer"],
   ["performance", "Performance"],
   ["privacy", "Privacy"],
@@ -20,6 +21,51 @@ const update = async (patch) => {
 
 function Setting({ t, d, children }) {
   return html`<div class="setting"><div class="grow"><div class="t">${t}</div>${d ? html`<div class="d">${d}</div>` : null}</div><div class="ctl">${children}</div></div>`;
+}
+
+function Usage({ label, used, limit }) {
+  const pct = limit ? Math.min(100, Math.round(((used || 0) / limit) * 100)) : 0;
+  return html`<div class="usage"><div class="row"><span class="grow">${label}</span><span class="mono muted">${used || 0} / ${limit}</span></div><div class="progress wide"><i style=${{ width: pct + "%" }}></i></div></div>`;
+}
+
+function AccountSection() {
+  const a = S.app.account || {};
+  const plans = a.plans || S.app.cloudPlans;
+  useEffect(() => { if (a.signedIn) tryCall("account.refresh"); }, []);
+  if (!a.signedIn) {
+    return html`<div class="card col" style=${{ gap: "12px" }}>
+      <h3>Sign in to pleeply</h3>
+      <p class="muted">Signing in raises your daily pleeply Cloud limits${plans ? ` to ${plans.free.free} free and ${plans.free.paid} premium requests` : ""} and lets you upgrade to pleeply Pro${plans ? ` (${plans.pro.free} and ${plans.pro.paid} a day)` : ""}. Local models never need an account.</p>
+      <div class="row">
+        <button class="btn btn-google" disabled=${a.signingIn} onClick=${() => tryCall("account.signIn")}><${GoogleG} />${a.signingIn ? "Waiting for your browser…" : "Continue with Google"}</button>
+        ${a.signingIn ? html`<button class="btn btn-ghost btn-sm" onClick=${() => tryCall("account.cancel")}>Cancel</button>` : null}
+      </div>
+      <p class="hint">pleeply opens Google in your browser. You sign in there, so pleeply never sees your Google password.</p>
+    </div>`;
+  }
+  const acc = a.account || {};
+  const pro = acc.plan === "pro";
+  const lim = acc.limits || plans?.[pro ? "pro" : "free"] || { free: 0, paid: 0 };
+  return html`<div class="card col" style=${{ gap: "14px" }}>
+      <div class="row">
+        <span class="avatar lg">${(acc.name || acc.email || "P").trim()[0].toUpperCase()}</span>
+        <div class="grow"><div class="ink" style=${{ fontWeight: 500 }}>${acc.name || acc.email}</div><div class="muted" style=${{ fontSize: "13px" }}>${acc.email}</div></div>
+        <span class=${"badge" + (pro ? " good" : "")}>${pro ? "Pro" : "Free"}</span>
+      </div>
+      <div class="label">pleeply Cloud today</div>
+      <${Usage} label="Free cloud models" used=${a.usage?.free} limit=${lim.free} />
+      <${Usage} label="Premium models (Claude, GPT, Gemini, DeepSeek)" used=${a.usage?.paid} limit=${lim.paid} />
+      ${pro && acc.planUntil ? html`<p class="hint">Pro renews or ends around ${new Date(acc.planUntil).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}.</p>` : null}
+      <div class="row wrap">
+        ${pro || acc.billing ? html`<button class="btn btn-line" onClick=${() => tryCall("account.manage")}>Manage subscription</button>` : null}
+        ${!pro ? html`<button class="btn btn-primary" disabled=${a.upgrade === false} onClick=${() => tryCall("account.upgrade")}>Upgrade to Pro${a.price ? ` · ${a.price}` : ""}</button>` : null}
+        ${!pro && a.upgrade === false ? html`<span class="hint">Payments are being set up.</span>` : null}
+        <span class="spacer"></span>
+        <button class="btn btn-ghost btn-sm" onClick=${async () => { if (confirm("Sign out of pleeply on this computer?")) await tryCall("account.signOut"); }}>Sign out</button>
+      </div>
+    </div>
+    ${!pro && plans ? html`<div class="card"><b class="ink">pleeply Pro</b><p class="muted" style=${{ marginTop: "6px" }}>${plans.pro.free} requests a day to free cloud models and ${plans.pro.paid} to premium ones. Local models stay free and unlimited. Cancel any time; payment is handled by Paddle.</p></div>` : null}
+    <p class="hint" style=${{ marginTop: "10px" }}>While you're signed in, pleeply Cloud counts your requests against your account. The text of requests is never stored.</p>`;
 }
 
 function Computer() {
@@ -237,7 +283,7 @@ function Storage() {
 
 export function ControlView() {
   const sec = S.ccSection || "computer";
-  const body = { computer: Computer, performance: Performance, privacy: Privacy, modelsettings: ModelSettings, providers: Providers, integrations: Integrations, storage: Storage }[sec];
+  const body = { account: AccountSection, computer: Computer, performance: Performance, privacy: Privacy, modelsettings: ModelSettings, providers: Providers, integrations: Integrations, storage: Storage }[sec];
   const title = SECTIONS.find(([id]) => id === sec)?.[1];
   return html`<div class="page">
     <header class="topbar drag"><${TopLead} /><span class="title">Control Center</span></header>

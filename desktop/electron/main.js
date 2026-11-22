@@ -65,6 +65,13 @@ function api() {
       return r.filePaths[0];
     },
 
+    "account.state": () => core.account.status(),
+    "account.refresh": () => core.account.refresh(),
+    "account.signIn": () => core.account.signIn(),
+    "account.cancel": () => core.account.cancelSignIn(),
+    "account.signOut": () => core.account.signOut(),
+    "account.upgrade": () => core.account.upgrade(),
+    "account.manage": () => core.account.manage(),
     "providers.setKey": (a) => core.setProviderKey(a?.id, a?.key),
     "providers.removeKey": (id) => core.removeProviderKey(id),
     "providers.refresh": (id) => (id === "pleeply" ? core.refreshGateway({ force: true }) : core.refreshCloudModels(id)),
@@ -245,7 +252,11 @@ app.on("second-instance", () => {
 });
 
 app.whenReady().then(async () => {
-  core = await new Core({ dataDir: app.getPath("userData"), cipher, emit: send, openMail, version: app.getVersion() }).init();
+  core = await new Core({
+    dataDir: app.getPath("userData"), cipher, emit: send, openMail, version: app.getVersion(),
+    openUrl: openExternalSafe,
+    focusApp: () => { if (!win) return; if (win.isMinimized()) win.restore(); win.show(); win.focus(); app.focus({ steal: true }); },
+  }).init();
   const handlers = api();
   ipcMain.handle("pleeply:invoke", async (e, method, arg) => {
     if (!e.senderFrame || !e.senderFrame.url.startsWith("file://")) return { error: "Not allowed" };
