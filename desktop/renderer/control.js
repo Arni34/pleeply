@@ -28,6 +28,9 @@ function Usage({ label, used, limit }) {
   return html`<div class="usage"><div class="row"><span class="grow">${label}</span><span class="mono muted">${used || 0} / ${limit}</span></div><div class="progress wide"><i style=${{ width: pct + "%" }}></i></div></div>`;
 }
 
+// Премиум у Pro считается в месяц, у остальных тарифов — в день
+const per = (p) => (p?.paidPeriod === "month" ? "a month" : "a day");
+
 function AccountSection() {
   const a = S.app.account || {};
   const plans = a.plans || S.app.cloudPlans;
@@ -35,7 +38,7 @@ function AccountSection() {
   if (!a.signedIn) {
     return html`<div class="card col" style=${{ gap: "12px" }}>
       <h3>Sign in to pleeply</h3>
-      <p class="muted">Signing in raises your daily pleeply Cloud limits${plans ? ` to ${plans.free.free} free and ${plans.free.paid} premium requests` : ""} and lets you upgrade to pleeply Pro${plans ? ` (${plans.pro.free} and ${plans.pro.paid} a day)` : ""}. Local models never need an account.</p>
+      <p class="muted">Signing in raises your daily pleeply Cloud limits${plans ? ` to ${plans.free.free} free and ${plans.free.paid} premium requests` : ""} and lets you upgrade to pleeply Pro${plans ? ` (${plans.pro.free} free requests a day and ${plans.pro.paid} premium ${per(plans.pro)})` : ""}. Local models never need an account.</p>
       <div class="row">
         <button class="btn btn-google" disabled=${a.signingIn} onClick=${() => tryCall("account.signIn")}><${GoogleG} />${a.signingIn ? "Waiting for your browser…" : "Continue with Google"}</button>
         ${a.signingIn ? html`<button class="btn btn-ghost btn-sm" onClick=${() => tryCall("account.cancel")}>Cancel</button>` : null}
@@ -52,9 +55,9 @@ function AccountSection() {
         <div class="grow"><div class="ink" style=${{ fontWeight: 500 }}>${acc.name || acc.email}</div><div class="muted" style=${{ fontSize: "13px" }}>${acc.email}</div></div>
         <span class=${"badge" + (pro ? " good" : "")}>${pro ? "Pro" : "Free"}</span>
       </div>
-      <div class="label">pleeply Cloud today</div>
-      <${Usage} label="Free cloud models" used=${a.usage?.free} limit=${lim.free} />
-      <${Usage} label="Premium models (Claude, GPT, Gemini, DeepSeek)" used=${a.usage?.paid} limit=${lim.paid} />
+      <div class="label">pleeply Cloud usage</div>
+      <${Usage} label="Free cloud models · today" used=${a.usage?.free} limit=${lim.free} />
+      <${Usage} label=${`Premium models (Claude, GPT, Gemini, DeepSeek) · ${lim.paidPeriod === "month" ? "this month" : "today"}`} used=${lim.paidPeriod === "month" ? a.usage?.paid_month : a.usage?.paid} limit=${lim.paid} />
       ${pro && acc.planUntil ? html`<p class="hint">Pro renews or ends around ${new Date(acc.planUntil).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}.</p>` : null}
       <div class="row wrap">
         ${pro || acc.billing ? html`<button class="btn btn-line" onClick=${() => tryCall("account.manage")}>Manage subscription</button>` : null}
@@ -64,7 +67,7 @@ function AccountSection() {
         <button class="btn btn-ghost btn-sm" onClick=${async () => { if (confirm("Sign out of pleeply on this computer?")) await tryCall("account.signOut"); }}>Sign out</button>
       </div>
     </div>
-    ${!pro && plans ? html`<div class="card"><b class="ink">pleeply Pro</b><p class="muted" style=${{ marginTop: "6px" }}>${plans.pro.free} requests a day to free cloud models and ${plans.pro.paid} to premium ones. Local models stay free and unlimited. Cancel any time; payment is handled by Paddle.</p></div>` : null}
+    ${!pro && plans ? html`<div class="card"><b class="ink">pleeply Pro</b><p class="muted" style=${{ marginTop: "6px" }}>${plans.pro.free} requests a day to free cloud models and ${plans.pro.paid} premium requests ${per(plans.pro)} (Claude, GPT, Gemini). Local models stay free and unlimited. Cancel any time; payment is handled by Paddle.</p></div>` : null}
     <p class="hint" style=${{ marginTop: "10px" }}>While you're signed in, pleeply Cloud counts your requests against your account. The text of requests is never stored.</p>`;
 }
 

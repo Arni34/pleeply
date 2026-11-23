@@ -76,7 +76,9 @@ export async function catalog() {
       for (const [id, vendor] of [['claude', 'Anthropic'], ['gpt', 'OpenAI'], ['gemini', 'Google'], ['deepseek', 'DeepSeek']]) {
         const m = p[id];
         if (!m || list.some((x) => x.id === id)) continue;
-        list.push({ id, name: nameOf(m), vendor, tier: 'paid', via: 'openrouter', upstream: m.id, context: m.context_length || null });
+        // дороже $5 за миллион входных токенов (сейчас GPT-6.2 Astra) — считается за два премиум-запроса
+        const weight = Number(m.pricing?.prompt) * 1e6 > 5 ? 2 : 1;
+        list.push({ id, name: nameOf(m), vendor, tier: 'paid', via: 'openrouter', upstream: m.id, context: m.context_length || null, weight });
       }
     } catch {}
   }
@@ -112,9 +114,16 @@ const ensureUsage = () => (usageReady ??= sql.query(`create table if not exists 
   key text not null, day date not null default current_date, tier text not null, n integer not null default 0,
   primary key (key, day, tier))`));
 
-async function bump(key, tier) {
-  const [row] = await sql`insert into ai_usage (key, day, tier, n) values (${key}, current_date, ${tier}, 1)
-    on conflict (key, day, tier) do update set n = ai_usage.n + 1 returning n`;
+async function bump(key, tier, inc = 1) {
+  const [row] = await sql`insert into ai_usage (key, day, tier, n) values (${key}, current_date, ${tier}, ${inc})
+    on conflict (key, day, tier) do update set n = ai_usage.n + ${inc} returning n`;
+  return row.n;
+}
+
+/** Сумма за текущий календарный месяц (UTC) — для месячного премиум-лимита Pro. */
+export async function monthUsed(key, tier = 'paid') {
+  const [row] = await sql`select coalesce(sum(n), 0)::int as n from ai_usage
+    where key = ${key} and tier = ${tier} and day >= date_trunc('month', current_date)::date`;
   return row.n;
 }
 
@@ -122,27 +131,39 @@ async function bump(key, tier) {
  * Считает запрос и решает, можно ли. Возвращает null или текст отказа.
  * Без входа лимит на установку (и на сеть), с аккаунтом — на аккаунт по тарифу: free или Pro.
  */
-export async function checkLimits(req, deviceId, tier, account = null) {
+const proOffer = (tier) => {
+  const p = PLANS.pro;
+  return tier === 'paid' ? `${p.paid} premium requests a ${p.paidPeriod === 'month' ? 'month' : 'day'}` : `${p.free} requests a day`;
+};
+
+export async function checkLimits(req, deviceId, tier, account = null, weight = 1) {
   await ensureUsage();
   const plan = account ? effectivePlan(account) : 'guest';
-  const perDay = PLANS[plan][tier];
+  const limit = PLANS[plan][tier];
   const kind = tier === 'paid' ? 'premium ' : '';
+  const inc = Math.max(1, Math.round(weight)); // дорогие модели и поиск в интернете считаются за несколько запросов
   if (account) {
-    const n = await bump('a:' + account.id, tier);
-    if (n > perDay) {
-      return plan === 'pro'
-        ? `You've used today's ${perDay} ${kind}requests on pleeply Pro. They reset at midnight UTC.`
-        : `You've used today's ${perDay} ${kind}requests. pleeply Pro gives ${PLANS.pro[tier]} a day — upgrade in Control Center → Account.`;
+    const key = 'a:' + account.id;
+    const n = await bump(key, tier, inc);
+    const monthly = tier === 'paid' && PLANS[plan].paidPeriod === 'month';
+    const used = monthly ? await monthUsed(key) : n;
+    if (used > limit) {
+      if (plan === 'pro') {
+        return monthly
+          ? `You've used this month's ${limit} premium requests on pleeply Pro. They renew on the 1st (UTC); free models are still available.`
+          : `You've used today's ${limit} requests on pleeply Pro. They reset at midnight UTC.`;
+      }
+      return `You've used today's ${limit} ${kind}requests. pleeply Pro gives ${proOffer(tier)} — see pleeply.vercel.app/pro.`;
     }
   } else {
     const dev = 'd:' + crypto.createHash('sha256').update(`pleeply-ai:${deviceId}`).digest('hex').slice(0, 24);
-    const [d, i] = await Promise.all([bump(dev, tier), bump('i:' + clientKey(req), tier)]);
-    if (d > perDay) return `You've used today's ${perDay} ${kind}requests without an account. Sign in with Google for ${PLANS.free[tier]} a day, or use a local model.`;
-    if (i > perDay * LIMITS.ipFactor) return 'Too many pleeply Cloud requests from this network today. Sign in with Google or use a local model.';
+    const [d, i] = await Promise.all([bump(dev, tier, inc), bump('i:' + clientKey(req), tier, inc)]);
+    if (d > limit) return `You've used today's ${limit} ${kind}requests without an account. Sign in with Google for ${PLANS.free[tier]} a day.`;
+    if (i > limit * LIMITS.ipFactor) return 'Too many pleeply Cloud requests from this network today. Sign in with Google to keep going.';
   }
   if (tier === 'paid') {
     const pro = plan === 'pro';
-    if ((await bump(pro ? 'g:pro' : 'g:all', tier)) > (pro ? LIMITS.proGlobal : LIMITS.paidGlobal)) return 'pleeply Cloud has reached its daily limit for premium models. Try a free model or a local one.';
+    if ((await bump(pro ? 'g:pro' : 'g:all', tier, inc)) > (pro ? LIMITS.proGlobal : LIMITS.paidGlobal)) return 'pleeply Cloud has reached its daily limit for premium models. Try a free model.';
   }
   return null;
 }

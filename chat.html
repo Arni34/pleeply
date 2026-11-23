@@ -123,6 +123,11 @@
   .meta .ic-btn svg { width: 15px; height: 15px; }
   .route { margin-left: 6px; }
   .err { padding: 10px 14px; border: 1px solid rgba(240,138,126,.35); border-radius: 10px; background: rgba(240,138,126,.07); color: var(--err); }
+  .ups { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .up-btn { display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border: 1px solid var(--line-2); border-radius: 999px; color: var(--ink); text-decoration: none; font-size: 14px; }
+  .up-btn:hover { border-color: var(--line-3); }
+  .up-btn.google { background: #fff; color: #1f1f1f; border-color: #fff; }
+  .up-btn.primary { background: var(--ink); color: #000; border-color: var(--ink); }
   .cursor::after { content: ""; display: inline-block; width: 8px; height: 8px; margin-left: 4px; border-radius: 50%; background: var(--g-3); animation: pulse 1s infinite ease-in-out; vertical-align: middle; }
   @keyframes pulse { 50% { opacity: .25; transform: scale(.8); } }
 
@@ -141,6 +146,59 @@
   .composer:focus-within { border-color: var(--line-3); }
   .composer textarea { flex: 1; min-height: 26px; max-height: 240px; resize: none; border: 0; outline: 0; background: transparent; color: var(--ink); font: 15.5px/1.55 var(--sans); padding: 4px 0; }
   .composer textarea::placeholder { color: var(--dim); }
+  .tool-btn { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 11px; flex: none; border: 1px solid var(--line-2); border-radius: 999px; background: transparent; color: var(--muted); font-size: 13.5px; cursor: pointer; }
+  .tool-btn svg.ic { width: 16px; height: 16px; }
+  .tool-btn:hover { color: var(--ink); border-color: var(--line-3); }
+  .tool-btn[aria-pressed="true"] { color: var(--g-4); border-color: rgba(92,191,122,.55); background: rgba(62,155,90,.14); }
+  .searching { display: inline-block; font-size: 14px; color: var(--muted); background: linear-gradient(90deg, var(--muted) 0%, var(--ink) 45%, var(--muted) 90%); background-size: 220% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: shimmer 1.6s linear infinite; }
+  @keyframes shimmer { from { background-position: 120% 0; } to { background-position: -120% 0; } }
+  .jump { position: absolute; left: 50%; bottom: 112px; transform: translateX(-50%); z-index: 15; width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid var(--line-2); border-radius: 50%; background: #121212; color: var(--text); cursor: pointer; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
+  .jump:hover { color: var(--ink); border-color: var(--line-3); }
+  .jump svg.ic { width: 16px; height: 16px; }
+  @media (prefers-reduced-motion: reduce) { .searching { animation: none; -webkit-text-fill-color: var(--muted); } }
+  .tool-btn.icon { padding: 0; width: 36px; justify-content: center; }
+  .conn-list { list-style: none; margin: 10px 0 0; padding: 0 !important; display: flex; flex-direction: column; gap: 8px; }
+  .conn-list li { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--line-2); border-radius: 12px; }
+  .conn-list .cinfo { flex: 1; min-width: 0; }
+  .conn-list .cinfo b { display: block; color: var(--ink); font-weight: 500; font-size: 14px; }
+  .conn-list .cinfo small { color: var(--dim); font-size: 12px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .conn-list input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--g-2); }
+  .conn-suggest { display: flex; flex-wrap: wrap; gap: 8px; }
+  .conn-suggest button, .conn-add { padding: 7px 12px; border: 1px solid var(--line-2); border-radius: 999px; background: transparent; color: var(--text); font-size: 13.5px; cursor: pointer; }
+  .conn-suggest button:hover, .conn-add:hover { border-color: var(--line-3); color: var(--ink); }
+  .conn-suggest button small { color: var(--dim); margin-left: 4px; }
+  .conn-form { display: grid; gap: 8px; }
+  .conn-form input { padding: 9px 12px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--soft); color: var(--ink); font: 14px var(--sans); outline: none; }
+  .conn-form input:focus { border-color: var(--line-3); }
+  .conn-add { justify-self: start; background: var(--ink); color: #000; border-color: var(--ink); }
+  .conn-note { margin: 0; color: var(--dim); font-size: 12.5px !important; }
+  .conn-note.err { color: var(--err); }
+  .tools-used { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .tools-used span { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border: 1px solid var(--line-2); border-radius: 999px; color: var(--muted); font-size: 12px; }
+  .tools-used span.bad { color: var(--err); border-color: rgba(240,138,126,.35); }
+  .tools-used svg.ic { width: 12px; height: 12px; }
+  .attach-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; }
+  .achip { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 5px 6px 5px 10px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--soft); font-size: 13px; color: var(--text); }
+  .achip svg.ic { width: 14px; height: 14px; color: var(--muted); }
+  .achip .aname { max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .achip small { color: var(--dim); }
+  .achip.error { border-color: rgba(240,138,126,.4); }
+  .achip.error small { color: var(--err); }
+  .achip button { display: grid; place-items: center; width: 22px; height: 22px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); cursor: pointer; }
+  .achip button:hover { background: var(--soft-2); color: var(--ink); }
+  .achip button svg.ic { width: 13px; height: 13px; }
+  .ucol { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; max-width: 85%; }
+  .ucol .bubble { max-width: 100%; }
+  .ufiles { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+  .fchip, .fcite { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border: 1px solid var(--line-2); border-radius: 999px; color: var(--text); font-size: 12.5px; }
+  .fchip svg.ic, .fcite svg.ic { width: 13px; height: 13px; color: var(--muted); }
+  .main.drop::after { content: "Drop files to attach"; position: absolute; inset: 12px; display: grid; place-items: center; border: 2px dashed rgba(92,191,122,.6); border-radius: 18px; background: rgba(0,0,0,.7); color: var(--g-4); font-size: 18px; z-index: 30; pointer-events: none; }
+  .sources { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .sources b { width: 100%; color: var(--dim); font-size: 12px; font-weight: 500; }
+  .sources a { display: inline-flex; align-items: baseline; gap: 6px; max-width: 100%; padding: 4px 10px; border: 1px solid var(--line-2); border-radius: 999px; color: var(--text); text-decoration: none; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sources a:hover { border-color: var(--line-3); color: var(--ink); }
+  .sources a small { color: var(--dim); }
+  @media (max-width: 800px) { .tool-btn span { display: none; } .tool-btn { padding: 0 9px; } }
   .send { width: 36px; height: 36px; flex: none; border: 0; border-radius: 50%; background: var(--ink); color: #000; display: grid; place-items: center; cursor: pointer; }
   .send:disabled { background: var(--soft-2); color: var(--dim); cursor: default; }
   .fine { margin: 8px 0 0; text-align: center; font-size: 12px; color: var(--dim); }
@@ -162,6 +220,106 @@
   .toast.err { color: var(--err); }
   .scrim { display: none; }
 
+
+  /* ---------- проекты ---------- */
+  .side-row { display: flex; align-items: center; justify-content: space-between; margin-right: 12px; }
+  .ic-btn.tiny { width: 24px; height: 24px; border-radius: 6px; }
+  .ic-btn.tiny svg.ic { width: 15px; height: 15px; }
+  .chats.projects { flex: none; max-height: 28vh; }
+  .chats.projects a { display: flex; align-items: center; gap: 8px; padding-right: 10px; }
+  .chats.projects a svg.ic { width: 15px; height: 15px; color: var(--muted); flex: none; }
+  .chats.projects a span { overflow: hidden; text-overflow: ellipsis; }
+  .main:not(.project-mode) > #project { display: none; }
+  .main.project-mode > #empty, .main.project-mode > #scroll, .main.project-mode > #composer-wrap, .main.project-mode > #jump, .main.project-mode .picker { display: none !important; }
+  .project { flex: 1; overflow-y: auto; }
+  .pv { width: min(980px, 100%); margin: 0 auto; padding: 8px 24px 64px; }
+  .pv-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .pv-name { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--ink); font: 500 26px/1.2 var(--sans); letter-spacing: -.02em; padding: 4px 0; border-bottom: 1px solid transparent; }
+  .pv-name:focus { border-bottom-color: var(--line-2); }
+  .pv-actions { display: flex; gap: 6px; }
+  .pv-label { display: block; margin: 6px 0 6px; color: var(--dim); font-size: 12.5px; }
+  .pv-obj { width: 100%; resize: vertical; min-height: 70px; padding: 12px 14px; border: 1px solid var(--line-2); border-radius: 14px; background: var(--soft); color: var(--ink); font: 15px/1.55 var(--sans); outline: 0; }
+  .pv-obj:focus { border-color: var(--line-3); }
+  .pv-ctx { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 14px 0; }
+  .pv-card { padding: 16px 18px; border: 1px solid var(--line-2); border-radius: 16px; background: #0c0c0c; margin-bottom: 12px; }
+  .pv-ctx .pv-card { margin: 0; }
+  .pv-card-h { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; color: var(--ink); font-size: 14px; }
+  .pv-card-h b { font-weight: 500; }
+  .pv-hint { margin: 6px 0 0; color: var(--dim); font-size: 13px; }
+  .pv-files { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pv-files .fchip button, .pv-notes button { display: grid; place-items: center; width: 20px; height: 20px; margin-left: 2px; border: 0; border-radius: 5px; background: transparent; color: var(--dim); cursor: pointer; }
+  .pv-files .fchip button:hover, .pv-notes button:hover { color: var(--ink); background: var(--soft-2); }
+  .pv-files .fchip button svg.ic, .pv-notes button svg.ic { width: 12px; height: 12px; }
+  .pv-notes { list-style: none; margin: 0 0 10px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .pv-notes li { display: flex; align-items: flex-start; gap: 8px; padding: 7px 10px; border-radius: 10px; background: var(--soft); font-size: 13.5px; }
+  .pv-notes li span { flex: 1; }
+  .pv-notes small { display: block; color: var(--dim); font-size: 12px; }
+  .pv-note-form { display: flex; gap: 8px; }
+  .pv-note-form input { flex: 1; min-width: 0; padding: 8px 12px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--soft); color: var(--ink); font: 14px var(--sans); outline: 0; }
+  .pv-mini, .pv-ghost, .pv-primary { display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; border: 1px solid var(--line-2); border-radius: 999px; background: transparent; color: var(--text); font: 13.5px var(--sans); cursor: pointer; white-space: nowrap; }
+  .pv-mini svg.ic, .pv-ghost svg.ic { width: 14px; height: 14px; }
+  .pv-mini:hover, .pv-ghost:hover { border-color: var(--line-3); color: var(--ink); }
+  .pv-ghost.danger:hover { color: var(--err); border-color: rgba(240,138,126,.45); }
+  .pv-primary { background: var(--ink); color: #000; border-color: var(--ink); font-weight: 500; }
+  .pv-primary:hover { background: #e9e9e9; }
+  .pv-primary:disabled, .pv-ghost:disabled { opacity: .45; cursor: default; }
+  .pv-cofounder { display: flex; flex-direction: column; gap: 12px; }
+  .pv-cf-h { display: flex; align-items: center; gap: 12px; }
+  .pv-cf-h b { display: block; color: var(--ink); font-weight: 500; }
+  .pv-cf-h small { display: block; color: var(--muted); font-size: 13px; }
+  .pv-cofounder > .pv-primary { align-self: flex-start; }
+  .trole { display: inline-grid; place-items: center; flex: none; width: 28px; height: 28px; border-radius: 8px; background: var(--soft-2); color: var(--ink); font: 600 13px var(--mono); }
+  .trole.cf { width: 34px; height: 34px; border-radius: 10px; background: rgba(62,155,90,.18); color: var(--g-4); }
+  .pv-summary-line { margin: 0; color: var(--text); font-size: 14.5px; }
+  .pv-plan { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .pv-check { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; cursor: pointer; }
+  .pv-check:hover { border-color: var(--line-2); }
+  .pv-check input { margin-top: 6px; width: 16px; height: 16px; accent-color: var(--g-2); }
+  .pv-task { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .pv-task b { color: var(--ink); font-weight: 500; font-size: 14.5px; }
+  .pv-task small { color: var(--dim); font-size: 12.5px; }
+  .pv-obj-line { color: var(--text); font-size: 13.5px; }
+  .pv-obj-line em { color: var(--muted); font-style: normal; }
+  .pv-approve { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+  .pv-approve .spacer { flex: 1; }
+  .pv-budget { color: var(--muted); font-size: 13.5px; }
+  .pv-budget input { width: 58px; margin: 0 4px; padding: 5px 8px; border: 1px solid var(--line-2); border-radius: 8px; background: var(--soft); color: var(--ink); font: 13.5px var(--sans); }
+  .pv-runbar { display: flex; align-items: center; gap: 10px; margin: 4px 0 12px; padding: 10px 14px; border: 1px solid rgba(92,191,122,.35); border-radius: 12px; background: rgba(62,155,90,.08); font-size: 13.5px; color: var(--text); }
+  .pv-runbar b { color: var(--ink); font-weight: 500; }
+  .pv-runbar .spacer { flex: 1; }
+  .pv-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--g-3); animation: pulse 1s infinite ease-in-out; }
+  .board { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 12px; }
+  .col { display: flex; flex-direction: column; gap: 8px; min-height: 120px; padding: 10px; border-radius: 14px; background: #0a0a0a; border: 1px solid var(--line); }
+  .col h3 { display: flex; justify-content: space-between; margin: 2px 4px 4px; color: var(--muted); font: 500 12.5px var(--sans); text-transform: uppercase; letter-spacing: .04em; }
+  .col h3 small { color: var(--dim); }
+  .col-empty { margin: 8px 4px; color: var(--dim); font-size: 13px; }
+  .tcard { display: flex; align-items: flex-start; gap: 9px; width: 100%; padding: 10px; border: 1px solid var(--line-2); border-radius: 12px; background: var(--soft); color: inherit; text-align: left; cursor: pointer; font: inherit; }
+  .tcard:hover { border-color: var(--line-3); }
+  .tcard .trole { width: 24px; height: 24px; font-size: 12px; border-radius: 7px; }
+  .tbody { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .tbody b { color: var(--ink); font-weight: 500; font-size: 13.5px; line-height: 1.35; }
+  .tbody small { color: var(--dim); font-size: 12px; }
+  .tbody .terr { color: var(--err); }
+  .tcard.s-running { border-color: rgba(92,191,122,.55); }
+  .tcard.s-review { border-color: rgba(224,180,108,.5); }
+  .tcard.s-done .trole { background: rgba(62,155,90,.2); color: var(--g-4); }
+  .tcard.s-skipped, .tcard.s-cancelled { opacity: .55; }
+  .pv-out { margin-top: 4px; }
+  dialog.wide { width: min(760px, calc(100vw - 32px)); }
+  .td-head { display: flex; align-items: center; gap: 12px; margin: 0 36px 12px 0; }
+  .td-head h2 { margin: 0; font-size: 19px; }
+  .td-head small { color: var(--muted); font-size: 13px; }
+  .td-line { margin: 6px 0; font-size: 14px; }
+  .td-line b { color: var(--ink); font-weight: 500; }
+  .td-out { margin: 14px 0 4px; padding-top: 12px; border-top: 1px solid var(--line); }
+  .td-trace { color: var(--dim); font-size: 12.5px; }
+  .td-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .td-revise { display: grid; gap: 8px; margin-top: 12px; }
+  .td-revise textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--line-2); border-radius: 12px; background: var(--soft); color: var(--ink); font: 14px/1.5 var(--sans); outline: 0; resize: vertical; }
+  .td-revise .pv-primary { justify-self: start; }
+  @media (max-width: 900px) { .board { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 800px) { .pv { padding: 4px 16px 48px; } .pv-ctx { grid-template-columns: 1fr; } .pv-name { font-size: 22px; } .pv-actions .pv-ghost { padding: 7px 10px; } }
+  @media (max-width: 520px) { .board { grid-template-columns: 1fr; } }
   @media (max-width: 800px) {
     .app, .app.collapsed { grid-template-columns: 1fr; }
     .side { position: fixed; inset: 0 auto 0 0; width: min(300px, 86vw); z-index: 25; transform: translateX(-100%); transition: transform .2s ease; visibility: visible !important; }
@@ -187,6 +345,10 @@
   <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="11" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M15.5 8.5V6a1.5 1.5 0 0 0-1.5-1.5H6A1.5 1.5 0 0 0 4.5 6v8A1.5 1.5 0 0 0 6 15.5h2.5" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
   <symbol id="i-retry" viewBox="0 0 24 24"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3M19.5 4.5v4h-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="i-down" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3.5 7.5a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v7.5a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+  <symbol id="i-plug" viewBox="0 0 24 24"><path d="M9 3.5v4M15 3.5v4M6.5 7.5h11v3.5a5.5 5.5 0 0 1-11 0V7.5zM12 16.5v4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-clip" viewBox="0 0 24 24"><path d="M19 11.5l-7.2 7.2a4.6 4.6 0 0 1-6.5-6.5l7.6-7.6a3.1 3.1 0 0 1 4.4 4.4l-7.4 7.4a1.6 1.6 0 0 1-2.3-2.3l6.8-6.8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 12h17M12 3.5c2.4 2.3 3.6 5.1 3.6 8.5s-1.2 6.2-3.6 8.5c-2.4-2.3-3.6-5.1-3.6-8.5S9.6 5.8 12 3.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
   <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3.5 5 6v5.5c0 4.3 3 7.6 7 9 4-1.4 7-4.7 7-9V6l-7-2.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
   <symbol id="i-g" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></symbol>
 </svg>
@@ -198,7 +360,10 @@
       <button class="ic-btn collapse" id="collapse" type="button" aria-label="Hide sidebar" title="Hide sidebar"><svg class="ic"><use href="#i-side"/></svg></button>
     </div>
     <button class="side-act primary" id="new-chat" type="button"><svg class="ic"><use href="#i-plus"/></svg>New chat</button>
+    <button class="side-act" id="open-connectors" type="button"><svg class="ic"><use href="#i-plug"/></svg>Connectors</button>
     <button class="side-act" id="open-privacy" type="button"><svg class="ic"><use href="#i-shield"/></svg>Providers &amp; privacy</button>
+    <div class="side-label side-row">Projects<button class="ic-btn tiny" id="new-project" type="button" aria-label="New project" title="New project"><svg class="ic"><use href="#i-plus"/></svg></button></div>
+    <ul class="chats projects" id="projects"></ul>
     <div class="side-label">Recents</div>
     <ul class="chats" id="chats"></ul>
     <div class="side-foot" id="account"></div>
@@ -213,6 +378,7 @@
         <div class="models" id="models" role="listbox" hidden></div>
       </div>
       <div class="spacer"></div>
+      <a class="top-link" href="/pro">Pricing</a>
       <a class="top-link" href="/#early-access">Get pleeply for Mac</a>
     </header>
 
@@ -231,10 +397,15 @@
       </div>
     </div>
 
-    <div class="scroll" id="scroll" hidden><div class="thread" id="thread"></div></div>
+    <div class="scroll" id="scroll" hidden><div class="thread" id="thread"></div><div id="tail-space" aria-hidden="true"></div></div>
+    <section class="project" id="project" aria-label="Project"></section>
+    <button class="jump" id="jump" type="button" aria-label="Scroll to the latest message" title="Scroll down" hidden><svg class="ic"><use href="#i-down"/></svg></button>
 
     <div class="composer-wrap" id="composer-wrap">
+      <div class="attach-row" id="attach-row" hidden></div>
       <form class="composer" id="composer" autocomplete="off">
+        <button class="tool-btn icon" id="attach-btn" type="button" title="Attach files (PDF, DOCX, text)" aria-label="Attach files"><svg class="ic"><use href="#i-clip"/></svg></button>
+        <input type="file" id="file-input" multiple hidden>
         <textarea id="input" rows="1" placeholder="Message pleeply" aria-label="Message pleeply"></textarea>
         <button class="send" id="send" type="submit" aria-label="Send" disabled><svg class="ic"><use href="#i-up"/></svg></button>
       </form>
@@ -242,6 +413,30 @@
     </div>
   </main>
 </div>
+
+<dialog id="task-dlg" class="wide">
+  <button class="ic-btn close" type="button" data-close aria-label="Close"><svg class="ic"><use href="#i-x"/></svg></button>
+  <div class="in" id="task-body"></div>
+</dialog>
+
+<dialog id="connectors">
+  <button class="ic-btn close" type="button" data-close aria-label="Close"><svg class="ic"><use href="#i-x"/></svg></button>
+  <div class="in">
+    <h2>Connectors</h2>
+    <p>Let pleeply look things up in other services through <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener">MCP</a>. pleeply only reads: tools that could change your data stay hidden.</p>
+    <ul class="conn-list" id="conn-list"></ul>
+    <h3>Suggested</h3>
+    <div class="conn-suggest" id="conn-suggest"></div>
+    <h3>Add your own MCP server</h3>
+    <form class="conn-form" id="conn-form" autocomplete="off">
+      <input id="conn-name" placeholder="Name, for example Notion" maxlength="40">
+      <input id="conn-url" placeholder="https://mcp.example.com/mcp" inputmode="url" required>
+      <input id="conn-token" type="password" placeholder="Access token (optional)" autocomplete="off">
+      <button class="conn-add" type="submit">Check and add</button>
+      <p class="conn-note" id="conn-note">The token stays in this browser. It's sent to pleeply's server only to reach the connector and is never stored there.</p>
+    </form>
+  </div>
+</dialog>
 
 <dialog id="privacy">
   <button class="ic-btn close" type="button" data-close aria-label="Close"><svg class="ic"><use href="#i-x"/></svg></button>

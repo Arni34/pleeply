@@ -3,56 +3,227 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>pleeply Pro</title>
-<meta name="robots" content="noindex">
-<link rel="icon" href="/favicon.svg">
+<title>pleeply Pro — pricing</title>
+<meta name="description" content="pleeply is free in your browser and on your Mac. pleeply Pro adds premium models like Claude, GPT and Gemini and higher daily limits for $19.99 a month.">
+<link rel="canonical" href="https://pleeply.vercel.app/pro">
+<meta property="og:title" content="pleeply Pro — pricing">
+<meta property="og:description" content="Free in your browser. Pro adds Claude, GPT and Gemini for $19.99 a month.">
+<meta property="og:image" content="https://pleeply.vercel.app/og.png">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta name="theme-color" content="#000000">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root { --bg:#000; --ink:#fff; --text:#d4d4d4; --muted:#9b9b9b; --g3:#6fcf8c; }
-  body { margin:0; min-height:100vh; display:grid; place-items:center; background:var(--bg); color:var(--text); font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif; }
-  main { width:min(520px,100%); padding:40px 24px; }
-  h1 { color:var(--ink); font-weight:500; font-size:34px; letter-spacing:-.03em; margin:0 0 8px; }
-  .price { color:var(--ink); font-size:20px; margin:18px 0 6px; }
-  ul { padding-left:20px; margin:12px 0 22px; }
-  li { margin:6px 0; }
-  .note { color:var(--muted); font-size:14px; }
-  .ok { padding:14px 16px; border-radius:12px; background:rgba(62,155,90,.16); color:#a8e2b9; }
-  a { color:var(--g3); }
+  :root {
+    --bg: #000; --soft: #121212; --soft-2: #1d1d1d; --ink: #fff; --text: #d4d4d4; --muted: #9b9b9b; --dim: #6b6b6b;
+    --line: rgba(255,255,255,.1); --line-2: rgba(255,255,255,.16); --g: #3e9b5a; --g-2: #5cbf7a; --g-3: #6fcf8c; --g-4: #a8e2b9;
+    --sans: "Geist", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 var(--sans); -webkit-font-smoothing: antialiased; }
+  a { color: var(--g-3); }
+  .wrap { width: min(1040px, 100%); margin: 0 auto; padding: 0 20px; }
+  header { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; }
+  .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); text-decoration: none; font-weight: 600; font-size: 18px; letter-spacing: -.02em; }
+  .brand svg { width: 26px; height: 26px; }
+  nav a { color: var(--muted); text-decoration: none; font-size: 14px; margin-left: 20px; }
+  nav a:hover { color: var(--ink); }
+  .hero { text-align: center; padding: 56px 0 36px; }
+  h1 { margin: 0 0 12px; color: var(--ink); font-weight: 500; font-size: clamp(32px, 5vw, 48px); letter-spacing: -.035em; line-height: 1.1; }
+  .sub { margin: 0 auto; max-width: 600px; color: var(--muted); font-size: 17px; }
+  .plans { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 30px 0 10px; }
+  .plan { display: flex; flex-direction: column; padding: 28px; border: 1px solid var(--line-2); border-radius: 20px; background: var(--soft); }
+  .plan.pro { border-color: rgba(92,191,122,.55); background: linear-gradient(180deg, rgba(62,155,90,.14), rgba(62,155,90,.02) 60%), var(--soft); }
+  .plan h2 { margin: 0; color: var(--ink); font-weight: 500; font-size: 22px; letter-spacing: -.02em; }
+  .tag { display: inline-block; margin-left: 8px; padding: 2px 9px; border-radius: 999px; background: rgba(92,191,122,.18); color: var(--g-4); font-size: 12px; vertical-align: 3px; }
+  .price { margin: 14px 0 4px; color: var(--ink); font-size: 40px; font-weight: 500; letter-spacing: -.03em; }
+  .price small { color: var(--muted); font-size: 15px; font-weight: 400; letter-spacing: 0; }
+  .for { margin: 0 0 18px; color: var(--muted); font-size: 14.5px; }
+  .plan ul { list-style: none; margin: 0 0 24px; padding: 0; flex: 1; }
+  .plan li { position: relative; padding: 7px 0 7px 28px; border-top: 1px solid var(--line); font-size: 15px; }
+  .plan li:first-child { border-top: 0; }
+  .plan li::before { content: ""; position: absolute; left: 2px; top: 13px; width: 14px; height: 8px; border-left: 2px solid var(--g-3); border-bottom: 2px solid var(--g-3); transform: rotate(-45deg); }
+  .plan li b { color: var(--ink); font-weight: 500; }
+  .btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 13px 18px; border: 1px solid var(--line-2); border-radius: 999px; background: transparent; color: var(--ink); font: 500 15px var(--sans); text-decoration: none; cursor: pointer; }
+  .btn:hover { border-color: rgba(255,255,255,.3); }
+  .btn.primary { background: var(--ink); color: #000; border-color: var(--ink); }
+  .btn.primary:hover { background: #e9e9e9; }
+  .btn[aria-disabled="true"] { opacity: .55; cursor: default; }
+  .note { margin: 10px 0 0; min-height: 20px; text-align: center; color: var(--muted); font-size: 13px; }
+  .ok { padding: 14px 16px; border-radius: 12px; background: rgba(62,155,90,.16); color: var(--g-4); text-align: center; }
+  .local { margin: 18px 0 0; padding: 18px 22px; border: 1px solid var(--line); border-radius: 16px; color: var(--muted); font-size: 15px; }
+  .local b { color: var(--ink); font-weight: 500; }
+  .faq { margin: 56px auto 0; max-width: 760px; }
+  .faq h2 { color: var(--ink); font-weight: 500; font-size: 26px; letter-spacing: -.02em; margin: 0 0 12px; }
+  details { border-top: 1px solid var(--line); padding: 14px 0; }
+  details:last-of-type { border-bottom: 1px solid var(--line); }
+  summary { cursor: pointer; color: var(--ink); font-weight: 500; list-style: none; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; float: right; color: var(--muted); }
+  details[open] summary::after { content: "–"; }
+  details p { margin: 10px 0 0; color: var(--text); font-size: 15px; }
+  footer { margin: 64px 0 0; padding: 26px 0 40px; border-top: 1px solid var(--line); color: var(--dim); font-size: 13px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  footer a { color: var(--muted); text-decoration: none; }
+  @media (max-width: 760px) {
+    .plans { grid-template-columns: 1fr; }
+    .hero { padding: 32px 0 20px; }
+    nav a.hide-sm { display: none; }
+  }
 </style>
 </head>
 <body>
-<main>
-  <h1>pleeply Pro</h1>
-  <p>More cloud requests in pleeply Desktop, through pleeply Cloud. Local models are always free and unlimited.</p>
-  <div class="price" id="price">$19.99 / month</div>
-  <ul id="limits"><li>1000 requests a day to free cloud models</li><li>150 requests a day to premium models: Claude, GPT, Gemini, DeepSeek</li></ul>
-  <p id="status" class="note">To upgrade, open pleeply Desktop → Control Center → Account → Upgrade to Pro. Payment is handled by Paddle, our reseller.</p>
-</main>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="mark" viewBox="-60 -60 120 120"><g transform="rotate(-18)"><path d="M -50 0 A 50 13 0 0 1 50 0" fill="none" stroke="#3E9B5A" stroke-width="5" stroke-linecap="round"/></g><circle r="30" fill="#3E9B5A"/><g transform="rotate(-18)"><path d="M -50 0 A 50 13 0 0 0 50 0" fill="none" stroke="#3E9B5A" stroke-width="5" stroke-linecap="round"/></g></symbol>
+  <symbol id="i-g" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></symbol>
+</svg>
+<div class="wrap">
+  <header>
+    <a class="brand" href="/"><svg aria-hidden="true"><use href="#mark"/></svg>pleeply</a>
+    <nav><a class="hide-sm" href="/">Home</a><a class="hide-sm" href="/community">Community</a><a href="/chat">Open chat</a></nav>
+  </header>
+
+  <section class="hero">
+    <h1>Start free. Go Pro for the best models.</h1>
+    <p class="sub">pleeply is free in your browser and runs offline on your Mac. Pro adds premium models like Claude, GPT and Gemini, plus room for heavy days.</p>
+  </section>
+
+  <section class="plans" aria-label="Plans">
+    <div class="plan">
+      <h2>Free</h2>
+      <div class="price">$0</div>
+      <p class="for">For trying pleeply and everyday questions.</p>
+      <ul>
+        <li><b>pleeply Free</b>: the best free AI model available right now, picked for you</li>
+        <li><b><span data-n="guest-free">60</span> messages a day</b> without an account, <b><span data-n="free-free">100</span></b> when you sign in with Google</li>
+        <li>A taste of premium models: <span data-n="free-paid">25</span> requests a day when signed in</li>
+        <li>Chats stay in your browser</li>
+        <li>Local models on your Mac: free and unlimited</li>
+      </ul>
+      <a class="btn" href="/chat">Start chatting free</a>
+      <p class="note">No card, no sign-up needed.</p>
+    </div>
+
+    <div class="plan pro">
+      <h2>Pro <span class="tag">Most capable</span></h2>
+      <div class="price"><span id="price">$19.99</span> <small>/ month</small></div>
+      <p class="for">For people who use AI every day for work and study.</p>
+      <ul>
+        <li><b><span data-n="pro-paid">300</span> premium requests a <span data-n="pro-period">month</span></b>: <span id="premium-models">Claude, GPT and Gemini</span></li>
+        <li><b><span data-n="pro-free">1000</span> messages a day</b> to free cloud models</li>
+        <li>Works in the browser and in pleeply for Mac with one account</li>
+        <li>Premium answers without your own API keys</li>
+        <li>Cancel any time in two clicks</li>
+      </ul>
+      <a class="btn primary" id="pro-btn" href="/api/auth/web?next=/pro">Get Pro</a>
+      <p class="note" id="pro-note">Payment is handled by Paddle, our reseller.</p>
+    </div>
+  </section>
+
+  <p class="local"><b>Private by design.</b> pleeply Cloud never stores what you write. It keeps only daily request counts for the limits. For fully offline use, local models in pleeply for Mac run on your own computer and never leave it.</p>
+
+  <section class="faq" aria-label="Questions">
+    <h2>Questions</h2>
+    <details><summary>What counts as a premium request?</summary><p>One message you send to a premium model, such as Claude, GPT or Gemini. The most expensive models count as two. Your premium requests renew on the 1st of each month (UTC). Free models stay available when they run out.</p></details>
+    <details><summary>Which premium models are included?</summary><p id="faq-models">The latest Claude, GPT, Gemini and DeepSeek models available through pleeply Cloud. The list updates as new models come out.</p></details>
+    <details><summary>Do I need my own API keys?</summary><p>No. Pro includes the models. If you already have keys, pleeply for Mac can also use them directly.</p></details>
+    <details><summary>How do I cancel?</summary><p>Open your account menu and choose Manage subscription. Paddle's page lets you cancel any time; Pro stays active until the end of the period you paid for.</p></details>
+    <details><summary>Who handles payment and taxes?</summary><p>Paddle, our reseller, takes the payment and handles sales tax and VAT. pleeply never sees your card details.</p></details>
+    <details><summary>Is there a free trial?</summary><p>The free plan is the trial: use pleeply in your browser as long as you like, then go Pro when you need premium models.</p></details>
+  </section>
+
+  <footer>
+    <span>© 2026 pleeply</span>
+    <span><a href="/chat#providers">Providers &amp; privacy</a> · <a href="/">pleeply.vercel.app</a></span>
+  </footer>
+</div>
+
 <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
 <script>
   (async () => {
-    const status = document.getElementById('status');
+    const $ = (s) => document.querySelector(s);
+    const btn = $('#pro-btn');
+    const note = $('#pro-note');
+    const set = (k, v) => document.querySelectorAll(`[data-n="${k}"]`).forEach((el) => { el.textContent = v; });
+    const disable = (text, hint) => { btn.textContent = text; btn.setAttribute('aria-disabled', 'true'); btn.removeAttribute('href'); if (hint) note.textContent = hint; };
+    const params = new URLSearchParams(location.search);
+    const signin = params.get('signin');
+    const signinMsg = signin ? (signin === 'cancelled' ? 'Sign-in cancelled.' : "Google sign-in didn't finish. Try again.") : '';
+    if (signin) history.replaceState(null, '', '/pro');
+
+    let me = {}, models = {};
     try {
-      const c = await fetch('/api/account/config').then((r) => r.json());
-      if (c.price) document.getElementById('price').textContent = c.price;
-      if (c.plans?.pro) document.getElementById('limits').innerHTML =
-        `<li>${Number(c.plans.pro.free)} requests a day to free cloud models</li><li>${Number(c.plans.pro.paid)} requests a day to premium models: Claude, GPT, Gemini, DeepSeek</li>`;
-      const txn = new URLSearchParams(location.search).get('_ptxn');
-      if (!txn) return;
-      if (!c.clientToken || !window.Paddle) { status.textContent = 'Payments are being set up. Please try again later.'; return; }
-      if (c.environment === 'sandbox') Paddle.Environment.set('sandbox');
+      [me, models] = await Promise.all([
+        fetch('/api/account/me', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : {})),
+        fetch('/api/ai/v1/models').then((r) => r.json()),
+      ]);
+    } catch {}
+    const plans = me.plans || models.plans;
+    if (plans) {
+      set('guest-free', plans.guest.free); set('free-free', plans.free.free); set('free-paid', plans.free.paid);
+      set('pro-free', plans.pro.free); set('pro-paid', plans.pro.paid); set('pro-period', plans.pro.paidPeriod === 'month' ? 'month' : 'day');
+    }
+    if (me.price) $('#price').textContent = me.price.replace(/\s*\/\s*month$/i, '');
+    // Только то, что реально подключено к pleeply Cloud сейчас
+    const premium = (models.data || []).filter((m) => m.tier === 'paid').map((m) => m.name);
+    if (premium.length) {
+      $('#premium-models').textContent = premium.join(', ');
+      $('#faq-models').textContent = `Right now: ${premium.join(', ')}. The list updates as new models come out.`;
+    } else {
+      $('#premium-models').textContent = 'Claude, GPT and Gemini (connecting now)';
+    }
+
+    // Оплата Paddle: страница открыта по ссылке оплаты с ?_ptxn=…
+    if (params.get('_ptxn')) {
+      let cfg = {};
+      try { cfg = await fetch('/api/account/config').then((r) => r.json()); } catch {}
+      if (!cfg.clientToken || !window.Paddle) { note.textContent = 'Payments are being set up. Please try again later.'; return; }
+      if (cfg.environment === 'sandbox') Paddle.Environment.set('sandbox');
       Paddle.Initialize({
-        token: c.clientToken,
+        token: cfg.clientToken,
         eventCallback: (e) => {
           if (e.name === 'checkout.completed') {
-            status.className = 'ok';
-            status.textContent = "You're on pleeply Pro. Return to pleeply Desktop — it updates within a minute.";
+            note.className = 'ok';
+            note.textContent = "You're on pleeply Pro. Open pleeply — it updates within a minute.";
+            disable("You're on Pro");
           }
         },
       });
-      status.textContent = 'Opening secure checkout…';
-    } catch {
-      status.textContent = "Couldn't load the checkout. Refresh the page or try again from pleeply Desktop.";
+      note.textContent = 'Opening secure checkout…';
+      return;
     }
+
+    async function go(path) {
+      btn.setAttribute('aria-disabled', 'true');
+      const r = await fetch(path, { method: 'POST' }).catch(() => null);
+      const j = r ? await r.json().catch(() => ({})) : {};
+      if (r?.ok && j.url) { location.href = j.url; return; }
+      btn.removeAttribute('aria-disabled');
+      note.textContent = j.error || "Couldn't reach pleeply. Try again.";
+    }
+
+    const acc = me.account;
+    if (acc?.plan === 'pro') {
+      btn.textContent = 'Manage subscription';
+      btn.removeAttribute('href');
+      note.textContent = "You're on pleeply Pro. Thank you!";
+      btn.onclick = () => go('/api/account/portal');
+      return;
+    }
+    if (!me.upgrade) {
+      disable('Pro opens soon', signinMsg || 'Payments are being set up. Use pleeply free in the meantime.');
+      return;
+    }
+    if (!acc) {
+      btn.innerHTML = '<svg width="18" height="18" aria-hidden="true"><use href="#i-g"/></svg>Sign in with Google to get Pro';
+      note.textContent = signinMsg || 'You come back here after signing in. Payment is handled by Paddle.';
+      return;
+    }
+    btn.textContent = `Upgrade to Pro · ${me.price || '$19.99 / month'}`;
+    btn.removeAttribute('href');
+    note.textContent = `Signed in as ${acc.email}. Payment is handled by Paddle.`;
+    btn.onclick = () => go('/api/account/checkout');
   })();
 </script>
 </body>

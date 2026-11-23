@@ -311,7 +311,7 @@ function tierText(m) {
   const plans = S.app.cloudPlans;
   const lim = acc?.signedIn && acc.account?.limits ? acc.account.limits : plans?.guest || (S.app.cloudLimits && { free: S.app.cloudLimits.free_per_day, paid: S.app.cloudLimits.premium_per_day });
   if (m.tier === "free") return `Free${lim ? ` · ${lim.free} a day` : ""}`;
-  return `Premium${lim ? ` · ${lim.paid} a day` : ""}`;
+  return `Premium${lim ? ` · ${lim.paid} ${lim.paidPeriod === "month" ? "a month" : "a day"}` : ""}`;
 }
 
 export function ModelPicker() {

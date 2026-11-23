@@ -31,6 +31,9 @@
     },
     "api/account.js": {
       "maxDuration": 20
+    },
+    "api/ai/v1/connectors.js": {
+      "maxDuration": 30
     }
   },
   "headers": [

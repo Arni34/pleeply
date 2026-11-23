@@ -157,6 +157,36 @@ export function candidates(list, state, request) {
 
 const routeLabel = (m) => `${FREE_PROVIDERS[m.provider].name} · ${m.name}`;
 
+/**
+ * Ответ целиком (без потока и инструментов) от первой доступной бесплатной модели, кроме провайдеров exclude.
+ * Нужен агенту, когда весь Groq упёрся в лимиты: найденное в сети дописывает другая модель. null — никто не ответил.
+ */
+export async function freeComplete(request, signal, exclude = []) {
+  const [list, state] = await Promise.all([liveChain('smart'), loadState().catch(() => new Map())]);
+  const tries = candidates(list.filter((m) => !exclude.includes(m.provider)), state, request).slice(0, 4);
+  for (const m of tries) {
+    if (signal.aborted) return null;
+    const ep = endpoint(m.provider);
+    const p = FREE_PROVIDERS[m.provider];
+    try {
+      const r = await fetch(ep.url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(ep.token ? { Authorization: `Bearer ${ep.token}` } : {}), ...(p.headers || {}) },
+        body: JSON.stringify({ model: m.id, messages: request.messages, max_tokens: Math.min(request.max_tokens || 2048, 4096) }),
+        signal: AbortSignal.any([signal, AbortSignal.timeout(p.timeout || HEADER_TIMEOUT * 2)]),
+      });
+      if (!r.ok) { await r.body?.cancel().catch(() => {}); const secs = cooldownFor(r.status, r.headers.get('retry-after')); if (secs) await cool(m.target, secs, `http ${r.status}`); continue; }
+      const text = String((await r.json().catch(() => null))?.choices?.[0]?.message?.content || '').trim();
+      if (!text) continue;
+      count(m.target);
+      return { text, label: routeLabel(m) };
+    } catch {
+      if (signal.aborted) return null;
+    }
+  }
+  return null;
+}
+
 /** Ответ от первой модели цепочки, которая согласилась; поток SSE передаётся как есть. */
 export async function relayFree(entry, request, res, signal) {
   if (!request.messages.some((m) => m.role === 'user' && m.content.trim())) {

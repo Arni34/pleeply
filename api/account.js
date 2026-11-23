@@ -55,7 +55,10 @@ async function start(req, res) {
   return redirect(res, url.toString());
 }
 
-/** Вход из браузерной версии (/chat): та же Google-авторизация, но сессия кладётся в cookie, а не отдаётся приложению. */
+const NEXT_COOKIE = '__Host-pleeply_next';
+const WEB_NEXT = ['/chat', '/pro'];
+
+/** Вход из браузерной версии (/chat, /pro): та же Google-авторизация, но сессия кладётся в cookie, а не отдаётся приложению. */
 async function webstart(req, res) {
   if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
     return page(res, 503, 'Sign-in is not set up yet', 'Google sign-in for pleeply is being set up. <a href="/chat">Back to pleeply</a> — you can keep chatting without an account.');
@@ -65,7 +68,9 @@ async function webstart(req, res) {
   const browserNonce = randomToken(24); // привязывает ответ Google к этому браузеру: чужую ссылку входа не подсунуть
   await sql`delete from auth_requests where created_at < now() - interval '1 day'`;
   await sql`insert into auth_requests (state, app_state, challenge, port) values (${serverState}, ${browserNonce}, '-', 0)`;
-  res.setHeader('Set-Cookie', cookieHeader(OAUTH_COOKIE, browserNonce, 600));
+  // куда вернуть после входа: только свои страницы из списка
+  const next = WEB_NEXT.includes(String(req.query?.next)) ? String(req.query.next) : '/chat';
+  res.setHeader('Set-Cookie', [cookieHeader(OAUTH_COOKIE, browserNonce, 600), cookieHeader(NEXT_COOKIE, next, 600)]);
   const url = new URL('https://accounts.google.com/o/oauth2/v2/auth');
   url.search = new URLSearchParams({
     client_id: process.env.GOOGLE_CLIENT_ID, redirect_uri: GOOGLE_REDIRECT, response_type: 'code',
@@ -85,8 +90,9 @@ async function callback(req, res) {
   }
   const back = web
     ? (params) => {
-      res.setHeader('Set-Cookie', [cookieHeader(OAUTH_COOKIE, '', 0), ...(params.session ? [cookieHeader(SESSION_COOKIE, params.session, 30 * 86400)] : [])]);
-      return redirect(res, params.session ? '/chat' : `/chat?signin=${params.error === 'cancelled' ? 'cancelled' : 'failed'}`);
+      const next = WEB_NEXT.includes(readCookie(req, NEXT_COOKIE)) ? readCookie(req, NEXT_COOKIE) : '/chat';
+      res.setHeader('Set-Cookie', [cookieHeader(OAUTH_COOKIE, '', 0), cookieHeader(NEXT_COOKIE, '', 0), ...(params.session ? [cookieHeader(SESSION_COOKIE, params.session, 30 * 86400)] : [])]);
+      return redirect(res, `${next}${params.session ? '' : `?signin=${params.error === 'cancelled' ? 'cancelled' : 'failed'}`}`);
     }
     : (params) => redirect(res, loopback(ar.port, { state: ar.app_state, ...params }));
   const fail = async (reason) => { await sql`update auth_requests set used = true where state = ${ar.state}`; return back({ error: reason }); };
@@ -135,8 +141,16 @@ async function me(req, res) {
     if (readCookie(req, SESSION_COOKIE)) res.setHeader('Set-Cookie', cookieHeader(SESSION_COOKIE, '', 0));
     return json(res, 401, { error: 'Signed out.' });
   }
-  const usage = await sql`select tier, n from ai_usage where key = ${'a:' + acc.id} and day = current_date`.catch(() => []);
-  return json(res, 200, { account: publicAccount(acc), usage: Object.fromEntries(usage.map((u) => [u.tier, u.n])), price: PRO_PRICE_TEXT, upgrade: paddleReady(), plans: PLANS });
+  const key = 'a:' + acc.id;
+  const [usage, [month]] = await Promise.all([
+    sql`select tier, n from ai_usage where key = ${key} and day = current_date`.catch(() => []),
+    // премиум за текущий месяц — у Pro лимит месячный
+    sql`select coalesce(sum(n), 0)::int as n from ai_usage where key = ${key} and tier = 'paid' and day >= date_trunc('month', current_date)::date`.catch(() => [{ n: 0 }]),
+  ]);
+  return json(res, 200, {
+    account: publicAccount(acc), usage: { ...Object.fromEntries(usage.map((u) => [u.tier, u.n])), paid_month: month?.n || 0 },
+    price: PRO_PRICE_TEXT, upgrade: paddleReady(), plans: PLANS,
+  });
 }
 
 async function signout(req, res) {

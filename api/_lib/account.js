@@ -10,11 +10,13 @@ export const PRO_PRICE_TEXT = process.env.PRO_PRICE_TEXT || '$19.99 / month';
 
 const num = (name, d) => (Number.isFinite(Number(process.env[name])) && process.env[name] !== '' && process.env[name] != null ? Number(process.env[name]) : d);
 
-// Суточные лимиты pleeply Cloud: гость (без входа), бесплатный аккаунт, Pro.
+// Лимиты pleeply Cloud: гость (без входа), бесплатный аккаунт, Pro. Бесплатные модели — в сутки.
+// Премиум у Pro — в месяц (paidPeriod): 150 в сутки на Claude Opus стоили бы до $117 в месяц на подписчика при цене $19.99,
+// а 300 в месяц — не больше ~$8. Дорогие модели (GPT-6.2 Astra) считаются за два запроса (weight в каталоге).
 export const PLANS = {
   guest: { free: num('AI_GUEST_FREE', 60), paid: num('AI_GUEST_PAID', 10) },
   free: { free: num('AI_ACCOUNT_FREE', 100), paid: num('AI_ACCOUNT_PAID', 25) },
-  pro: { free: num('AI_PRO_FREE', 1000), paid: num('AI_PRO_PAID', 150) },
+  pro: { free: num('AI_PRO_FREE', 1000), paid: num('AI_PRO_PAID_PER_MONTH', 300), paidPeriod: 'month' },
 };
 
 let ready;
