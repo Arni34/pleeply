@@ -5,7 +5,7 @@
 import { sql, allow, slugify, SITE } from './forum.js';
 
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
-const GROQ_MODELS = [process.env.GROQ_MODEL || 'openai/gpt-oss-120b', 'llama-3.3-70b-versatile'];
+const GROQ_MODELS = [process.env.GROQ_MODEL || 'openai/gpt-oss-120b', 'qwen/qwen3.8-27b', 'openai/gpt-oss-20b'];
 
 export const BOT_NAME = 'pleeply-bot';
 export const ANSWER_CATEGORIES = new Set(['questions', 'models-and-benchmarks', 'smart-home-and-voice']);
@@ -44,7 +44,7 @@ async function groq({ system, prompt, search, maxTokens, model }) {
       messages: [{ role: 'system', content: system }, { role: 'user', content: prompt }],
       max_completion_tokens: maxTokens,
       temperature: 0.6,
-      ...(model.startsWith('openai/gpt-oss') ? { reasoning_effort: 'low' } : {}),
+      ...(model.startsWith('openai/gpt-oss') ? { reasoning_effort: 'low' } : model.startsWith('qwen/') ? { reasoning_format: 'hidden' } : {}),
       ...(search ? { tools: [{ type: 'browser_search' }], tool_choice: 'required' } : {}),
     }),
     signal: AbortSignal.timeout(60000),

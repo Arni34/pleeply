@@ -6,6 +6,7 @@ import { json } from '../../../_lib/forum.js';
 import { accountFromRequest } from '../../../_lib/account.js';
 import { relayAgent, parseConnectors } from '../../../_lib/connect.js';
 import { planProject } from '../../../_lib/plan.js';
+import { designSite } from '../../../_lib/site.js';
 
 export default async function handler(req, res) {
   try {
@@ -20,6 +21,13 @@ export default async function handler(req, res) {
       const denied = await checkLimits(req, device, 'free', account, 2);
       if (denied) return json(res, 429, { error: { message: denied } });
       return await planProject(req.body, res);
+    }
+    // pleeply Studio: сценарий 3D-сайта (или правка текущего), лимит бесплатных моделей ×2
+    if (req.body?.task === 'site') {
+      const account = await accountFromRequest(req).catch(() => null);
+      const denied = await checkLimits(req, device, 'free', account, 2);
+      if (denied) return json(res, 429, { error: { message: denied } });
+      return await designSite(req.body, res);
     }
     // Браузерная версия: интернет всегда включён. Агент сам ищет в сети, читает страницы и вызывает коннекторы.
     // Если Groq недоступен ещё до ответа, ниже отвечает обычная модель (без интернета), лимит уже учтён.

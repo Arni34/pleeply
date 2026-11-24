@@ -4,7 +4,7 @@
 import { json } from './forum.js';
 
 const GROQ = 'https://api.groq.com/openai/v1/chat/completions';
-const MODELS = ['openai/gpt-oss-120b', 'llama-3.3-70b-versatile'];
+const MODELS = ['openai/gpt-oss-120b', 'qwen/qwen3.8-27b', 'openai/gpt-oss-20b'];
 export const ROLES = ['Researcher', 'Analyst', 'Writer', 'Builder'];
 const MAX_TASKS = 8;
 
@@ -59,7 +59,7 @@ export async function planProject(body, res) {
         body: JSON.stringify({
           model, messages: [{ role: 'system', content: PROMPT }, { role: 'user', content: user }],
           response_format: { type: 'json_object' }, max_completion_tokens: 2500,
-          ...(model.startsWith('openai/gpt-oss') ? { reasoning_effort: 'low' } : {}),
+          ...(model.startsWith('openai/gpt-oss') ? { reasoning_effort: 'low' } : model.startsWith('qwen/') ? { reasoning_format: 'hidden' } : {}),
         }),
         signal: AbortSignal.timeout(45_000),
       });

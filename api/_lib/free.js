@@ -199,7 +199,7 @@ export async function relayFree(entry, request, res, signal) {
   const need = tokensOf(request.messages);
   let lastStatus = 0;
   let refused = 0; // отказы, которые мог вызвать сам запрос
-  const REFUSED = { error: { message: "The free models couldn't process this message. Try rephrasing or shortening it." } };
+  const REFUSED = { error: { message: "The free models couldn't answer this message. Start a new chat or try again in a minute." } };
   for (const m of tries.slice(0, MAX_ATTEMPTS)) {
     if (signal.aborted) return;
     const ep = endpoint(m.provider);
@@ -226,6 +226,7 @@ export async function relayFree(entry, request, res, signal) {
       lastStatus = up.status;
       await up.body?.cancel().catch(() => {});
       signal.removeEventListener('abort', onAbort);
+      if (up.status === 413) continue; // запрос велик для лимитов этого провайдера — у следующего они больше
       const secs = cooldownFor(up.ok ? 502 : up.status, up.headers.get('retry-after'));
       if (secs) await cool(m.target, secs, `http ${up.status}`);
       else if (++refused >= 2) return json(res, 400, REFUSED); // две модели подряд отказали — дело в запросе

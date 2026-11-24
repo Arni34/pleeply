@@ -21,7 +21,7 @@ const DEVICE = (() => {
 })();
 
 const SYSTEM = 'You are pleeply, a friendly and capable AI assistant. Answer in the language the user writes in. Be clear and concise, and use Markdown (lists, tables, code blocks) when it helps.';
-const KEEP_CHARS = 48_000;
+const KEEP_CHARS = 24_000; // сервер всё равно укладывает историю в лимит модели
 
 const S = {
   chats: (() => { const v = store.get('pleeply.web.chats', []); return Array.isArray(v) ? v : []; })(),
@@ -37,7 +37,8 @@ const S = {
 };
 // Ответы, оборванные закрытием вкладки, не должны вечно «печататься»
 for (const c of S.chats) for (const m of c.messages || []) { delete m.view; delete m.status; if (m.streaming) { m.streaming = false; if (!m.content) m.error = 'Interrupted.'; } }
-const save = () => store.set('pleeply.web.chats', S.chats.slice(0, 200));
+// Скриншоты облачного браузера и токены одобрения в историю не сохраняем
+const save = () => store.set('pleeply.web.chats', JSON.parse(JSON.stringify(S.chats.slice(0, 200), (k, v) => (k === 'shot' || k === 'approval' ? undefined : v))));
 const chat = () => S.chats.find((c) => c.id === S.current) || null;
 
 // ---------- markdown ----------
@@ -205,6 +206,23 @@ function sourcesHtml(list) {
   return `<div class="sources"><b>Sources</b>${items.map((s, i) => `<a href="${esc(s.href)}" target="_blank" rel="noopener noreferrer" title="${esc(s.href)}">${i + 1}. ${esc(s.title && s.title !== s.host ? s.title : s.host)} <small>${esc(s.host)}</small></a>`).join('')}</div>`;
 }
 
+// Панель облачного браузера (computer use): скриншот, шаги, запрос одобрения
+const SHOT = /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/;
+function computerHtml(m) {
+  const b = m.browser;
+  if (!b) return '';
+  let host = '';
+  try { host = new URL(b.url).hostname.replace(/^www\./, ''); } catch {}
+  const steps = b.steps || [];
+  const a = b.approval;
+  return `<div class="computer${m.streaming ? ' live' : ''}">
+    <div class="cu-head">${icon('i-globe')}<b>Cloud browser</b>${host ? `<span class="cu-url">${esc(host)}</span>` : ''}${m.streaming ? '<span class="cu-live">live</span>' : ''}</div>
+    ${b.shot && SHOT.test(b.shot) ? `<img class="cu-shot" src="${b.shot}" alt="What the cloud browser shows now">` : ''}
+    ${a ? `<div class="cu-ask"><b>Approve this step?</b><p>${esc(a.description)}</p>${a.why ? `<small>${esc(a.why)}</small>` : ''}<div class="cu-btns"><button type="button" class="up-btn primary" data-cu="approve">Approve</button><button type="button" class="up-btn" data-cu="deny">Deny</button></div></div>` : ''}
+    ${steps.length ? `<details class="cu-steps"${m.streaming ? ' open' : ''}><summary>${steps.length} step${steps.length > 1 ? 's' : ''}</summary><ol>${steps.map((st) => `<li>${esc(st.action)}${st.why ? ` <small>${esc(st.why)}</small>` : ''}</li>`).join('')}</ol></details>` : ''}
+  </div>`;
+}
+
 function msgHtml(m, i, last) {
   if (m.role === 'user') {
     const files = (m.files || []).map((n) => `<span class="fchip">${icon('i-clip')}${esc(n)}</span>`).join('');
@@ -226,7 +244,7 @@ function msgHtml(m, i, last) {
       ${m.content ? `<button class="ic-btn" type="button" data-copy="${i}" title="Copy" aria-label="Copy">${icon('i-copy')}</button>` : ''}
       ${last ? `<button class="ic-btn" type="button" data-retry title="Try again" aria-label="Try again">${icon('i-retry')}</button>` : ''}
       ${m.route ? `<span class="route">${esc(m.route)}</span>` : ''}</div>`;
-  return `<div class="msg ai" data-i="${i}">${think}${body}${meta}</div>`;
+  return `<div class="msg ai" data-i="${i}">${think}${computerHtml(m)}${body}${meta}</div>`;
 }
 function decorateCode(root) {
   root.querySelectorAll('pre').forEach((pre) => {
@@ -269,6 +287,17 @@ $('#thread').onclick = (e) => {
   const cp = e.target.closest('[data-copy]');
   if (cp) { navigator.clipboard?.writeText(chat().messages[Number(cp.dataset.copy)].content); toast('Copied.'); return; }
   if (e.target.closest('[data-retry]')) retry();
+  const cu = e.target.closest('[data-cu]');
+  if (cu) {
+    const m = chat()?.messages.at(-1);
+    const a = m?.browser?.approval;
+    if (!a) return;
+    const approve = cu.dataset.cu === 'approve';
+    cu.closest('.cu-btns').querySelectorAll('button').forEach((x) => { x.disabled = true; });
+    fetch('/api/ai/v1/browse', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Pleeply-Device': DEVICE }, body: JSON.stringify({ op: 'decide', id: a.id, token: a.token, approve }) })
+      .then((r) => { if (!r.ok) toast('That approval has expired.', true); })
+      .catch(() => toast("Couldn't reach pleeply.", true));
+  }
 };
 
 // ---------- прокрутка: новый вопрос встаёт наверх, ответ растёт под ним без автопрокрутки (как в ChatGPT и Claude) ----------
@@ -372,6 +401,55 @@ async function fileContext(c, prior) {
   return { prompt: excerptsPrompt(ex), cites: citeList(ex) };
 }
 
+/** Задача в облачном браузере: поток шагов со скриншотами; итог дописывается в то же сообщение. */
+async function runComputer(reply, signal, typer, paint) {
+  reply.browser = { task: reply.computer.task, steps: [], url: reply.computer.start_url };
+  reply.status = 'Starting a browser';
+  paint();
+  const r = await fetch('/api/ai/v1/browse', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Pleeply-Device': DEVICE }, body: JSON.stringify({ task: reply.computer.task, start_url: reply.computer.start_url }), signal });
+  if (!r.ok) {
+    const j = await r.json().catch(() => ({}));
+    if (r.status === 429) reply.upsell = !S.account?.account ? 'signin' : S.account.account.plan === 'pro' ? null : 'pro';
+    throw new Error(j.error?.message || `The cloud browser returned ${r.status}.`);
+  }
+  const reader = r.body.getReader();
+  const dec = new TextDecoder();
+  let buf = '';
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    let nl;
+    while ((nl = buf.indexOf('\n')) >= 0) {
+      const line = buf.slice(0, nl).trim();
+      buf = buf.slice(nl + 1);
+      if (!line.startsWith('data:')) continue;
+      const data = line.slice(5).trim();
+      if (data === '[DONE]') continue;
+      let j; try { j = JSON.parse(data); } catch { continue; }
+      if (j.error) throw new Error(j.error.message || 'The cloud browser stopped with an error.');
+      if (typeof j.pleeply_status === 'string') reply.status = j.pleeply_status;
+      if (typeof j.pleeply_route === 'string') reply.route = `Done by ${j.pleeply_route}`;
+      const st = j.pleeply_browser;
+      if (st) {
+        reply.browser.steps.push({ action: String(st.action || '').slice(0, 200), why: String(st.why || '').slice(0, 200) });
+        reply.browser.url = String(st.url || '');
+        if (SHOT.test(st.shot || '')) reply.browser.shot = st.shot;
+      }
+      const ap = j.pleeply_approval;
+      if (ap) {
+        reply.browser.approval = { id: String(ap.id), token: String(ap.token), description: String(ap.description || ''), why: String(ap.why || '') };
+        if (SHOT.test(ap.shot || '')) reply.browser.shot = ap.shot;
+        toast('pleeply needs your approval to continue.');
+      }
+      if (j.pleeply_approval_done) delete reply.browser.approval;
+      const d = j.choices?.[0]?.delta || {};
+      if (d.content) { reply.content += d.content; reply.status = ''; typer.kick(); }
+      paint();
+    }
+  }
+}
+
 async function ask(c) {
   const conns = activeConnectors();
   const reply = { role: 'assistant', content: '', reasoning: '', streaming: true, view: '' };
@@ -422,6 +500,7 @@ async function ask(c) {
         if (typeof j.pleeply_status === 'string') { reply.status = j.pleeply_status; paint(); }
         if (j.pleeply_reset) { reply.content = ''; typer.reset(); paint(); }
         if (typeof j.pleeply_route === 'string') reply.route = `Answered by ${j.pleeply_route}`;
+        if (j.pleeply_computer?.task) reply.computer = { task: String(j.pleeply_computer.task), start_url: String(j.pleeply_computer.start_url || '') };
         if (Array.isArray(j.pleeply_tools)) reply.tools = j.pleeply_tools.slice(0, 20).map((t) => ({ connector: String(t.connector || ''), tool: String(t.tool || ''), ok: t.ok !== false }));
         if (Array.isArray(j.pleeply_sources)) reply.sources = j.pleeply_sources.slice(0, 8).map((s) => ({ url: String(s.url || ''), title: String(s.title || '') }));
         const d = j.choices?.[0]?.delta || {};
@@ -430,6 +509,7 @@ async function ask(c) {
         if (typeof th === 'string' && th) { reply.reasoning += th; paint(); }
       }
     }
+    if (reply.computer) await runComputer(reply, ctrl.signal, typer, paint);
     if (!reply.content) throw new Error('The model returned an empty answer. Try again.');
   } catch (e) {
     if (ctrl.signal.aborted) { if (!reply.content) reply.error = 'Stopped.'; }
@@ -441,6 +521,7 @@ async function ask(c) {
     reply.streaming = false;
     delete reply.view;
     delete reply.status;
+    if (reply.browser) delete reply.browser.approval;
     if (!reply.reasoning) delete reply.reasoning;
     c.updated = Date.now();
     S.busy = null; setBusy(false);
